@@ -1,0 +1,129 @@
+ROLE: Skeptical staff engineer doing independent adversarial review of an Architecture
+Decision Record. Default to REJECT when uncertain. Your job is to find what is WRONG,
+not to be agreeable. If you cannot verify something, say so plainly instead of guessing.
+
+CONTEXT (verified facts, re-fetched from primaries 2026-08-17 — treat as ground truth):
+- Host: Ruby 3.4.10 WITHOUT YJIT, Windows 11, RubyInstaller + MSYS2/UCRT devkit.
+- Game: Gosu 1.4.6 (source-compiled), tick-locked deterministic lockstep coop,
+  replays md5-compared, p95 sim tick < 16.6 ms budget.
+- Gosu 1.4.6 audio = mojoAL (OpenAL 1.1 reimpl) over SDL2 audio + bundled SDL_sound
+  decoders; API ceiling = Sample->Channel (vol/speed/pan) + one Song; no buses/DSP/
+  offline render (verified from v1.4.6 tree + CHANGELOG).
+- ruby-ffi callback semantics (verified from ffi wiki): callback on non-Ruby thread
+  spawns a NEW Ruby thread per invocation; on Ruby-owned thread must acquire GVL.
+- miniaudio (verified from miniaudio.h): engine API ma_engine/ma_sound/ma_sound_group/
+  ma_node_graph; engineConfig.noDevice=MA_TRUE + ma_engine_read_pcm_frames() documented
+  for device-less manual reading; license dual Unlicense/MIT-0.
+- WASAPI shared mode mixes multiple clients (verified, Microsoft Learn).
+- FMOD license terms could NOT be verified (site JS-walled); SoLoud zlib verified;
+  OpenAL Soft LGPL v2.0 verified.
+
+THE ADR UNDER REVIEW:
+---
+# ADR 0001 — Audio foundation: miniaudio engine API bridged via ruby-ffi
+
+- Status: **DRAFT — pending council adversarial review (Rule 6 gate)**
+- Date: 2026-08-17
+- Deciders: dev of record (this project), owner (veto)
+- Evidence base: `knowledge/sources/gosu-audio-architecture-2026-08/` (pass-1 verified
+  2026-08-17) + vault notes `game-research/ruby-gosu-audio-engine-selection.md`,
+  `game-research/game-audio-architecture-2d-deterministic.md`
+
+## Context
+
+game-two (Ruby 3.4.10 no-YJIT, Gosu 1.4.6 source-compiled x64-mingw-ucrt, Windows 11,
+tick-locked deterministic lockstep coop, md5-compared replays, p95 tick < 16.6 ms) needs
+audio beyond `Gosu::Sample/Song`: voice pooling with steal policies, bus graph
+(master/music/sfx/ui) with ducking + dynamic LPF, 2D pan/attenuation, music state machine
+(crossfades, stems), music streaming. Audio is owner-ordered OUT of the game-two repo;
+this sibling project develops the system to integration-readiness (lore-project pattern).
+
+Gosu 1.4.6's audio ceiling is verified: mojoAL over SDL2 audio + bundled SDL_sound
+decoders; `Sample→Channel` (volume/speed/pan) + one `Song`; no buses, no DSP, no offline
+render, no callback hooks. It cannot host the target features.
+
+## Decision
+
+1. **Engine: miniaudio (high-level engine API), bridged via ruby-ffi, all state C-side.**
+   - Verified: single C file; engine layer (`ma_engine`, `ma_sound`, `ma_sound_group`,
+     `ma_node_graph`, spatializer, filters); **first-class device-less operation**
+     (`engineConfig.noDevice = MA_TRUE` + `ma_engine_read_pcm_frames()`) — the CI gate is
+     a documented mode, not a hack; license dual Unlicense/MIT-0 (zero obligations).
+   - We own a thin FFI layer (no maintained gem exists — verified gem-graveyard finding).
+2. **Gosu audio is bypassed entirely; miniaudio owns the (single) audio device.**
+   - WASAPI shared mode makes coexistence safe (verified), but single-owner is the clean
+     architecture. `ENV["SDL_AUDIODRIVER"]="dummy"` before Gosu init silences Gosu's stack
+     — **spike must validate the timing** (hint read at SDL audio init; Gosu inits lazily).
+3. **Structural law: the audio thread never enters Ruby.** Verified ffi callback semantics
+   (foreign-thread callback = new Ruby thread per invocation) make callbacks structurally
+   unusable; the Ruby↔C surface is exclusively game-thread FFI calls into miniaudio's
+   command-style API. No Ruby procs registered as callbacks, ever. End-of-sound etc. is
+   polled (`ma_sound_at_end`), never notified.
+4. **AudioSystem is a pure event-bus sink** (game-two `EventBus::EVENTS` pattern): sim
+   events → data-driven cue tables (`data/audio/*.json`) → FFI commands. No audio state in
+   sim state, saves, or netplay handshake; audio derives fully from (event stream, tick).
+5. **Ship-gate (Rule 2 analog): deterministic offline render.** Replay script → event
+   stream → audio commands → `noDevice` render → WAV artifact → scripted assertions
+   (duration, per-window RMS envelope, cue-presence, silence floors) + critic listen for
+   presentation. Same double-run md5 discipline as game-two's frame gate, applied to the
+   command log (bit-exact) and the rendered WAV (bit-exact given fixed engine version +
+   dither settings — spike validates).
+6. **Packaging: vendored DLL.** `vendor/miniaudio.dll` built once via MSYS2
+   (`gcc -shared -O2`, pinned miniaudio release, build documented in `rake dll`);
+   committed to git; loaded by absolute path (`ffi_lib File.expand_path`). Collaborator
+   machines need only `bundle install`.
+
+## Alternatives rejected
+
+- **FMOD Core**: best feature depth, but ALL license terms unverified at decision time
+  (fmod.com JS-walled; fast-decay), registration + attribution + commercial-DLL friction
+  for a two-machine hobby git repo. Re-enters only after a first-party license re-read.
+- **SoLoud**: viable fallback (zlib verified, buses/filters/C-API); weaker maintenance
+  cadence than miniaudio; fewer first-party offline-render guarantees.
+- **OpenAL Soft**: LGPL v2.0 + no decoder/streaming layer (would rebuild SDL_sound on top).
+- **SDL_mixer / Gosu-native / Wwise / BASS / PortAudio**: feature ceiling, licensing, or
+  wrong-layer (device I/O without mixer) — see evidence note.
+
+## Consequences
+
+- We own ~200-400 lines of FFI bindings + the C DLL build recipe (accepted: zero-license
+  single-file C is the cheapest ownership on offer).
+- Ruby GC pressure is bounded by design (opaque handles, preallocated command structs,
+  no per-frame allocation in the audio path); `GC.stat` watched in the perf harness.
+- miniaudio version pins in `vendor/VERSION`; upgrades re-run the full gate suite.
+- If the spike falsifies a load-bearing assumption (offline render determinism,
+  `SDL_AUDIODRIVER` timing, p95 command cost), the ADR reopens at the fallback ladder
+  (SoLoud → FMOD-after-license-read), not at a blank page.
+
+## Spike falsification list (must pass before status: ACCEPTED)
+
+1. init → load ogg/wav → play → `noDevice` offline render → WAV out, twice, byte-identical.
+2. Gosu window + `SDL_AUDIODRIVER=dummy`: Gosu boots silent, miniaudio owns the device,
+   game renders normally.
+3. 1000-command tick batch: p95 cost inside the 16.6 ms budget with GC.stat deltas ~0.
+4. Voice pool: 64 concurrent + steal policy audible + assertable in the rendered WAV.
+---
+
+CLAIMS TO ATTACK (each demands: VERDICT (CONFIRMED / REFUTED / UNCERTAIN) + the exact
+reasoning or evidence line that proves it):
+
+1. "miniaudio via ruby-ffi with all state C-side is the right foundation for this stack"
+   — attack the engine choice given the constraints (no YJIT, GC pauses, 16.6ms ticks,
+   two-machine hobby distribution).
+2. "The audio thread never enters Ruby; polling instead of callbacks is sufficient"
+   — is anything in the target feature list (voice pools, stems, quantized transitions,
+   ducking, spatial) impossible or badly degraded under a poll-only, command-only model?
+3. "Offline noDevice render as the CI ship-gate, with byte-identical WAV across two runs
+   on the same machine + engine version" — is bit-exactness a sound expectation for
+   miniaudio's float pipeline with fixed inputs? Where does it break (dither, resampler,
+   thread scheduling, denormals)?
+4. "SDL_AUDIODRIVER=dummy before Gosu init silences Gosu audio safely" — failure modes?
+   Is bypassing Gosu audio while keeping Gosu graphics/input actually clean?
+5. "Vendored prebuilt miniaudio.dll in git + absolute-path ffi_lib is the right packaging"
+   — attack for a repo built on two Windows machines (owner + collaborator).
+6. "Deterministic lockstep safety: audio as pure event-bus sink cannot desync the sim"
+   — find the desync path I missed (think: RNG use in audio choice, Time.now leakage,
+   float state, GC timing feeding back into tick timing).
+
+FINAL REQUIRED SECTION: "BIGGEST RISK NOT THOUGHT OF" — the one thing this ADR misses
+that would hurt most in practice.

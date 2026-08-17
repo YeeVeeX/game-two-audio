@@ -1,0 +1,9 @@
+# swarmforge config for game-two-audio (Ruby/minitest; mirrors game-two).
+# Gauntlet test stage runs rake. CLI: C:/Users/gabri/workspace/swarm-forge/.venv/Scripts/.
+
+[gauntlet]
+test_command = ["C:/Ruby34-x64/bin/ruby.exe", "C:/Ruby34-x64/bin/bundle", "exec", "rake"]
+full_command = ["C:/Ruby34-x64/bin/ruby.exe", "C:/Ruby34-x64/bin/bundle", "exec", "rake"]
+
+[tdd]
+test_patterns = ["{stem}_test.rb"]

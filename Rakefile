@@ -1,0 +1,27 @@
+require "rake/testtask"
+
+Rake::TestTask.new(:test) do |t|
+  t.libs << "test" << "src"
+  t.pattern = "test/**/*_test.rb"
+  t.warning = false
+end
+
+task default: :test
+
+desc "M1 spike falsification runner (one script per ADR item under spike/)"
+task :spike do
+  scripts = Dir["spike/[0-9]*_*.rb"].sort
+  abort "No spike scripts yet — see docs/adr/0001 falsification list" if scripts.empty?
+  failures = scripts.reject { |s| sh("ruby -Isrc #{s}") { |ok, _| ok } }
+  abort "SPIKE FAILURES: #{failures.join(', ')}" unless failures.empty?
+  puts "spike: all #{scripts.size} items passed"
+end
+
+desc "Rebuild vendor/miniaudio.dll from the committed amalgamation (bumps VERSION; rerun full gate)"
+task :dll do
+  abort <<~MSG
+    Deliberate manual step (see AGENTS.md vendor law). From an MSYS2 UCRT64 shell:
+      gcc -shared -O2 -o vendor/miniaudio.dll vendor/miniaudio_impl.c
+    Then: sha256sum vendor/miniaudio.dll  ->  update vendor/VERSION, rerun rake + gate.
+  MSG
+end
