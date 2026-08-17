@@ -1,0 +1,101 @@
+Session goal: game-two-audio M1 SPIKE - run ADR 0001's five-item falsification list to
+completion and flip the ADR to ACCEPTED (or reopen it at the fallback ladder). Work in
+C:/Users/gabri/workspace/game-two-audio (NOT the knowledge repo - its lane closed
+2026-08-17: corpus ingested + pass-1 verified + condensed + pushed, HEAD f7fac33).
+
+Repo state at handoff (measured 2026-08-17): single commit ebf776a on master, pushed to
+https://github.com/YeeVeeX/game-two-audio (public; juniormaciel10 invited with write -
+he may accept and pull anytime, so: pull before push, always). Suite green: 3 tests / 7
+assertions. No vendor/ binary yet, no src/ code yet, no spike scripts yet - M1 creates
+them. Ruby 3.4.10 at C:\Ruby34-x64 (export PATH="/c/Ruby34-x64/bin:$PATH" per shell;
+no YJIT on this build).
+
+LOAD FIRST (in order, before any action):
+1. AGENTS.md - the laws. Non-negotiables 1-7 govern every line of M1 code, especially:
+   audio thread NEVER enters Ruby (no FFI callbacks, poll + schedule-ahead only);
+   no mocks in integration tests (real DLL, real render, or skip loudly); placeholder
+   names only; zero per-tick Ruby allocations on the steady-state path.
+2. docs/adr/0001-audio-foundation.md - the decision (v2) and THE FIVE-ITEM SPIKE
+   FALSIFICATION LIST at the bottom; M1 exists to execute exactly that list.
+3. drafts/_council-reconciliation-adr1.md - why the gate is same-machine byte-compare +
+   feature assertions (NOT cross-machine bit-exactness), why music timing is
+   schedule-ahead, and which council claims were fabricated (calibration for how much
+   to trust reviewer prose).
+4. vendor/README.md - the pinned-DLL recipe and rebuild law.
+5. Reference (read-only, cite don't copy): vault notes via
+   hub kb query --domain game-research "gosu audio engine selection" and
+   "audio architecture deterministic" - the evidence base behind the ADR.
+
+PRE-APPROVED ACTIONS (owner approved in advance - Rule 5, execute end-to-end; re-ask
+only on genuine scope break or new irreversible risk):
+
+1. VENDOR THE ENGINE: pick the latest stable miniaudio release TAG (not master), fetch
+   miniaudio.h + write the one-line miniaudio_impl.c (#define MINIAUDIO_IMPLEMENTATION
+   + #include), commit BOTH; build ONE dll: locate the UCRT64 gcc via `ridk exec` or
+   /c/Ruby34-x64/msys64 (RubyInstaller devkit - game-two compiled gosu with it, it is
+   present); `gcc -shared -O2 -o vendor/miniaudio.dll vendor/miniaudio_impl.c`;
+   record tag + sha256 in vendor/VERSION. The DLL is committed by design (AGENTS law:
+   one binary, both machines).
+2. MINIMAL FFI BINDING (src/): only what the five spike items need - engine init with
+   noDevice + jobThreadCount=0 + MA_RESOURCE_MANAGER_FLAG_NO_THREADING, full-decode
+   sound load, play/stop, volume/pan, ma_engine_read_pcm_frames, engine-clock reads,
+   schedule-ahead (ma_sound_set_start_time_in_pcm_frames / set_stop_time /
+   set_fade_in_pcm_frames), ma_sound_at_end. Struct layouts from the PINNED header
+   only. No speculative surface.
+3. SPIKE SCRIPTS spike/01..05_*.rb, one per ADR item, each exits nonzero on fail,
+   `rake spike` runs all:
+   01 determinism: init -> load generated test tone WAVs (write a tiny fixture
+      generator; no copyrighted audio) -> play schedule -> offline render twice ->
+      byte-compare. PASS = identical.
+   02 gosu bypass: add gem "gosu", "= 1.4.6" to a :spike Gemfile group (compiles from
+      source via devkit - expected, game-two proved it); minimal Gosu window with
+      ENV["SDL_AUDIODRIVER"]="dummy" set at PROCESS ENTRY before require "gosu";
+      assert window boots + renders a frame + miniaudio opens the real device and
+      plays. PASS = silent Gosu, audible-path miniaudio, no crash. Capture the timing
+      verdict (env var read at first SDL audio init?) and note it for the knowledge
+      repo correction flow.
+   03 command-batch cost: worst-case 64-voice tick batch (starts/stops/pans/volumes/
+      fades) measured over >=1000 ticks; report p50/p95/p99; assert p95 < 0.5 ms AND
+      GC.stat allocation delta ~0 on steady state.
+   04 voice pool: 64 concurrent + steal policy (lowest_priority -> furthest -> oldest
+      from data/audio/cues.json); render offline; assert the steal is present in the
+      WAV (RMS window where the stolen voice cut).
+   05 quantized transition: compute a bar boundary in PCM frames, schedule stem swap +
+      crossfade at it, render, locate fade midpoint; assert within +-1 frame.
+4. EVIDENCE + VERDICT: drafts/_m1-spike-verdict-YYYYMMDD.md - per-item PASS/FAIL with
+   pasted measurements (byte-compare output, p95 numbers, frame offsets); WAV artifacts
+   under tmp/ (gitignored) with sha256s quoted in the verdict doc.
+5. ON ALL-PASS: flip ADR status to ACCEPTED (dated), update AGENTS.md current-cycle
+   block to M2 (AudioSystem event-sink + gate harness), commit + push.
+   ON ANY FAIL: do NOT argue around it - ADR reopens at the fallback ladder (SoLoud
+   first; FMOD only after a fresh first-party license read), document the falsifying
+   measurement, ONE council consult max (deepseek) on the failure interpretation,
+   JSON to file first, re-verify any REFUTED claim against the pinned header before
+   adopting (2026-08-17 lesson: reviewers fabricate symbols and fake spikes).
+6. ENFORCEMENT WIRING (after first green rake spike): git hooks pre-commit + pre-push
+   = 4 lines each (#!/bin/sh, PATH export, exec bundle exec rake) - game-two pattern.
+7. COMMIT + PUSH per phase (conventional messages, explicit paths, never git add -A;
+   pull before push - Junior has write).
+
+BUDGET (Rule 7): single session, local-deterministic work, no research quota, no
+fan-out; council = 1 consult MAX and only on a spike failure; stop condition = all five
+items adjudicated (pass or documented fail) + verdict doc committed, or context low ->
+write remaining state into drafts/_m1-spike-verdict + AGENTS current-cycle and stop
+cleanly.
+
+LAWS THAT BITE IN M1 (from AGENTS.md, restated because they are easy to violate here):
+- Determinism preconditions are jobThreadCount=0 + NO_THREADING + full decode at load;
+  if you relax ANY of them to make something work, spike 01 is INVALID - say so.
+- Windows paths: run ruby through the exported PATH; multi-line ad-hoc scripts go in
+  temp files, never inline heredocs in bash args.
+- Spike fixtures are GENERATED tones/stems (or midi-writing-mcp output later); zero
+  third-party audio files enter this repo.
+- The 16.6 ms tick law belongs to game-two; M1's audio-side budget is the 0.5 ms p95
+  command-batch bound - do not confuse the two in assertions.
+
+COORDINATION - do not overstep: never write in workspace/game-two, game-two-assets,
+game-two-lore, or ~/knowledge this session (knowledge corrections - e.g. the
+SDL_AUDIODRIVER timing verdict - get NOTED in the verdict doc for a later knowledge
+session, not written there now). Junior may have pulled: check git status + git pull
+--ff-only before every push. If a second local session appears, its lane is NOT this
+repo.
