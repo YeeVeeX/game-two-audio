@@ -1,0 +1,17 @@
+# vendor/ pin — miniaudio (see AGENTS.md vendor law, vendor/README.md rebuild recipe)
+
+miniaudio release tag: 0.11.25 (github.com/mackron/miniaudio, published 2026-03-03)
+source: https://raw.githubusercontent.com/mackron/miniaudio/0.11.25/miniaudio.h
+
+sha256:
+720d8b8a5c606632a5bdf62719c332011dd0340c17e0714a1b530db9058007cd  miniaudio.dll
+ac7af4de748b7e26b777f37e01cee313a308a7296a3eb080e2906b320cc55c89  miniaudio.h
+ab1984bb9804ffd7b0303813595d0b345a8a86c34da1daffc353a14b34102a65  miniaudio_impl.c
+7aaa2a9f3f0b6d7de57aecd7af446fc1f90cf0d0e41a86f9ba1af03640a3573f  gta_shim.c
+
+build (2026-08-17, deliberate — a rebuild bumps this file and reruns the full gate):
+  gcc.exe (Rev5, Built by MSYS2 project) 16.1.0  [RubyInstaller devkit UCRT64]
+  gcc -shared -O2 -o vendor/miniaudio.dll vendor/miniaudio_impl.c vendor/gta_shim.c
+  deps: KERNEL32 + api-ms-win-crt-* (UCRT) only — no MinGW runtime DLLs.
+  exports: all ma_* plus the gta_* flat shim (see gta_shim.c header comment for
+  why Ruby binds only flat functions — no struct layouts cross the FFI boundary).

@@ -21,7 +21,7 @@ desc "Rebuild vendor/miniaudio.dll from the committed amalgamation (bumps VERSIO
 task :dll do
   abort <<~MSG
     Deliberate manual step (see AGENTS.md vendor law). From an MSYS2 UCRT64 shell:
-      gcc -shared -O2 -o vendor/miniaudio.dll vendor/miniaudio_impl.c
-    Then: sha256sum vendor/miniaudio.dll  ->  update vendor/VERSION, rerun rake + gate.
+      gcc -shared -O2 -o vendor/miniaudio.dll vendor/miniaudio_impl.c vendor/gta_shim.c
+    Then: sha256sum vendor/*.dll vendor/*.c vendor/*.h -> update vendor/VERSION, rerun rake + gate.
   MSG
 end
