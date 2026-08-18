@@ -9,8 +9,9 @@ lifts the audio order.
 ## The decision (pinned)
 
 **miniaudio (engine API) bridged via ruby-ffi; Gosu audio bypassed entirely.**
-ADR: `docs/adr/0001-audio-foundation.md` (v2, council-reconciled —
-`drafts/_council-reconciliation-adr1.md`). Evidence:
+ADR: `docs/adr/0001-audio-foundation.md` (**ACCEPTED 2026-08-17** — all five spike
+falsification items passed, `drafts/_m1-spike-verdict-20260817.md`; council
+reconciliation `drafts/_council-reconciliation-adr1.md`). Evidence:
 `~/knowledge/sources/gosu-audio-architecture-2026-08/` (pass-1 verified) + vault notes
 `game-research/ruby-gosu-audio-engine-selection.md`,
 `game-research/game-audio-architecture-2d-deterministic.md` (query via
@@ -36,18 +37,27 @@ ADR: `docs/adr/0001-audio-foundation.md` (v2, council-reconciled —
 7. **Per-tick allocation discipline**: zero Ruby allocations on the steady-state audio
    path; cue tables parse at load; `GC.stat` deltas watched in the perf harness.
 
-## Current cycle: M1 — the spike (falsification list)
+## Current cycle: M2 — AudioSystem event-sink + gate harness
 
-The ADR is DRAFT v2 until every item passes (list in the ADR):
-1. Double `noDevice` render byte-identical (same machine; `jobThreadCount=0`,
-   `NO_THREADING`, full decode at load).
-2. `SDL_AUDIODRIVER=dummy` at process entry silences Gosu; miniaudio owns the device.
-3. Worst-case 64-voice tick command batch p95 < 0.5 ms, GC-clean.
-4. Voice pool + steal policy assertable in the rendered WAV.
-5. Schedule-ahead quantized transition lands within ±1 PCM frame.
+M1 closed 2026-08-17: 5/5 spike items PASS (`rake spike` stays green as the regression
+floor; measurements in `drafts/_m1-spike-verdict-20260817.md`). Headlines: double-render
+byte-identical; SDL=dummy verified via SDL_GetCurrentAudioDriver (control=wasapi);
+64-voice batch p95 0.036 ms (14x inside the 0.5 ms bound), 0 allocs/tick; steal 13557:1
+collapse at the exact frame; transition midpoint offset 0.0 frames.
 
-A failed item reopens the ADR at the fallback ladder (SoLoud → FMOD after first-party
-license re-read) — it does not get argued around.
+M2 scope:
+1. **AudioSystem event sink** (`src/`): consumes sim-event tuples against
+   `data/audio/cues.json` (schema grows: cue→file mapping, bus routing, per-cue voice
+   params); emits the bit-exact command log; drives the voice pool + music state machine.
+2. **Gate harness** (`harness/` + `rake gate`): scripted replay → command log (md5) →
+   `noDevice` render → WAV artifact → double-render byte-compare + feature assertions
+   (RMS windows, cue timing, silence floors) — non-negotiable 3 mechanized.
+3. Bus graph (master/music/sfx/ui) with ducking (schedule-ahead fades only).
+4. Spike-pinned facts stay encoded in tests (empty-graph read, NO_THREADING job pump,
+   stop-with-fade window, clock_gettime allocation).
+
+Knowledge-repo correction queue (SDL_AUDIODRIVER timing verdict, empty-graph read
+semantics) lives in the verdict doc — owned by a later knowledge session, not this repo.
 
 **OUT of scope (→ PARKING_LOT.md):** integration into game-two (gated on owner order);
 HRTF/binaural; audio occlusion raycasts; runtime asset hot-reload; network-synced audio;
@@ -64,8 +74,8 @@ anything the spike doesn't need.
 ## Commands
 
 - `rake` — run tests (minitest).
-- `rake spike` — M1 falsification runner (wired during M1; each spike item = one script
-  under `spike/` with a pass/fail exit).
+- `rake spike` — M1 falsification runner (5/5 green 2026-08-17; kept as regression
+  floor; spike 02 needs the :spike bundler group — gosu — and a desktop session).
 - Gate tasks (`rake gate`) arrive with the harness once M1 proves the render path.
 - swarmforge: `PATH="/c/Users/gabri/workspace/swarm-forge/.venv/Scripts:$PATH"
   swarmforge gauntlet --repo .` (test stage = rake, see swarmforge.toml).

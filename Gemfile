@@ -8,3 +8,9 @@ gem "rake", "~> 13.0"
 group :test do
   gem "minitest", "~> 5.25"
 end
+
+group :spike do
+  # Spike 02 only (Gosu-bypass falsification). Compiles from source via the
+  # RubyInstaller UCRT64 devkit — same recipe game-two proved 2026-08-09.
+  gem "gosu", "= 1.4.6"
+end

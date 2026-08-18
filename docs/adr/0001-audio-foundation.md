@@ -1,6 +1,8 @@
 # ADR 0001 — Audio foundation: miniaudio engine API bridged via ruby-ffi
 
-- Status: **DRAFT v2 — council round 1 reconciled (see `drafts/_council-reconciliation-adr1.md`); becomes ACCEPTED when the spike falsification list passes**
+- Status: **ACCEPTED** — 2026-08-17, all five spike falsification items passed
+  (`drafts/_m1-spike-verdict-20260817.md`; measurements + artifact hashes therein).
+  v2 council reconciliation: `drafts/_council-reconciliation-adr1.md`.
 - Date: 2026-08-17 (v2 same day, post-council)
 - Deciders: dev of record (this project), owner (veto)
 - Evidence base: `knowledge/sources/gosu-audio-architecture-2026-08/` (pass-1 verified
@@ -94,7 +96,7 @@ render, no callback hooks. It cannot host the target features.
   `SDL_AUDIODRIVER` timing, p95 command cost), the ADR reopens at the fallback ladder
   (SoLoud → FMOD-after-license-read), not at a blank page.
 
-## Spike falsification list (must pass before status: ACCEPTED)
+## Spike falsification list (passed 2026-08-17 — now the regression floor for the gate harness)
 
 1. init → load ogg/wav (full decode, `jobThreadCount=0`, `NO_THREADING`) → play →
    `noDevice` offline render → WAV out, twice, **byte-identical on the same machine**.
