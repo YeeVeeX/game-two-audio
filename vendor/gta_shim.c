@@ -198,3 +198,98 @@ GTA_API void gta_sound_set_fade_start_pcm(ma_sound* s, float volBeg, float volEn
 {
     ma_sound_set_fade_start_in_pcm_frames(s, volBeg, volEnd, lenFrames, absStartFrame);
 }
+
+/*
+ * Bus graph (M2). ma_sound_group IS ma_sound (miniaudio.h L11274 typedef);
+ * every ma_sound_group_* function delegates to the ma_sound_* function on the
+ * same pointer (implementations at miniaudio.h L79839+). Groups are STARTED
+ * by default (L77064) — once a group is attached to the endpoint the engine
+ * graph always produces frames (silence), unlike the M1 empty-graph case.
+ *
+ * parent == NULL parents the group to the engine endpoint (master bus).
+ */
+GTA_API ma_sound_group* gta_group_create(gta_engine* e, ma_sound_group* parent)
+{
+    ma_sound_group* g;
+    ma_result result;
+
+    g = (ma_sound_group*)calloc(1, sizeof(ma_sound_group));
+    if (g == NULL) {
+        gta_lastResult = MA_OUT_OF_MEMORY;
+        return NULL;
+    }
+
+    result = ma_sound_group_init(&e->engine, 0, parent, g);
+    if (result != MA_SUCCESS) {
+        gta_lastResult = result;
+        free(g);
+        return NULL;
+    }
+
+    gta_lastResult = MA_SUCCESS;
+    return g;
+}
+
+GTA_API void gta_group_destroy(ma_sound_group* g)
+{
+    if (g == NULL) {
+        return;
+    }
+    ma_sound_group_uninit(g);
+    free(g);
+}
+
+GTA_API void gta_group_set_volume(ma_sound_group* g, float v)
+{
+    ma_sound_group_set_volume(g, v);
+}
+
+GTA_API float gta_group_get_volume(ma_sound_group* g)
+{
+    return ma_sound_group_get_volume(g);
+}
+
+/* Relative group fade: applied from the next processed chunk (ducking attack). */
+GTA_API void gta_group_set_fade_pcm(ma_sound_group* g, float volBeg, float volEnd, ma_uint64 lenFrames)
+{
+    ma_sound_group_set_fade_in_pcm_frames(g, volBeg, volEnd, lenFrames);
+}
+
+/*
+ * Absolute-start group fade (ducking with schedule-ahead law). miniaudio
+ * 0.11.25 declares no ma_sound_group_set_fade_start_in_pcm_frames, but the
+ * group typedef + delegation pattern above makes the ma_sound_* call on the
+ * group pointer exactly what such a wrapper would compile to.
+ */
+GTA_API void gta_group_set_fade_start_pcm(ma_sound_group* g, float volBeg, float volEnd, ma_uint64 lenFrames, ma_uint64 absStartFrame)
+{
+    ma_sound_set_fade_start_in_pcm_frames(g, volBeg, volEnd, lenFrames, absStartFrame);
+}
+
+/* Same synchronous full-decode load as gta_sound_create, routed into a bus. */
+GTA_API ma_sound* gta_sound_create_in_group(gta_engine* e, const char* pFilePath, ma_sound_group* pGroup)
+{
+    ma_sound* s;
+    ma_result result;
+
+    s = (ma_sound*)calloc(1, sizeof(ma_sound));
+    if (s == NULL) {
+        gta_lastResult = MA_OUT_OF_MEMORY;
+        return NULL;
+    }
+
+    result = ma_sound_init_from_file(&e->engine, pFilePath,
+                                     MA_SOUND_FLAG_DECODE | MA_SOUND_FLAG_NO_PITCH | MA_SOUND_FLAG_NO_SPATIALIZATION,
+                                     pGroup, NULL, s);
+    if (result != MA_SUCCESS) {
+        gta_lastResult = result;
+        free(s);
+        return NULL;
+    }
+
+    /* Drain any pending jobs on the calling thread (NON_BLOCKING queue). */
+    while (ma_resource_manager_process_next_job(&e->resourceManager) == MA_SUCCESS) { }
+
+    gta_lastResult = MA_SUCCESS;
+    return s;
+}

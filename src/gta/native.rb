@@ -55,5 +55,16 @@ module GTA
     attach_function :gta_sound_set_stop_time_with_fade_pcm, [:pointer, :uint64, :uint64], :void
     attach_function :gta_sound_set_fade_pcm, [:pointer, :float, :float, :uint64], :void
     attach_function :gta_sound_set_fade_start_pcm, [:pointer, :float, :float, :uint64, :uint64], :void
+
+    # bus graph (M2): sound groups. Groups are started by default and attached
+    # to the endpoint (parent NULL) or a parent group — once buses exist the
+    # engine graph always produces frames (empty-graph starvation is gone).
+    attach_function :gta_group_create, [:pointer, :pointer], :pointer
+    attach_function :gta_group_destroy, [:pointer], :void
+    attach_function :gta_group_set_volume, [:pointer, :float], :void
+    attach_function :gta_group_get_volume, [:pointer], :float
+    attach_function :gta_group_set_fade_pcm, [:pointer, :float, :float, :uint64], :void
+    attach_function :gta_group_set_fade_start_pcm, [:pointer, :float, :float, :uint64, :uint64], :void
+    attach_function :gta_sound_create_in_group, [:pointer, :string, :pointer], :pointer
   end
 end

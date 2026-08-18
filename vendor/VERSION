@@ -4,12 +4,20 @@ miniaudio release tag: 0.11.25 (github.com/mackron/miniaudio, published 2026-03-
 source: https://raw.githubusercontent.com/mackron/miniaudio/0.11.25/miniaudio.h
 
 sha256:
-720d8b8a5c606632a5bdf62719c332011dd0340c17e0714a1b530db9058007cd  miniaudio.dll
+15f03e0219d6630e2645b647ce4798b54fd3e9ba7b2cc792b397b650e60f4e65  miniaudio.dll
 ac7af4de748b7e26b777f37e01cee313a308a7296a3eb080e2906b320cc55c89  miniaudio.h
 ab1984bb9804ffd7b0303813595d0b345a8a86c34da1daffc353a14b34102a65  miniaudio_impl.c
-7aaa2a9f3f0b6d7de57aecd7af446fc1f90cf0d0e41a86f9ba1af03640a3573f  gta_shim.c
+da7ad9abcbd60bff8959fa066c9a84ca018def454f8a94910bd5405fbcd6f099  gta_shim.c
 
-build (2026-08-17, deliberate — a rebuild bumps this file and reruns the full gate):
+build (2026-08-18, deliberate M2 rebuild — bus-graph shim surface added):
+  gta_group_create/destroy/set_volume/get_volume, gta_group_set_fade_pcm,
+  gta_group_set_fade_start_pcm (delegation: ma_sound_group IS ma_sound,
+  miniaudio.h L11274; group fns delegate to sound fns L79839+; groups started
+  by default L77064), gta_sound_create_in_group. 30 gta_* exports total.
+  miniaudio.h and miniaudio_impl.c UNCHANGED from the M1 pin (same sha256s).
+  rake + rake spike rerun green on this binary before any M2 code landed.
+
+previous build (2026-08-17, M1 — dll sha256 720d8b8a…07cd, gta_shim 7aaa2a9f…573f):
   gcc.exe (Rev5, Built by MSYS2 project) 16.1.0  [RubyInstaller devkit UCRT64]
   gcc -shared -O2 -o vendor/miniaudio.dll vendor/miniaudio_impl.c vendor/gta_shim.c
   deps: KERNEL32 + api-ms-win-crt-* (UCRT) only — no MinGW runtime DLLs.
