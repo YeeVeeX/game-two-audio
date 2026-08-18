@@ -43,11 +43,12 @@ module GTA
     end
 
     class Runner
-      def initialize(replay_path, data_dir:, fixture_dir:, out_dir:)
+      def initialize(replay_path, data_dir:, fixture_dir:, out_dir:, expectation_types: nil)
         @replay = JSON.parse(File.read(replay_path))
         @data_dir = data_dir
         @fixture_dir = fixture_dir
         @out_dir = out_dir
+        @expectation_types = expectation_types
         @engine_tbl = JSON.parse(File.read(File.join(data_dir, "engine.json")))
         @tf = @engine_tbl["tick_frames"]
         @sr = @engine_tbl["sample_rate"]
@@ -71,18 +72,27 @@ module GTA
         checks = []
         samples = bytes_a.unpack("e*")
         expectations = @replay.fetch("expectations")
-        (expectations["goertzel"] || []).each { |e| checks << check_goertzel(samples, e) }
-        (expectations["rms"] || []).each { |e| checks << check_rms(samples, e) }
-        (expectations["silence"] || []).each { |e| checks << check_silence(samples, e) }
-        (expectations["ratio"] || []).each { |e| checks << check_ratio(samples, e) }
-        (expectations["log"] || []).each { |e| checks << check_log(log_a, e) }
-        (expectations["peak"] || []).each { |e| checks << check_peak(samples, e) }
+        (want(expectations, "goertzel") || []).each { |e| checks << check_goertzel(samples, e) }
+        (want(expectations, "rms") || []).each { |e| checks << check_rms(samples, e) }
+        (want(expectations, "silence") || []).each { |e| checks << check_silence(samples, e) }
+        (want(expectations, "ratio") || []).each { |e| checks << check_ratio(samples, e) }
+        (want(expectations, "log") || []).each { |e| checks << check_log(log_a, e) }
+        (want(expectations, "peak") || []).each { |e| checks << check_peak(samples, e) }
 
         Result.new(name, log_a.md5, Digest::SHA256.hexdigest(bytes_a),
                    bytes_a == bytes_b, log_a.md5 == log_b.md5, checks, diag, metrics(samples))
       end
 
       private
+
+      # Expectation-type filter (listen track runs the SAME replays with only
+      # material-independent types — peak/headroom; the sine-tuned goertzel/
+      # ratio/rms/silence/log accuracy pins stay gate-only). nil = all types
+      # (the gate default; behavior unchanged).
+      def want(expectations, type)
+        return nil if @expectation_types && !@expectation_types.include?(type)
+        expectations[type]
+      end
 
       # One full fresh render: fresh engine, fresh AudioSystem, recorder on.
       # Tick contract: events for tick T -> update(T) -> advance tick_frames.

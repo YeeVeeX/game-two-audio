@@ -1,0 +1,132 @@
+{
+  "_comment": "LISTEN-track fixture manifest (M4). Musical placeholder stems for the presentation axis: the owner listen (2026-08-19, drafts/_m4-owner-scores.md) falsified raw sines as listen material, so the ear track renders these while the accuracy corpus keeps data/audio/fixtures.json sines (goertzel/ratio math needs pure tones). Everything is A-minor at 120 bpm so cues sit in one harmonic world. All in-repo generated synthesis (GTA::Fixtures type=notes) — no third-party audio, ever; owner Reaper stems replace entries per docs/listen-track.md. LAW: dur_s of every entry MUST equal its gate-manifest counterpart (choreography timing — steal/duck/transition moments — depends on cue durations; test/listen_track_test.rb pins the mirror). Relative level bands follow KB music-production/production-fundamentals.md Game Audio Targets (music bed mid, ambient drone below everything, sfx cutting above music, UI clear-not-jarring); LUFS metering itself stays parked.",
+  "tones": {
+    "mstem_calm_6s": {
+      "type": "notes", "dur_s": 6.0, "gain": 1.0,
+      "_what": "calm state music: warm triangle pad, 3 bars (Am | Fmaj7 | C), soft top line, slow-breathing A2 root drone. Loops at 3 bars.",
+      "notes": [
+        { "t": 0.0, "dur": 6.0, "freq_hz": 110.0, "amp": 0.10, "wave": "tri", "attack_s": 0.3, "release_s": 0.5, "trem": { "rate_hz": 0.25, "depth": 0.15 } },
+        { "t": 0.0, "dur": 2.05, "freq_hz": 220.0,   "amp": 0.11, "wave": "tri", "attack_s": 0.35, "release_s": 0.6 },
+        { "t": 0.0, "dur": 2.05, "freq_hz": 261.626, "amp": 0.10, "wave": "tri", "attack_s": 0.35, "release_s": 0.6 },
+        { "t": 0.0, "dur": 2.05, "freq_hz": 329.628, "amp": 0.09, "wave": "tri", "attack_s": 0.35, "release_s": 0.6 },
+        { "t": 2.0, "dur": 2.05, "freq_hz": 174.614, "amp": 0.11, "wave": "tri", "attack_s": 0.35, "release_s": 0.6 },
+        { "t": 2.0, "dur": 2.05, "freq_hz": 220.0,   "amp": 0.10, "wave": "tri", "attack_s": 0.35, "release_s": 0.6 },
+        { "t": 2.0, "dur": 2.05, "freq_hz": 261.626, "amp": 0.09, "wave": "tri", "attack_s": 0.35, "release_s": 0.6 },
+        { "t": 2.0, "dur": 2.05, "freq_hz": 329.628, "amp": 0.07, "wave": "tri", "attack_s": 0.35, "release_s": 0.6 },
+        { "t": 4.0, "dur": 2.0,  "freq_hz": 195.998, "amp": 0.11, "wave": "tri", "attack_s": 0.35, "release_s": 0.6 },
+        { "t": 4.0, "dur": 2.0,  "freq_hz": 261.626, "amp": 0.10, "wave": "tri", "attack_s": 0.35, "release_s": 0.6 },
+        { "t": 4.0, "dur": 2.0,  "freq_hz": 329.628, "amp": 0.09, "wave": "tri", "attack_s": 0.35, "release_s": 0.6 },
+        { "t": 4.0, "dur": 2.0,  "freq_hz": 391.995, "amp": 0.06, "wave": "tri", "attack_s": 0.35, "release_s": 0.6 },
+        { "t": 1.0, "dur": 0.9, "freq_hz": 659.255, "amp": 0.05, "wave": "sine", "attack_s": 0.05, "decay_tau_s": 0.6, "release_s": 0.3 },
+        { "t": 3.0, "dur": 0.9, "freq_hz": 523.251, "amp": 0.05, "wave": "sine", "attack_s": 0.05, "decay_tau_s": 0.6, "release_s": 0.3 },
+        { "t": 5.0, "dur": 0.9, "freq_hz": 440.0,   "amp": 0.05, "wave": "sine", "attack_s": 0.05, "decay_tau_s": 0.6, "release_s": 0.3 }
+      ]
+    },
+    "mstem_combat_6s": {
+      "type": "notes", "dur_s": 6.0, "gain": 1.0,
+      "_what": "combat state music: driving eighth-note square bass riff (Am), offbeat saw power-chord stabs, throbbing A1 pulse, bar-3 riser. Loops at 3 bars.",
+      "notes": [
+        { "t": 0.0, "dur": 6.0, "freq_hz": 55.0, "amp": 0.07, "wave": "sine", "attack_s": 0.05, "release_s": 0.3, "trem": { "rate_hz": 4.0, "depth": 0.5 } },
+        { "t": 0.0,  "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 0.25, "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 0.5,  "dur": 0.22, "freq_hz": 97.999,  "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 0.75, "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 1.0,  "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 1.25, "dur": 0.22, "freq_hz": 130.813, "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 1.5,  "dur": 0.22, "freq_hz": 123.471, "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 1.75, "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 2.0,  "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 2.25, "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 2.5,  "dur": 0.22, "freq_hz": 97.999,  "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 2.75, "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 3.0,  "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 3.25, "dur": 0.22, "freq_hz": 130.813, "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 3.5,  "dur": 0.22, "freq_hz": 123.471, "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 3.75, "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 4.0,  "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 4.25, "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 4.5,  "dur": 0.22, "freq_hz": 97.999,  "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 4.75, "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 5.0,  "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 5.25, "dur": 0.22, "freq_hz": 130.813, "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 5.5,  "dur": 0.22, "freq_hz": 123.471, "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 5.75, "dur": 0.22, "freq_hz": 110.0,   "amp": 0.16, "wave": "square", "attack_s": 0.004, "decay_tau_s": 0.1, "release_s": 0.04 },
+        { "t": 0.5, "dur": 0.18, "freq_hz": 220.0,   "amp": 0.10, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 0.5, "dur": 0.18, "freq_hz": 329.628, "amp": 0.08, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 1.5, "dur": 0.18, "freq_hz": 220.0,   "amp": 0.10, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 1.5, "dur": 0.18, "freq_hz": 329.628, "amp": 0.08, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 2.5, "dur": 0.18, "freq_hz": 220.0,   "amp": 0.10, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 2.5, "dur": 0.18, "freq_hz": 329.628, "amp": 0.08, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 3.5, "dur": 0.18, "freq_hz": 220.0,   "amp": 0.10, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 3.5, "dur": 0.18, "freq_hz": 329.628, "amp": 0.08, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 4.5, "dur": 0.18, "freq_hz": 220.0,   "amp": 0.10, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 4.5, "dur": 0.18, "freq_hz": 329.628, "amp": 0.08, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 5.5, "dur": 0.18, "freq_hz": 220.0,   "amp": 0.10, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 5.5, "dur": 0.18, "freq_hz": 329.628, "amp": 0.08, "wave": "saw", "attack_s": 0.003, "decay_tau_s": 0.06, "release_s": 0.03 },
+        { "t": 4.0, "dur": 0.4, "freq_hz": 220.0,   "amp": 0.09, "wave": "saw", "attack_s": 0.005, "decay_tau_s": 0.15, "release_s": 0.06 },
+        { "t": 4.5, "dur": 0.4, "freq_hz": 246.942, "amp": 0.09, "wave": "saw", "attack_s": 0.005, "decay_tau_s": 0.15, "release_s": 0.06 },
+        { "t": 5.0, "dur": 0.4, "freq_hz": 261.626, "amp": 0.09, "wave": "saw", "attack_s": 0.005, "decay_tau_s": 0.15, "release_s": 0.06 },
+        { "t": 5.5, "dur": 0.4, "freq_hz": 329.628, "amp": 0.09, "wave": "saw", "attack_s": 0.005, "decay_tau_s": 0.15, "release_s": 0.06 }
+      ]
+    },
+    "msfx_drone_4s": {
+      "type": "notes", "dur_s": 4.0, "gain": 1.0,
+      "_what": "drone_low sfx: dark detuned-saw pair on A2 (+/-4 cents) over E2 + A1, slow tremolo. Ambient band: sits below everything (KB).",
+      "notes": [
+        { "t": 0.0, "dur": 4.0, "freq_hz": 109.746, "amp": 0.12, "wave": "saw", "attack_s": 0.15, "release_s": 0.35, "trem": { "rate_hz": 0.4, "depth": 0.25 } },
+        { "t": 0.0, "dur": 4.0, "freq_hz": 110.254, "amp": 0.12, "wave": "saw", "attack_s": 0.15, "release_s": 0.35, "trem": { "rate_hz": 0.4, "depth": 0.25 } },
+        { "t": 0.0, "dur": 4.0, "freq_hz": 82.407,  "amp": 0.08, "wave": "sine", "attack_s": 0.15, "release_s": 0.35 },
+        { "t": 0.0, "dur": 4.0, "freq_hz": 55.0,    "amp": 0.06, "wave": "sine", "attack_s": 0.15, "release_s": 0.35 }
+      ]
+    },
+    "msfx_stinger_2s": {
+      "type": "notes", "dur_s": 2.0, "gain": 1.0,
+      "_what": "boss1_spawn stinger: noise impact + pitch-drop hit (A3->A2) + decaying Am saw swell + high E5 tail. SFX band: must cut above the music bed (KB).",
+      "notes": [
+        { "t": 0.0, "dur": 0.14, "freq_hz": 1.0, "amp": 0.24, "wave": "noise", "seed": 11, "attack_s": 0.002, "decay_tau_s": 0.035, "release_s": 0.04 },
+        { "t": 0.0, "dur": 0.4, "freq_hz": 220.0, "glide_to_hz": 110.0, "glide_s": 0.09, "amp": 0.40, "wave": "sine", "attack_s": 0.002, "decay_tau_s": 0.12, "release_s": 0.08 },
+        { "t": 0.02, "dur": 1.9, "freq_hz": 220.0,   "amp": 0.13, "wave": "saw", "attack_s": 0.012, "decay_tau_s": 0.55, "release_s": 0.45 },
+        { "t": 0.02, "dur": 1.9, "freq_hz": 261.626, "amp": 0.11, "wave": "saw", "attack_s": 0.012, "decay_tau_s": 0.55, "release_s": 0.45 },
+        { "t": 0.02, "dur": 1.9, "freq_hz": 329.628, "amp": 0.10, "wave": "saw", "attack_s": 0.012, "decay_tau_s": 0.55, "release_s": 0.45 },
+        { "t": 0.02, "dur": 0.8, "freq_hz": 659.255, "amp": 0.07, "wave": "sine", "attack_s": 0.005, "decay_tau_s": 0.2, "release_s": 0.2 }
+      ]
+    },
+    "msfx_swarmpip_4s": {
+      "type": "notes", "dur_s": 4.0, "gain": 1.0,
+      "_what": "filler_blip: soft E6 bell pip every 250 ms. Replays stack up to 47 voices at 1-tick offsets -> shimmering rain texture instead of a coherent sine wall; per-pip amp keeps the stack in the texture band.",
+      "notes": [
+        { "t": 0.0,  "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 0.25, "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 0.5,  "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 0.75, "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 1.0,  "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 1.25, "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 1.5,  "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 1.75, "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 2.0,  "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 2.25, "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 2.5,  "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 2.75, "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 3.0,  "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 3.25, "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 3.5,  "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 },
+        { "t": 3.75, "dur": 0.2, "freq_hz": 1318.51, "amp": 0.022, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.05, "release_s": 0.05 }
+      ]
+    },
+    "mui_confirm_200ms": {
+      "type": "notes", "dur_s": 0.2, "gain": 1.0,
+      "_what": "toll_paid: bright two-note confirm pluck A5 -> E6 (bell). UI band: clear but not jarring (KB).",
+      "notes": [
+        { "t": 0.0,  "dur": 0.09, "freq_hz": 880.0,   "amp": 0.30, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.03,  "release_s": 0.02 },
+        { "t": 0.09, "dur": 0.11, "freq_hz": 1318.51, "amp": 0.34, "wave": "bell", "attack_s": 0.002, "decay_tau_s": 0.035, "release_s": 0.03 }
+      ]
+    },
+    "mui_ping_1200ms": {
+      "type": "notes", "dur_s": 1.2, "gain": 1.0,
+      "_what": "hud_ping: single soft E5 sonar bell with a long tail; 8 stack at 150 ms spacing in the cap replay -> a rising cascade.",
+      "notes": [
+        { "t": 0.0, "dur": 1.2, "freq_hz": 659.255, "amp": 0.08, "wave": "bell", "attack_s": 0.003, "decay_tau_s": 0.28, "release_s": 0.25 }
+      ]
+    }
+  }
+}

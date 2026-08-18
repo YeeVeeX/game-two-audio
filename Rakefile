@@ -15,6 +15,13 @@ task :gate do
   sh "ruby -Isrc -Iharness harness/run_gate.rb #{replays.join(' ')}"
 end
 
+desc "M4 listen track: same replays, musical fixtures (data/audio_listen) -> WAVs under tmp/listen for the owner's ears"
+task :listen do
+  replays = Dir["harness/replays/*.json"].sort
+  abort "No replays under harness/replays/" if replays.empty?
+  sh "ruby -Isrc -Iharness harness/run_listen.rb #{replays.join(' ')}"
+end
+
 desc "M1 spike falsification runner (one script per ADR item under spike/)"
 task :spike do
   scripts = Dir["spike/[0-9]*_*.rb"].sort

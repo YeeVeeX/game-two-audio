@@ -1,0 +1,6 @@
+{
+  "_comment": "LISTEN-track engine/timebase table (M4). MUST be byte-equal in values to data/audio/engine.json (same tick->frame map, or the replay choreography would shift); test/listen_track_test.rb pins it.",
+  "sample_rate": 48000,
+  "channels": 2,
+  "tick_frames": 800
+}

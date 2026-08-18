@@ -24,4 +24,24 @@ class GateSmokeTest < Minitest::Test
     assert File.exist?(File.expand_path("../tmp/gate/mini_smoke.wav", __dir__))
     assert File.exist?(File.expand_path("../tmp/gate/mini_smoke.log", __dir__))
   end
+
+  # Listen-track harness contract (M4): expectation_types filters the checks
+  # to material-independent types; run_listen.rb relies on this to reuse the
+  # gate replays against musical fixtures without the sine-tuned pins.
+  def test_expectation_types_filter_keeps_only_requested_checks
+    result = GTA::Gate::Runner.new(
+      File.expand_path("replays/mini_smoke.json", __dir__),
+      data_dir: File.expand_path("../data/audio", __dir__),
+      fixture_dir: File.expand_path("../tmp/fixtures", __dir__),
+      out_dir: File.expand_path("../tmp/gate", __dir__),
+      expectation_types: %w[peak]
+    ).run
+
+    assert result.render_match && result.log_match, "determinism must still assert under the filter"
+    refute_empty result.checks, "peak checks missing (mini_smoke should carry one)"
+    result.checks.each do |c|
+      assert c.label.start_with?("peak "), "non-peak check leaked through the filter: #{c.label}"
+      assert c.pass, "#{c.label}: #{c.detail}"
+    end
+  end
 end

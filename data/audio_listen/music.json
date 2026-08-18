@@ -1,0 +1,21 @@
+{
+  "_comment": "LISTEN-track music table (M4). MIRROR LAW: timing, transition, states, initial_state, stem ids and gains MUST equal data/audio/music.json — only stem 'file' refs (and the informational freq_hz, now the musical fundamental) differ. test/listen_track_test.rb pins the mirror. Stems are 3-bar loops at the shared 120 bpm grid, both in A minor so the calm->combat crossfade stays harmonically coherent.",
+  "timing": {
+    "bpm": 120,
+    "beats_per_bar": 4,
+    "quantize": "bar"
+  },
+  "transition": {
+    "crossfade_frames": 9600
+  },
+  "initial_state": "calm",
+  "states": {
+    "calm": { "stem": "stem_a" },
+    "combat": { "stem": "stem_b" },
+    "silent": { "stem": null }
+  },
+  "stems": {
+    "stem_a": { "freq_hz": 220.0, "loop": true, "file": "mstem_calm_6s", "gain": 1.0 },
+    "stem_b": { "freq_hz": 110.0, "loop": true, "file": "mstem_combat_6s", "gain": 1.0 }
+  }
+}
