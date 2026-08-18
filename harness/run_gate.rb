@@ -25,6 +25,9 @@ paths.each do |path|
   end
   d = result.diagnostics
   puts "   diagnostics: voices=#{d[:active_voices]} dropped=#{d[:dropped_cues]} music=#{d[:music_state]}"
+  m = result.metrics
+  puts format("   metrics: peak=%.4f (%.2f dBFS) rms=%.4f (%.2f dBFS) crest=%.2f dB over_1.0=%d",
+              m[:peak], m[:peak_dbfs], m[:rms], m[:rms_dbfs], m[:crest_db], m[:over_1])
   all_pass &&= result.pass?
 end
 

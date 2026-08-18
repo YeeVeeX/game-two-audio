@@ -48,6 +48,40 @@ module GTA
       2.0 * Math.sqrt(power.abs) / frames
     end
 
+    # Max |sample| over the window (SAMPLE peak, not oversampled dBTP true
+    # peak — stated honestly; generated pure tones keep inter-sample overshoot
+    # small, and real assets arrive with their own -1 dBTP ceiling from the
+    # game-two-assets pipeline). ch nil = max across all channels.
+    def sample_peak(samples, from_frame, frames, channels:, ch: nil)
+      best = 0.0
+      frames.times do |i|
+        base = (from_frame + i) * channels
+        if ch
+          v = (samples[base + ch] || 0.0).abs
+          best = v if v > best
+        else
+          c = 0
+          while c < channels
+            v = (samples[base + c] || 0.0).abs
+            best = v if v > best
+            c += 1
+          end
+        end
+      end
+      best
+    end
+
+    # Samples strictly above the threshold in magnitude (f32 legality counter:
+    # >1.0 is legal in an f32 WAV but clips on any integer/DAC path).
+    def over_count(samples, threshold)
+      samples.count { |s| s.abs > threshold }
+    end
+
+    def dbfs(x)
+      return -Float::INFINITY if x <= 0.0
+      20.0 * Math.log10(x)
+    end
+
     # Least-squares line fit: ys over xs => [slope, intercept]
     def linear_fit(xs, ys)
       n = xs.size.to_f

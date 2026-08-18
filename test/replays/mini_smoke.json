@@ -12,6 +12,16 @@
     ],
     "rms": [
       { "from_frame": 0, "frames": 4800, "min": 0.1 }
+    ],
+    "log": [
+      { "_comment": "exactly one voice load after frame 0 (stems load at 0)",
+        "op": "sound_load", "from_tick": 1, "ticks": 39, "count": 1 },
+      { "op": "sound_start", "id": "stem_a", "count": 1 },
+      { "op": "sound_stop", "count": 0 }
+    ],
+    "peak": [
+      { "_comment": "headroom policy: whole render under -1 dBFS sample peak",
+        "max_peak": 0.8913 }
     ]
   }
 }

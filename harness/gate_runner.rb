@@ -10,9 +10,18 @@
 #   { "name": ..., "duration_ticks": N,
 #     "events": [[tick, "event", {payload}], ...],   # payload keys symbolized
 #     "expectations": { "goertzel": [...], "rms": [...], "silence": [...],
-#                        "ratio": [...] } }
+#                        "ratio": [...], "log": [...], "peak": [...] } }
 # Windows accept from_tick/ticks (mapped via engine.json tick_frames) or
 # from_frame/frames. All analysis runs on render A (A == B is asserted first).
+# M3 additions:
+#   "log"  — exact command count over the canonical log: {op, id?, window?,
+#            count} (catches steal/duck issuance regressions the WAV can't
+#            isolate; window optional = whole replay);
+#   "peak" — max |sample| bound over a window (window optional = whole
+#            render): {max_peak} — the headroom gate. Sample peak, not
+#            oversampled dBTP (see Analysis.sample_peak).
+# A per-replay metrics block (peak/rms/crest/over-1.0) is computed always —
+# informational (presentation axis input), only "peak" expectations gate.
 
 require "json"
 require "digest"
@@ -27,7 +36,7 @@ require "gta/analysis"
 module GTA
   module Gate
     Check = Struct.new(:pass, :label, :detail)
-    Result = Struct.new(:name, :log_md5, :wav_sha256, :render_match, :log_match, :checks, :diagnostics) do
+    Result = Struct.new(:name, :log_md5, :wav_sha256, :render_match, :log_match, :checks, :diagnostics, :metrics) do
       def pass?
         render_match && log_match && checks.all?(&:pass)
       end
@@ -66,9 +75,11 @@ module GTA
         (expectations["rms"] || []).each { |e| checks << check_rms(samples, e) }
         (expectations["silence"] || []).each { |e| checks << check_silence(samples, e) }
         (expectations["ratio"] || []).each { |e| checks << check_ratio(samples, e) }
+        (expectations["log"] || []).each { |e| checks << check_log(log_a, e) }
+        (expectations["peak"] || []).each { |e| checks << check_peak(samples, e) }
 
         Result.new(name, log_a.md5, Digest::SHA256.hexdigest(bytes_a),
-                   bytes_a == bytes_b, log_a.md5 == log_b.md5, checks, diag)
+                   bytes_a == bytes_b, log_a.md5 == log_b.md5, checks, diag, metrics(samples))
       end
 
       private
@@ -101,6 +112,63 @@ module GTA
         from = e["from_frame"] || (e.fetch("from_tick") * @tf)
         frames = e["frames"] || (e.fetch("ticks") * @tf)
         [from, frames]
+      end
+
+      # Window with whole-replay default (log/peak expectations).
+      def window_or_all(e)
+        if e["from_frame"] || e["from_tick"]
+          window(e)
+        else
+          [0, @replay.fetch("duration_ticks") * @tf]
+        end
+      end
+
+      # Mechanical presentation metrics over the full render (all channels).
+      # Informational — the accuracy/presentation split (Rule 2): these feed
+      # the listen sheet; only explicit "peak" expectations gate.
+      def metrics(samples)
+        total = samples.size / @channels
+        peak = GTA::Analysis.sample_peak(samples, 0, total, channels: @channels)
+        rms = GTA::Analysis.rms(samples, 0, total, channels: @channels, ch: nil)
+        {
+          peak: peak, peak_dbfs: GTA::Analysis.dbfs(peak),
+          rms: rms, rms_dbfs: GTA::Analysis.dbfs(rms),
+          crest_db: GTA::Analysis.dbfs(peak) - GTA::Analysis.dbfs(rms),
+          over_1: GTA::Analysis.over_count(samples, 1.0)
+        }
+      end
+
+      # Exact op-count over the canonical command log — deterministic by
+      # construction (the log md5 already gates bit-exactness; this pins
+      # issuance structure: steals, duck fades, ignored music requests).
+      def check_log(log, e)
+        from, frames = window_or_all(e)
+        op = e.fetch("op")
+        id = e["id"]
+        count = 0
+        log.lines.each do |line|
+          frame_s, line_op, line_id, = line.split(" ", 4)
+          next unless line_op == op
+          next if id && line_id != id
+          f = frame_s.to_i
+          next if f < from || f >= from + frames
+          count += 1
+        end
+        expected = e.fetch("count")
+        Check.new(count == expected, "log #{op}#{id ? " #{id}" : ''} [#{from},#{from + frames})",
+                  "count=#{count} expect=#{expected}")
+      end
+
+      # Headroom gate: max |sample| over the window (all channels unless ch).
+      def check_peak(samples, e)
+        from, frames = window_or_all(e)
+        peak = GTA::Analysis.sample_peak(samples, from, frames, channels: @channels, ch: e["ch"])
+        ok = true
+        ok &&= peak <= e["max_peak"] if e["max_peak"]
+        ok &&= peak >= e["min_peak"] if e["min_peak"]
+        Check.new(ok, "peak ch#{e['ch'] || 'all'} [#{from},#{from + frames})",
+                  format("peak=%.6g (%.2f dBFS) bounds=[%s,%s]", peak, GTA::Analysis.dbfs(peak),
+                         e["min_peak"] || "-", e["max_peak"] || "-"))
       end
 
       def check_goertzel(samples, e)

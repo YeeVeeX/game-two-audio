@@ -17,6 +17,10 @@ class GateSmokeTest < Minitest::Test
     assert result.log_match, "command log md5 differs between renders"
     result.checks.each { |c| assert c.pass, "#{c.label}: #{c.detail}" }
     assert result.pass?
+    assert(result.checks.any? { |c| c.label.start_with?("log ") }, "log expectation type not exercised")
+    assert(result.checks.any? { |c| c.label.start_with?("peak ") }, "peak expectation type not exercised")
+    assert_operator result.metrics[:peak], :>, 0.1, "metrics block missing or silent render"
+    assert_equal 0, result.metrics[:over_1]
     assert File.exist?(File.expand_path("../tmp/gate/mini_smoke.wav", __dir__))
     assert File.exist?(File.expand_path("../tmp/gate/mini_smoke.log", __dir__))
   end
