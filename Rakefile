@@ -22,6 +22,13 @@ task :listen do
   sh "ruby -Isrc -Iharness harness/run_listen.rb #{replays.join(' ')}"
 end
 
+namespace :stems do
+  desc "Owner production loop: import inbox renders (data/audio_listen/inbox) -> validated stems + manifest sha pins + listen re-render"
+  task :import do
+    sh "ruby -Isrc -Iharness harness/import_stems.rb"
+  end
+end
+
 desc "Export listen-track placeholder compositions as MIDI (data/audio_listen/midi/) for the owner's DAW/analog re-voicing loop"
 task :midi do
   sh "ruby -Isrc -Iharness harness/export_midi.rb"

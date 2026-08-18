@@ -80,13 +80,26 @@ round trip:
    `music-production/moog-dfam.md` §6 has game-audio patch recipes (Patch 3
    "alien texture loop" fits the `msfx_drone_4s` slot directly); records/
    renders to the spec above (48 kHz mono PCM16 WAV, exact slot duration).
-3. Drop the render under `data/audio_listen/stems/` and swap the manifest
-   entry to the **file type**:
-   `{ "type": "file", "dur_s": <slot>, "path": "stems/<slot>.wav", "sha256": "<pin>" }`
-   — sha256 is the provenance pin (mismatch refuses to load); format and
-   exact duration are validated at import (durations are load-bearing).
-4. `rake listen` re-renders the six WAVs with the new material; the mirror
-   law + peak ceiling + determinism all still gate.
+3. Render into `data/audio_listen/inbox/<slot>.wav` and run
+   **`rake stems:import`** (M4b). Per file it: refuses wrong sample rates
+   (engine.json is the authority) with the one-line Reaper fix; downmixes
+   stereo (L+R)/2; converts 24-bit / 32-bit int / 32-bit float to PCM16
+   (round + clamp; PCM16 passes through sample-exact); conforms duration to
+   the slot's exact `dur_s` (pad/trim tolerances + silence floor in
+   `data/audio_listen/import.json` — audible overhang always refuses; gross
+   mismatch refuses with measured-vs-expected frames). On accept it writes
+   `stems/<slot>.wav`, pins its sha256 into the manifest as a `type="file"`
+   entry (`_what` preserved), reports stem peak/rms dBFS against the slot's
+   KB level band, and re-renders the listen track with old→new sha heads.
+   Inbox files are the owner's documents: never deleted, never modified.
+   (Manual path still works: drop under `stems/`, swap the manifest entry
+   to `{ "type": "file", "dur_s": <slot>, "path": "stems/<slot>.wav",
+   "sha256": "<pin>" }` yourself — same validations apply at load.)
+4. `rake listen` re-renders the six WAVs with the new material any time; the
+   mirror law + peak ceiling + determinism all still gate. An accepted
+   import legitimately moves that slot's listen shas (the M4 verdict pins
+   the final set); a listen sha that moves WITHOUT an import or data commit
+   is a stop-the-line event.
 
 In-house original renders only (no third-party audio, no sample-pack content
 with redistribution restrictions committed to the repo). Real *runtime*
@@ -96,9 +109,10 @@ integration time; this track is only this repo's evaluation instrument.
 ## Commands
 
 ```
-rake listen   # render the 6 replays with musical fixtures -> tmp/listen/*.wav
-rake midi     # export placeholder compositions -> data/audio_listen/midi/*.mid
-rake gate     # the accuracy ship-gate (sine corpus) — unchanged
+rake listen        # render the 6 replays with musical fixtures -> tmp/listen/*.wav
+rake midi          # export placeholder compositions -> data/audio_listen/midi/*.mid
+rake stems:import  # inbox -> validated stems + manifest sha pins + listen re-render
+rake gate          # the accuracy ship-gate (sine corpus) — unchanged
 ```
 
 Owner listens against `drafts/_m4-listen-sheet.md`.

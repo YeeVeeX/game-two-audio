@@ -1,0 +1,16 @@
+{
+  "_comment": "Inbox-import policy (M4b owner production loop; docs/listen-track.md). All import tunables live here — data-driven law, zero constants in code. pad_tolerance_s: a render SHORTER than its slot by at most this much gets trailing zeros appended (durations are choreography-load-bearing, so bigger deficits refuse with measured-vs-expected frames). trim_tolerance_s: a render LONGER by at most this much gets trimmed ONLY when the overhang's peak stays under silence_floor — audible overhang always refuses (chopping the owner's audio is an artistic call, never the importer's). silence_floor is linear full-scale (0.001 = -60 dBFS). Scaffold region renders are frame-exact by construction; these tolerances exist for manual renders.",
+  "pad_tolerance_s": 0.05,
+  "trim_tolerance_s": 0.5,
+  "silence_floor": 0.001,
+  "_bands_comment": "Owner-facing report copy: the relative level band each slot should sit in, per KB music-production/production-fundamentals.md 'Game Audio Targets' (music bed mid, ambient drone below everything, sfx cutting above music, UI clear-not-jarring; verified 2026-04-09). Report guidance only — the mechanical gate is the -1 dBFS ceiling on the mixed render.",
+  "bands": {
+    "mstem_calm_6s": "music bed (mid) — under the sfx, over the drone",
+    "mstem_combat_6s": "music bed (mid) — under the sfx, over the drone",
+    "msfx_drone_4s": "ambient drone — lowest layer, sits below everything",
+    "msfx_stinger_2s": "sfx — must cut above the music bed",
+    "msfx_swarmpip_4s": "sfx texture — very quiet per pip (replays stack up to 47 copies)",
+    "mui_confirm_200ms": "ui — clear but not jarring",
+    "mui_ping_1200ms": "ui — clear but not jarring (8 stack at 150 ms in the cap replay)"
+  }
+}
