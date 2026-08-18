@@ -1,0 +1,34 @@
+{
+  "_comment": "Gate replay 2: quantized stem transition mid-replay (calm->combat at tick 120: boundary frame 192000 = bar 2, crossfade 9600), a set_state request while pending (tick 130, must be ignored), one ui cue over music, and a fade-to-silent tail (combat->silent at tick 300: boundary 288000, stem stopped 297600, float-exact silence after). Windows are 4800-frame Goertzel bins (10 Hz).",
+  "name": "replay_music",
+  "duration_ticks": 400,
+  "events": [
+    [20, "toll_paid", null],
+    [120, "music_set_state", { "state": "combat" }],
+    [130, "music_set_state", { "state": "calm" }],
+    [300, "music_set_state", { "state": "silent" }]
+  ],
+  "expectations": {
+    "goertzel": [
+      { "freq_hz": 880.0, "ch": 0, "from_frame": 16000, "frames": 4800, "min_amp": 0.1 },
+      { "freq_hz": 400.0, "ch": 0, "from_frame": 80000, "frames": 4800, "min_amp": 0.1 },
+      { "freq_hz": 1000.0, "ch": 0, "from_frame": 180000, "frames": 4800, "max_amp": 0.01 },
+      { "freq_hz": 1000.0, "ch": 0, "from_frame": 204000, "frames": 4800, "min_amp": 0.1 },
+      { "freq_hz": 400.0, "ch": 0, "from_frame": 204000, "frames": 4800, "max_amp": 0.005 }
+    ],
+    "rms": [
+      { "from_frame": 240000, "frames": 4800, "min": 0.1 }
+    ],
+    "ratio": [
+      { "_transition_lands_at_boundary": "stem_b ramps inside [192000,201600] - mid-fade amplitude ~1/3 of full; a bar-late landing would read ~0, a bar-early one ~1",
+        "freq_hz": 1000.0, "ch": 0,
+        "a": { "from_frame": 204000, "frames": 4800 },
+        "b": { "from_frame": 192800, "frames": 4800 },
+        "min_ratio": 0.2, "max_ratio": 0.5 }
+    ],
+    "silence": [
+      { "_tail": "stem_b stopped at 297600; the bus graph renders float-exact silence",
+        "from_frame": 300000, "frames": 16800, "max_rms": 1e-9 }
+    ]
+  }
+}

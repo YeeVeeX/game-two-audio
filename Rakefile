@@ -8,6 +8,13 @@ end
 
 task default: :test
 
+desc "M2 deterministic gate: scripted replays -> command log md5 -> noDevice render -> WAV -> double-render byte-compare -> feature assertions"
+task :gate do
+  replays = Dir["harness/replays/*.json"].sort
+  abort "No replays under harness/replays/" if replays.empty?
+  sh "ruby -Isrc -Iharness harness/run_gate.rb #{replays.join(' ')}"
+end
+
 desc "M1 spike falsification runner (one script per ADR item under spike/)"
 task :spike do
   scripts = Dir["spike/[0-9]*_*.rb"].sort

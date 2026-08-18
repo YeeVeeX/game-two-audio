@@ -1,0 +1,17 @@
+{
+  "_comment": "Mini replay for the default-suite gate smoke test (test/gate_smoke_test.rb). The heavy replays live under harness/replays/ and run via rake gate.",
+  "name": "mini_smoke",
+  "duration_ticks": 40,
+  "events": [
+    [2, "toll_paid", null]
+  ],
+  "expectations": {
+    "goertzel": [
+      { "freq_hz": 880.0, "ch": 0, "from_frame": 1600, "frames": 4800, "min_amp": 0.1 },
+      { "freq_hz": 880.0, "ch": 0, "from_frame": 16000, "frames": 4800, "max_amp": 0.01 }
+    ],
+    "rms": [
+      { "from_frame": 0, "frames": 4800, "min": 0.1 }
+    ]
+  }
+}

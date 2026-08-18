@@ -1,0 +1,565 @@
+{
+  "_comment": "Gate replay 1: cue spam, 64-voice pool pressure, one engineered steal (drone_low prio 10 vs boss1_spawn prio 90 at tick 210), one duck window on the music bus. All windows are 4800-frame Goertzel bins (10 Hz); fixture freqs are bin-aligned. Filler starts are 800 frames apart = integer cycles at 2100 Hz (coherent sum, deterministic).",
+  "name": "replay_cues",
+  "duration_ticks": 360,
+  "events": [
+    [
+      10,
+      "toll_paid",
+      null
+    ],
+    [
+      120,
+      "drone_low",
+      {
+        "pan": -0.25,
+        "distance": 0.9
+      }
+    ],
+    [
+      121,
+      "filler_blip",
+      {
+        "distance": 0.0
+      }
+    ],
+    [
+      122,
+      "filler_blip",
+      {
+        "distance": 0.1
+      }
+    ],
+    [
+      123,
+      "filler_blip",
+      {
+        "distance": 0.2
+      }
+    ],
+    [
+      124,
+      "filler_blip",
+      {
+        "distance": 0.3
+      }
+    ],
+    [
+      125,
+      "filler_blip",
+      {
+        "distance": 0.4
+      }
+    ],
+    [
+      126,
+      "filler_blip",
+      {
+        "distance": 0.5
+      }
+    ],
+    [
+      127,
+      "filler_blip",
+      {
+        "distance": 0.6
+      }
+    ],
+    [
+      128,
+      "filler_blip",
+      {
+        "distance": 0.7
+      }
+    ],
+    [
+      129,
+      "filler_blip",
+      {
+        "distance": 0.8
+      }
+    ],
+    [
+      130,
+      "filler_blip",
+      {
+        "distance": 0.9
+      }
+    ],
+    [
+      131,
+      "filler_blip",
+      {
+        "distance": 0.0
+      }
+    ],
+    [
+      132,
+      "filler_blip",
+      {
+        "distance": 0.1
+      }
+    ],
+    [
+      133,
+      "filler_blip",
+      {
+        "distance": 0.2
+      }
+    ],
+    [
+      134,
+      "filler_blip",
+      {
+        "distance": 0.3
+      }
+    ],
+    [
+      135,
+      "filler_blip",
+      {
+        "distance": 0.4
+      }
+    ],
+    [
+      136,
+      "filler_blip",
+      {
+        "distance": 0.5
+      }
+    ],
+    [
+      137,
+      "filler_blip",
+      {
+        "distance": 0.6
+      }
+    ],
+    [
+      138,
+      "filler_blip",
+      {
+        "distance": 0.7
+      }
+    ],
+    [
+      139,
+      "filler_blip",
+      {
+        "distance": 0.8
+      }
+    ],
+    [
+      140,
+      "filler_blip",
+      {
+        "distance": 0.9
+      }
+    ],
+    [
+      141,
+      "filler_blip",
+      {
+        "distance": 0.0
+      }
+    ],
+    [
+      142,
+      "filler_blip",
+      {
+        "distance": 0.1
+      }
+    ],
+    [
+      143,
+      "filler_blip",
+      {
+        "distance": 0.2
+      }
+    ],
+    [
+      144,
+      "filler_blip",
+      {
+        "distance": 0.3
+      }
+    ],
+    [
+      145,
+      "filler_blip",
+      {
+        "distance": 0.4
+      }
+    ],
+    [
+      146,
+      "filler_blip",
+      {
+        "distance": 0.5
+      }
+    ],
+    [
+      147,
+      "filler_blip",
+      {
+        "distance": 0.6
+      }
+    ],
+    [
+      148,
+      "filler_blip",
+      {
+        "distance": 0.7
+      }
+    ],
+    [
+      149,
+      "filler_blip",
+      {
+        "distance": 0.8
+      }
+    ],
+    [
+      150,
+      "filler_blip",
+      {
+        "distance": 0.9
+      }
+    ],
+    [
+      151,
+      "filler_blip",
+      {
+        "distance": 0.0
+      }
+    ],
+    [
+      152,
+      "filler_blip",
+      {
+        "distance": 0.1
+      }
+    ],
+    [
+      153,
+      "filler_blip",
+      {
+        "distance": 0.2
+      }
+    ],
+    [
+      154,
+      "filler_blip",
+      {
+        "distance": 0.3
+      }
+    ],
+    [
+      155,
+      "filler_blip",
+      {
+        "distance": 0.4
+      }
+    ],
+    [
+      156,
+      "filler_blip",
+      {
+        "distance": 0.5
+      }
+    ],
+    [
+      157,
+      "filler_blip",
+      {
+        "distance": 0.6
+      }
+    ],
+    [
+      158,
+      "filler_blip",
+      {
+        "distance": 0.7
+      }
+    ],
+    [
+      159,
+      "filler_blip",
+      {
+        "distance": 0.8
+      }
+    ],
+    [
+      160,
+      "filler_blip",
+      {
+        "distance": 0.9
+      }
+    ],
+    [
+      161,
+      "filler_blip",
+      {
+        "distance": 0.0
+      }
+    ],
+    [
+      162,
+      "filler_blip",
+      {
+        "distance": 0.1
+      }
+    ],
+    [
+      163,
+      "filler_blip",
+      {
+        "distance": 0.2
+      }
+    ],
+    [
+      164,
+      "filler_blip",
+      {
+        "distance": 0.3
+      }
+    ],
+    [
+      165,
+      "filler_blip",
+      {
+        "distance": 0.4
+      }
+    ],
+    [
+      166,
+      "filler_blip",
+      {
+        "distance": 0.5
+      }
+    ],
+    [
+      167,
+      "filler_blip",
+      {
+        "distance": 0.6
+      }
+    ],
+    [
+      168,
+      "filler_blip",
+      {
+        "distance": 0.7
+      }
+    ],
+    [
+      169,
+      "filler_blip",
+      {
+        "distance": 0.8
+      }
+    ],
+    [
+      170,
+      "filler_blip",
+      {
+        "distance": 0.9
+      }
+    ],
+    [
+      171,
+      "filler_blip",
+      {
+        "distance": 0.0
+      }
+    ],
+    [
+      172,
+      "filler_blip",
+      {
+        "distance": 0.1
+      }
+    ],
+    [
+      173,
+      "filler_blip",
+      {
+        "distance": 0.2
+      }
+    ],
+    [
+      174,
+      "filler_blip",
+      {
+        "distance": 0.3
+      }
+    ],
+    [
+      175,
+      "filler_blip",
+      {
+        "distance": 0.4
+      }
+    ],
+    [
+      176,
+      "filler_blip",
+      {
+        "distance": 0.5
+      }
+    ],
+    [
+      177,
+      "filler_blip",
+      {
+        "distance": 0.6
+      }
+    ],
+    [
+      178,
+      "filler_blip",
+      {
+        "distance": 0.7
+      }
+    ],
+    [
+      179,
+      "filler_blip",
+      {
+        "distance": 0.8
+      }
+    ],
+    [
+      180,
+      "filler_blip",
+      {
+        "distance": 0.9
+      }
+    ],
+    [
+      181,
+      "filler_blip",
+      {
+        "distance": 0.0
+      }
+    ],
+    [
+      182,
+      "filler_blip",
+      {
+        "distance": 0.1
+      }
+    ],
+    [
+      183,
+      "filler_blip",
+      {
+        "distance": 0.2
+      }
+    ],
+    [
+      210,
+      "boss1_spawn",
+      null
+    ]
+  ],
+  "expectations": {
+    "goertzel": [
+      {
+        "freq_hz": 880.0,
+        "ch": 0,
+        "from_frame": 0,
+        "frames": 4800,
+        "max_amp": 0.01
+      },
+      {
+        "freq_hz": 880.0,
+        "ch": 0,
+        "from_frame": 8000,
+        "frames": 4800,
+        "min_amp": 0.1
+      },
+      {
+        "freq_hz": 500.0,
+        "ch": 0,
+        "from_frame": 160000,
+        "frames": 4800,
+        "min_amp": 0.02
+      },
+      {
+        "freq_hz": 1500.0,
+        "ch": 0,
+        "from_frame": 160000,
+        "frames": 4800,
+        "max_amp": 0.01
+      },
+      {
+        "freq_hz": 1500.0,
+        "ch": 0,
+        "from_frame": 168800,
+        "frames": 4800,
+        "min_amp": 0.05
+      },
+      {
+        "freq_hz": 2100.0,
+        "ch": 0,
+        "from_frame": 152000,
+        "frames": 4800,
+        "min_amp": 0.3
+      }
+    ],
+    "rms": [
+      {
+        "from_frame": 0,
+        "frames": 4800,
+        "min": 0.1
+      }
+    ],
+    "ratio": [
+      {
+        "_steal_collapse": "500 Hz victim cut at frame 168000 (spike 04 analog)",
+        "freq_hz": 500.0,
+        "ch": 0,
+        "a": {
+          "from_frame": 160000,
+          "frames": 4800
+        },
+        "b": {
+          "from_frame": 168800,
+          "frames": 4800
+        },
+        "max_ratio": 0.02
+      },
+      {
+        "_duck_depth": "-12 dB = 0.2512 on the music bus during hold",
+        "freq_hz": 400.0,
+        "ch": 0,
+        "a": {
+          "from_frame": 158400,
+          "frames": 4800
+        },
+        "b": {
+          "from_frame": 176000,
+          "frames": 4800
+        },
+        "min_ratio": 0.2,
+        "max_ratio": 0.32
+      },
+      {
+        "_duck_recovery": "release complete by 204000, gain back to 1.0",
+        "freq_hz": 400.0,
+        "ch": 0,
+        "a": {
+          "from_frame": 158400,
+          "frames": 4800
+        },
+        "b": {
+          "from_frame": 208000,
+          "frames": 4800
+        },
+        "min_ratio": 0.85,
+        "max_ratio": 1.15
+      }
+    ]
+  }
+}
