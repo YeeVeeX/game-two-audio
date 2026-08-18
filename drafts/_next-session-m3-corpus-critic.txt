@@ -1,0 +1,175 @@
+Session goal: game-two-audio M3 - grow the replay corpus (per-category caps enforced +
+duck overlap + music churn/stem-reuse + spatial sweeps), add the presentation axis
+(mechanical loudness metrics + headroom policy + owner listen sheet - the critic-listen
+half of non-negotiable 3), and write the integration-readiness checklist (prepare only;
+integration stays PARKED on owner order). Work in C:/Users/gabri/workspace/game-two-audio.
+M2 closed 2026-08-18: AudioSystem event sink + rake gate + bus graph with ducking; both
+replays green end-to-end through the full gate.
+
+Repo state at handoff (measured 2026-08-18, HEAD 4f1dafa on master, pushed):
+- rake: 34 runs / 167 assertions green. rake spike: 5/5 green (M1 floor; spike 01
+  render sha256 51d9020db2c8433a... unchanged all cycle). rake gate: 2/2 green -
+  replay_cues log md5 63f4a1df9af84c8297d3b42eaf0210db, replay_music log md5
+  1c16c0613e7a3068250dfaa4d21a5141; md5s identical across separate processes.
+- vendor/miniaudio.dll rebuilt once in M2 (bus-graph shim; dll sha256 15f03e02...4e65;
+  30 gta_* exports; VERSION documents the delegation facts with header line refs).
+- src/gta/: audio_system.rb (event sink), command_io.rb (CommandIO+CommandLog - the
+  one FFI/log choke point; floats logged as IEEE-754 f32 hex, md5 rides the hex),
+  voice_pool.rb (pure steal policy - GLOBAL cap only), analysis.rb, render.rb,
+  audio_data.rb (validating loader), fixtures.rb, native.rb, wav.rb.
+- harness/: gate_runner.rb (expectation types: goertzel/rms/silence/ratio, windows in
+  ticks or frames), run_gate.rb, replays/replay_cues.json + replay_music.json.
+- Recorder equivalence proven (on/off byte-identical); steady-state 0 allocs/tick
+  (11 one-off @1k vs 0 @5k scaling, GC runs 0).
+- Known gaps (M2 verdict "Notes for M3"): per_category_caps in data but NOT enforced;
+  replay_cues mixes ~1.3 peak (f32 headroom, no clipper - policy undecided); stem
+  REUSE (restart after stop) is unit-tested at command level but never RENDERED in a
+  gate replay; critic listen not run.
+- Git hooks pre-commit/pre-push = bundle exec rake. Junior (juniormaciel10) has write
+  access: git pull --ff-only before EVERY push.
+- Ruby 3.4.10: export PATH="/c/Ruby34-x64/bin:$PATH" per shell.
+
+LOAD FIRST (in order, before any action):
+1. AGENTS.md - laws 1-7 + the M3 scope block (the contract for this session).
+2. drafts/_m2-gate-verdict-20260818.md - all M2 measurements, the three new pinned
+   facts (bus graph never starves; scheduled group fades sample-exact; ONE pending
+   fade slot per node -> duck release issues from update() after the hold), and the
+   M3 notes queue.
+3. drafts/_m1-spike-verdict-20260817.md - spike-pinned facts 1-4 (still load-bearing:
+   NO_THREADING job pump, stop-with-fade window [stop-len, stop], clock_gettime
+   allocates ~1 obj/call - keep it OUT of GC-asserted regions, prove by scaling).
+4. src/gta/audio_system.rb + command_io.rb + voice_pool.rb + harness/gate_runner.rb +
+   both harness/replays/*.json - the surfaces to extend. Extend; do not rewrite what
+   the gate already proves.
+5. hub kb query --domain music-production "game audio pipeline loudness LUFS" (and
+   --domain game-research "audio architecture deterministic" if needed) - BEFORE the
+   headroom decision. Cite, don't copy.
+6. Read-only reference for phase 4: ~/workspace/game-two src/core/event_bus.rb +
+   src/game/world.rb EVENTS whitelist (grep "EVENTS = "). NEVER write there.
+
+FIRST ACTION (cheap floor check): git pull --ff-only, bundle exec rake, bundle exec
+rake spike, bundle exec rake gate. All green before building. If spike 02 fails for
+desktop/session reasons, note it and continue (needs a desktop; do not weaken it).
+
+PRE-APPROVED PLAN (Rule 5: execute end-to-end; re-ask only on genuine scope break or
+new irreversible risk; deviate from pinned design only with stated reasons):
+
+1. PER-CATEGORY CAPS (VoicePool growth - the floor-riskiest change, do it first):
+   - Semantics pinned: category = the cue's bus (per_category_caps keys ARE bus
+     names). acquire(priority:, distance:, category: nil): when the category is at
+     its cap, steal WITHIN the category using the same data-driven chain
+     (lowest_priority -> furthest -> oldest, candidates restricted to that
+     category); refuse (nil) when the best in-category victim outranks the incoming.
+     category: nil preserves today's global-only behavior EXACTLY - spike 04 and
+     voice_pool_test must pass untouched. Global max still binds over everything.
+   - AudioSystem passes the cue's bus as category. Data already carries the caps;
+     AudioData validates caps sum <= max_voices (already true) and each cap >= 1.
+   - Unit tests (pure pool) + rerun rake AND rake spike BEFORE building phase 2 on
+     top. If the pool contract has to change shape for existing callers, that is a
+     scope break - stop and re-ask.
+2. HARNESS GROWTH (gate_runner.rb, additive expectation types, keep the runner dumb):
+   - "log" expectations: op-count within a tick/frame window, e.g.
+     {"op": "sound_stop", "from_tick": ..., "ticks": ..., "count": N} counted over
+     canonical log lines (frame column). Exact, deterministic, catches steal/duck
+     issuance regressions the WAV can't isolate.
+   - "peak" expectation: max |sample| over a window (true peak, f32) with
+     max_peak bound - the headroom gate.
+   - Every new type validated in the gate smoke test's mini replay or a unit test.
+3. REPLAY CORPUS (each new behavior lands with the replay that would catch its
+   regression; all numbers in the replay JSON or data/audio, never code):
+   - replay_ui_cap: fill the ui bus to its cap (8) with toll_paid at 3-tick spacing
+     (880 Hz stays phase-coherent: 880*2400/48000 = 44 cycles), then one more ui cue
+     -> in-category steal while sfx/music voices sit untouched below global max.
+     Assert: log count of sound_stop in the steal tick window == 1, 880 Hz ratio
+     window ~7/8 [0.83, 0.92], global voice diagnostics never exceed caps.
+     (Needs a 2nd ui cue id? Only if the steal needs spectral separation - prefer
+     log assertions; add a fixture/cue ONLY if the WAV assertion is impossible.)
+   - replay_duck_overlap: boss1_spawn at T1, second at T2 with overlapping hold
+     (duck_end extension - exactly ONE release, at the EXTENDED end), third after
+     release begins (re-attack from current volume, beg=-1). Assert: log count of
+     group_fade_at on bus_music == 4 (attack, release, re-attack, final release),
+     400 Hz ratio windows at the extension and re-attack points, recovery to 1.0.
+   - replay_music_churn: combat -> silent -> calm (stem_a REUSED after full stop:
+     the seek-0 + stop-time-NEVER + restart path finally RENDERED), with pending
+     requests fired mid-transition (must be ignored; log line count pins it).
+     Assert stem_a returns at the correct bar boundary at full level, correct
+     phase-start (first-audible-frame near boundary), double render byte-identical.
+   - replay_spatial: one spatial cue swept across pan extremes via payload
+     (pan -1, 0, +1 at separate ticks; distance variation for steal tie-breaks
+     later). Assert L/R goertzel per window (pan -1 -> right-channel amp ~0,
+     spike 05 balance-mode fact).
+   - rake gate green on ALL replays (old two + new four) twice in a row.
+4. PRESENTATION AXIS (accuracy and presentation scored separately - Rule 2):
+   - Mechanical metrics in src/gta/analysis.rb (pure, additive): true_peak,
+     rms_dbfs over a window, crest_db, over-1.0 sample count. Runner prints a
+     per-replay metrics block (not pass/fail unless a peak expectation says so).
+   - HEADROOM DECISION (dev-of-record call, KB-informed): recommended = data-staged
+     headroom, NOT a limiter: budget bus volume_db in data/audio/cues.json so the
+     engineered worst case (replay_cues coherent-filler pressure) lands under
+     -1 dBFS true peak, and pin it with "peak" expectations on every replay.
+     A limiter needs a custom C node = DLL rebuild = NOT approved for M3; if the
+     analysis genuinely demands one, that is a scope break - document and re-ask.
+     Bus-gain changes shift every log md5/WAV hash - expected; gates re-run.
+     Optional: 1 council consult (deepseek) MAX if the staging tradeoff is
+     genuinely unclear; JSON to file first; re-verify any claimed miniaudio fact
+     against the pinned header (fabrication precedent documented in
+     drafts/_council-reconciliation-adr1.md).
+   - OWNER LISTEN SHEET drafts/_m3-listen-sheet.md: per-replay artifact paths +
+     timestamps of every engineered moment (cue entries, steal, duck window,
+     transitions, silence tail), what to listen FOR at each, and blank score boxes
+     (presentation axes: timing feel, duck audibility, transition smoothness,
+     harshness/balance). The agent NEVER claims to have listened - machine metrics
+     + the owner's ears are the two presentation inputs. Owner is the tester.
+5. INTEGRATION-READINESS CHECKLIST (docs/integration-readiness.md - prepare only,
+   game-two stays untouched):
+   - Event mapping table: game-two EVENTS whitelist (read live from the repo) x
+     current cue table -> mapped / unmapped / needs-cue-decision rows; payload
+     conventions (symbol keys; pan/distance semantics; music_set_state shape).
+   - Boot + teardown order for real-device mode (SDL_AUDIODRIVER=dummy at process
+     entry per spike 02; engine use_device=1; destroy sounds -> groups -> engine).
+   - Asset handshake: exports/ pipeline expectations from game-two-assets (formats,
+     LUFS targets - cite music-production/game-audio-pipeline.md), fixture-manifest
+     -> real-file swap plan (cue "file" keys are the seam).
+   - Perf restatement: 0.5 ms p95 audio command budget, 0 allocs/tick, gate
+     invariants that must hold on the integration machine.
+6. EVIDENCE + CLOSE: drafts/_m3-verdict-YYYYMMDD.md - per-replay md5s/sha256s,
+   expectation tables, metrics block, headroom decision + before/after peaks,
+   corpus inventory; update AGENTS.md current-cycle block (M3 done -> M4 scope:
+   owner-listen feedback incorporation + limiter/headroom closure + whatever the
+   listen sheet surfaces; integration still parked); commit + push per phase
+   (conventional messages, explicit paths, never git add -A; pull --ff-only first -
+   hooks run the suite on every commit).
+
+BUDGET (Rule 7): single session, local deterministic work, no research quota, no
+fan-out. council = 0 by default, 1 consult MAX (deepseek, headroom staging only).
+hub kb queries are free-tier lookups, use as listed. Stop condition: rake gate green
+on the full corpus (6 replays) twice + listen sheet + checklist + verdict committed +
+AGENTS updated + pushed. If context runs low first: compact-checkpoint skill, write
+remaining state into drafts/_m3-checkpoint.md before stopping.
+
+LAWS THAT BITE IN M3 (restated because this milestone tempts each one):
+- The M1+M2 floors outrank everything new: VoicePool contract changes must leave
+  spike 04 + existing unit tests byte-for-byte green; if a refactor moves the floor,
+  revert and go additive.
+- One pending fade slot per node: duck overlap logic NEVER pre-stacks release with
+  attack; extension = move duck_end, single release from update(). If overlap seems
+  to need a second scheduled fade, the design is wrong - redesign.
+- Schedule-ahead only; end-of-sound polled; the audio thread never enters Ruby.
+- Data-driven: every new number (caps semantics stay in data, headroom dB, peak
+  bounds, replay timings) lands in data/audio/*.json or the replay JSON, not code.
+- Placeholder mechanical names only; generated tones only; no third-party audio.
+- NO DLL REBUILD is approved for M3. A rebuild = scope break, re-ask (limiter parked).
+- Zero per-tick allocations on the production path holds for every new update()
+  branch (category caps, overlap bookkeeping) - rerun the scaling test.
+- Critic-listen honesty: machine metrics + owner sheet; never "sounds right to me",
+  never a fabricated listen.
+- Multi-line ad-hoc scripts in temp files (run, delete); read files before editing;
+  silent-on-pass output.
+
+COORDINATION - do not overstep: game-two is READ-ONLY reference (EventBus whitelist
+for the checklist); never write game-two, game-two-assets, game-two-lore, or
+~/knowledge this session. The knowledge-correction queue (SDL_AUDIODRIVER timing,
+empty-graph read, started-groups starvation change) stays queued in the M1/M2
+verdicts for a knowledge-repo session. Junior may have pulled or pushed: check
+git status + pull --ff-only before every push; his commits are not yours to rewrite.
+If a second local session appears, its lane is NOT this repo.
