@@ -1,0 +1,135 @@
+Session goal: game-two-audio M2 - build the AudioSystem event sink + the deterministic
+gate harness (rake gate) + the bus graph with ducking, to the point where two scripted
+replays run end-to-end through the full gate (replay -> command log -> noDevice render ->
+WAV artifact -> double-render byte-compare -> feature assertions). Work in
+C:/Users/gabri/workspace/game-two-audio. M1 closed 2026-08-17: ADR 0001 ACCEPTED, 5/5
+spike falsification items PASS - the spike suite is now the regression floor.
+
+Repo state at handoff (measured 2026-08-17, HEAD 46c36ba on master, pushed):
+- Suite green: 13 runs / 33 assertions. `rake spike` green: 5/5 (01 determinism,
+  02 gosu bypass, 03 batch cost p95 0.036 ms / 0 allocs-per-tick, 04 steal 13557:1,
+  05 transition midpoint offset 0.0 frames).
+- vendor/miniaudio.dll = pinned miniaudio 0.11.25 + gta_* flat shim (23 exports;
+  tag + 4 sha256s in vendor/VERSION; recipe in vendor/README.md and rake dll).
+- src/gta/: native.rb (FFI binding, flat functions only), wav.rb (PCM16/f32 WAV I/O),
+  voice_pool.rb (pure steal policy, unit-tested). spike/support/common.rb has
+  render/RMS/Goertzel/linear-fit helpers. data/audio/: cues.json, music.json.
+- Git hooks pre-commit/pre-push = bundle exec rake (local .git/hooks, not in repo).
+- Junior (juniormaciel10) has write access: git pull --ff-only before EVERY push.
+- Ruby 3.4.10 at C:\Ruby34-x64: export PATH="/c/Ruby34-x64/bin:$PATH" per shell.
+
+LOAD FIRST (in order, before any action):
+1. AGENTS.md - laws 1-7 + the M2 scope block (the contract for this session).
+2. drafts/_m1-spike-verdict-20260817.md - measurements AND the four spike-pinned facts
+   (empty-graph read = 0 frames; NO_THREADING forces job-queue pump at load;
+   stop-with-fade fades over [stop-len, stop]; clock_gettime(:nanosecond) allocates
+   ~1 obj/call so it must stay OUT of GC-asserted regions - prove zero-alloc by
+   scaling tick counts, spike 03 pattern).
+3. docs/adr/0001-audio-foundation.md - decision 4 (pure event sink) and 5 (two gate
+   layers; the command log is md5-compared and bit-exact BY CONSTRUCTION).
+4. src/gta/native.rb + vendor/gta_shim.c + spike/support/common.rb - the existing
+   surface. Extend it; do not rewrite what the spike proved.
+5. Read-only reference: ~/workspace/game-two EventBus (grep EventBus::EVENTS) - the
+   event names/payload shapes the sink must eventually match. NEVER write there.
+6. hub kb query --domain game-research "audio architecture deterministic" (doctrine
+   note behind the ADR; cite, don't copy).
+
+FIRST ACTION (cheap floor check): git pull --ff-only, bundle exec rake, bundle exec
+rake spike. All green before building. If spike 02 fails for desktop/session reasons,
+note it and continue (it needs a desktop; do not weaken it).
+
+PRE-APPROVED PLAN (Rule 5: execute end-to-end; re-ask only on genuine scope break or
+new irreversible risk; deviate from pinned design only with stated reasons):
+
+1. BUS SHIM EXTENSION (one deliberate DLL rebuild): add ma_sound_group_* to
+   vendor/gta_shim.c - group create/destroy (parented to build master/music/sfx/ui),
+   group volume, group fade (relative AND absolute-start variants), and a
+   gta_sound_create_in_group loader. VERIFY EVERY SYMBOL against the pinned
+   vendor/miniaudio.h FIRST (grep the header; reviewers have fabricated miniaudio
+   symbols before - the header is the only authority). Rebuild via the vendor/VERSION
+   recipe, update ALL sha256s + build note in vendor/VERSION, then rerun rake AND
+   rake spike BEFORE building anything on the new DLL. One rebuild, not many.
+2. AUDIOSYSTEM EVENT SINK (src/gta/audio_system.rb): AudioSystem.new(engine:,
+   data_dir:, recorder: nil); handle_event(tick, name, payload); update(tick).
+   - Pure sink: consumes (tick, event, payload) tuples; never returns state to the
+     caller beyond diagnostics. All timing in absolute PCM frames; tick->frame map
+     is data-driven (tick_frames in a data/audio json, 800 = 48k @ 60fps).
+   - cues.json schema grows: per-cue file ref (generated-tone fixtures for now),
+     bus, priority, spatial, per-cue volume/pan defaults, duck rule (which bus,
+     how many dB, attack/release frames). Zero tunables in code.
+   - Voice pool wired in (existing src/gta/voice_pool.rb): acquire/steal/release
+     driven by cue priority; steal executes stop+reuse exactly like spike 04.
+   - Music state machine (minimal): states from music.json; transitions quantized to
+     the next bar boundary using the spike 05 schedule-ahead pattern (fade_start both
+     stems + stop_time on the outgoing; scheduled >= one tick ahead, never adjusted).
+   - Ducking: schedule-ahead GROUP fades only (attack fade down at cue frame, release
+     fade up at cue-end estimate or fixed hold from data). No callbacks, no polling
+     hacks; end-of-sound remains polled in update().
+3. COMMAND RECORDER (the bit-exact log): a thin recorder layer that AudioSystem calls
+   INSTEAD of GTA::Native directly; it forwards to FFI and, when recording, appends
+   one line per command: frame, mechanical handle id (sound_007, bus_music), op,
+   args - floats serialized as BOTH %.9g (human) and IEEE-754 hex bits (the bit-exact
+   md5 rides the hex, never decimal strings). Same code path drives FFI and log so
+   the log cannot lie.
+   - PRODUCTION MODE (recorder nil): zero per-tick Ruby allocations on the
+     steady-state path - prove with a spike-03-style scaling test (1k vs 5k ticks,
+     uninstrumented passes).
+   - GATE MODE (recorder on): allocations tolerated, but behavior identical -
+     RECORDER-EQUIVALENCE TEST: same replay with recorder on vs off must render
+     byte-identically (real DLL integration test, no mocks).
+4. GATE HARNESS (harness/ + rake gate), non-negotiable 3 mechanized:
+   - Replay files harness/replays/*.json: metadata (seed label, duration ticks) +
+     event list [[tick, event, payload], ...] + expectations block (RMS windows,
+     Goertzel cue presence/timing at tick*tick_frames, silence floors, duck depth).
+   - Runner per replay: fresh noDevice engine -> AudioSystem + recorder -> feed
+     events tick by tick, engine advanced tick_frames per tick (Spike.render_f32
+     pattern guards the empty-graph-starvation fact) -> command log + md5 ->
+     WAV artifact tmp/gate/<replay>.wav -> SECOND full fresh render -> byte-compare
+     -> expectations -> compact PASS/FAIL table, nonzero exit on any fail.
+   - Two replays minimum: replay_cues (cue spam, 64-voice pressure, one engineered
+     steal, one duck window) and replay_music (quantized stem transition mid-replay).
+   - Analysis helpers: promote Goertzel/RMS/fit into src/gta/analysis.rb; make
+     spike/support/common.rb delegate to it; rerun rake spike to prove the floor
+     did not move (if that rerun is not green, revert the refactor and duplicate
+     instead - the floor outranks DRY).
+5. TESTS: cue/music schema validation (grown schema), event->command mapping units
+   (pure), recorder equivalence (integration, real DLL), one small gate smoke in the
+   default rake run (keep the suite fast; the heavy replays live under rake gate).
+6. EVIDENCE + CLOSE: drafts/_m2-gate-verdict-YYYYMMDD.md - per-replay command-log
+   md5s, WAV sha256s, byte-compare results, expectation table, alloc-scaling numbers;
+   update AGENTS.md current-cycle block (M2 done -> name M3 scope: replay corpus
+   growth + critic listen + integration-readiness checklist, still parked on owner
+   order); commit + push per phase (conventional messages, explicit paths, never
+   git add -A; pull --ff-only first - the hook runs the suite on every commit).
+
+BUDGET (Rule 7): single session, local deterministic work, no research quota, no
+fan-out. council = 0 by default; 1 consult MAX (deepseek) only on a genuine gate
+failure interpretation or design impasse - JSON to file first, and re-verify any
+claimed miniaudio fact against the pinned header before adopting (fabrication
+precedent is documented in drafts/_council-reconciliation-adr1.md). Stop condition:
+rake gate green on both replays + verdict doc committed + AGENTS updated + pushed;
+if context runs low first, run the compact-checkpoint skill and write remaining
+state into drafts/_m2-checkpoint.md before stopping.
+
+LAWS THAT BITE IN M2 (restated because this milestone tempts each one):
+- The audio thread never enters Ruby; ducking and transitions are schedule-ahead
+  fades ONLY; end-of-sound is polled. If a feature seems to need a callback, the
+  feature is designed wrong - redesign, don't work around.
+- Audio is a pure event sink: nothing flows back into sim/replay/netplay state.
+- Zero per-tick allocations applies to the PRODUCTION path (recorder off). The
+  recorder exists so the gate never pressures the hot path into logging.
+- Data-driven: every new number introduced this session (duck dB, attack/release,
+  tick_frames, bar lengths, file refs) lands in data/audio/*.json, not in code.
+- Placeholder mechanical names only; generated tones only; no third-party audio.
+- The 0.5 ms p95 command-batch bound is audio's budget; 16.6 ms belongs to game-two.
+- DLL rebuild law: symbols verified in the pinned header first, VERSION bumped,
+  rake + rake spike green on the new binary before any M2 code depends on it.
+- Multi-line ad-hoc scripts go in temp files (run, delete) - never inline heredocs.
+- Read files before editing them (mechanically enforced); silent-on-pass output.
+
+COORDINATION - do not overstep: game-two is READ-ONLY reference (EventBus shapes);
+never write game-two, game-two-assets, game-two-lore, or ~/knowledge this session.
+The knowledge-correction queue (SDL_AUDIODRIVER timing, empty-graph read) stays
+queued in the M1 verdict doc for a knowledge-repo session. Junior may have pulled or
+pushed: check git status + pull --ff-only before every push; his commits are not
+yours to rewrite. If a second local session appears, its lane is NOT this repo.
