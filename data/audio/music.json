@@ -1,0 +1,15 @@
+{
+  "_comment": "Music timing table (placeholder mechanical names — owner order). M1 spike 05 uses these values for the quantized stem transition; M2 grows the schema (states, stem sets, ducking).",
+  "timing": {
+    "bpm": 120,
+    "beats_per_bar": 4,
+    "quantize": "bar"
+  },
+  "transition": {
+    "crossfade_frames": 9600
+  },
+  "stems": {
+    "stem_a": { "freq_hz": 400.0, "loop": true },
+    "stem_b": { "freq_hz": 1000.0, "loop": true }
+  }
+}
