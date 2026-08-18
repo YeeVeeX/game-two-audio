@@ -54,25 +54,33 @@ overlap issues NO fade (extension moves duck_end only); with sum(caps) ==
 max_voices the global steal path is unreachable for capped categories;
 collapse-ratio numerators are leakage floors — they don't scale with staging.
 
-M4 scope:
+M4 scope + status (2026-08-19):
 1. **Owner listen** (presentation axis, Rule 2's second score — accuracy is
-   green, presentation is UNSCORED): take 1 (sine fixtures) was falsified by
-   the owner's ears 2026-08-19 ("constant hum" — verbatim + triage in
-   `drafts/_m4-owner-scores.md`): raw sines swamp the behaviors. The musical
-   **listen track** answers it (owner-agreed direction): `data/audio_listen/`
-   mirror tables + deterministic note-synthesis fixtures (A minor, 120 bpm)
-   + `rake listen` → `tmp/listen/*.wav`; mirror law pinned by
-   `test/listen_track_test.rb`; gate corpus untouched (md5 set verified
-   identical). Owner scores `drafts/_m4-listen-sheet.md`; a sub-3 box fails
-   the presentation gate and its fix lands with a replay/expectation guard.
-   Reaper stem replacement spec: `docs/listen-track.md`.
-2. **Headroom closure**: the −1 dBFS ceiling holds mechanically; the open
+   green, presentation is UNSCORED): take 1 (sine fixtures) falsified by the
+   owner's ears ("constant hum"); take 2 (musical listen track,
+   `data/audio_listen/` + `rake listen`) approved in direction, ACCEPTED as
+   prototype placeholder material; **the 17 score boxes are still open**
+   (`drafts/_m4-listen-sheet.md`; sub-3 box = presentation-gate FAIL, fix
+   lands with a replay/expectation guard). Verbatim feedback trail:
+   `drafts/_m4-owner-scores.md`. Mirror law pinned by
+   `test/listen_track_test.rb`; gate corpus untouched (md5 set verified).
+2. **Owner production loop — live, growing**: roles pinned — **owner = ears +
+   sound design (Reaper/VST/analog); dev = ALL format/validation/render
+   automation and never scores presentation**. Built: `rake midi` (composition
+   → SMF scaffolds) + sha-pinned `type="file"` fixture import
+   (docs/listen-track.md). Next (M4b, spark-up
+   `drafts/_next-session-m4b-reaper-loop.txt`): Reaper project scaffold
+   sampled from the owner's REAL .rpp files (never fabricate the schema) +
+   `rake stems:import` inbox pipeline (format normalize → duration-exact →
+   auto-pin → auto listen render), then the interactive tweak loop.
+3. **Headroom closure**: the −1 dBFS ceiling holds mechanically; the open
    half is the balance question (does sfx sit too quiet at −10 dB?). Close
    with the owner's ears; a limiter stays out unless listening demands it
    (that would be a DLL-rebuild scope break — re-ask first).
-3. Whatever the listen sheet surfaces (steal transient, re-attack feel,
-   center-vs-side pan loudness are the flagged candidates).
-4. **Integration stays PARKED** on owner order; when it lifts, work from
+4. Whatever the listen sheet surfaces (steal transient, re-attack feel,
+   center-vs-side pan loudness are the flagged candidates; pre-thought fix
+   designs live in `drafts/_next-session-m4-listen-closure.txt` §2).
+5. **Integration stays PARKED** on owner order; when it lifts, work from
    `docs/integration-readiness.md` (music_set_state derivation decision +
    real-device clock-domain measurement are its two open design items).
 
@@ -101,6 +109,8 @@ distance-attenuation DSP (payload plumbed; needs a cue-table field + replay).
 - `rake listen` — M4 listen track: same replays through the same runner against
   `data/audio_listen/` (musical fixtures; mirror law) → tmp/listen/*.wav for
   the owner's ears; peak ceiling + determinism still gate (docs/listen-track.md).
+- `rake midi` — export the listen compositions as SMF scaffolds →
+  `data/audio_listen/midi/*.mid` (owner re-voices in Reaper/analog; deterministic).
 - swarmforge: `PATH="/c/Users/gabri/workspace/swarm-forge/.venv/Scripts:$PATH"
   swarmforge gauntlet --repo .` (test stage = rake, see swarmforge.toml).
 
@@ -111,8 +121,10 @@ distance-attenuation DSP (payload plumbed; needs a cue-table field + replay).
   the owner lifts the audio order. Never write into that repo from here.
 - **game-two-assets**: runtime audio files will arrive via its `exports/` pipeline
   (formats/loudness per `music-production/game-audio-pipeline.md` LUFS targets). Until
-  then, spike audio = generated test tones + `midi-writing-mcp` stems (no copyrighted
-  audio in this repo, ever).
+  then, spike audio = generated tones/synthesis (no copyrighted audio in this repo,
+  ever). **Listen-stems lane is separate**: owner-produced in-house renders live in
+  `data/audio_listen/stems/` (sha-pinned fixtures, evaluation-only) — they never
+  substitute for the game-two-assets runtime lane at integration.
 - **knowledge repo**: research corpus + vault notes are the citation base; new findings
   from the spike flow BACK as corrections (e.g., the `SDL_AUDIODRIVER` timing verdict).
 
@@ -121,8 +133,10 @@ distance-attenuation DSP (payload plumbed; needs a cue-table field + replay).
 - `src/` — AudioSystem (event sink, voice pool, music state machine), CommandIO
   recorder, analysis, renderer + FFI bindings
 - `spike/` — M1 falsification scripts (one per ADR list item)
-- `harness/` — gate runner + CLI + `replays/*.json` (rake gate)
-- `data/audio/` — engine/cue/bus/music/fixture JSON tables
+- `harness/` — gate runner + CLI + `replays/*.json` (rake gate) + listen/midi tools
+- `data/audio/` — engine/cue/bus/music/fixture JSON tables (accuracy corpus, sines)
+- `data/audio_listen/` — mirror tables + musical fixtures + `midi/` scaffolds +
+  owner `stems/` (listen track; docs/listen-track.md)
 - `vendor/` — pinned miniaudio (source + DLL + VERSION)
 - `docs/adr/` — decisions; `drafts/` — council records, verdicts, session notes
 - `test/` — minitest

@@ -1,0 +1,222 @@
+Session goal: game-two-audio M4b - Reaper co-processing loop + presentation
+scores + headroom closure. This is an OWNER-PRESENT INTERACTIVE session: the
+owner sound-designs in Reaper and listens; the dev automates every format,
+validation, render, and pinning step, and NEVER scores presentation. If the
+owner is not present in chat, run the floor check, commit a checkpoint
+(drafts/_m4b-checkpoint.md), and STOP - the loop cannot run without ears.
+Work in C:/Users/gabri/workspace/game-two-audio.
+
+ROLES (pinned in AGENTS.md, owner-ordered 2026-08-19):
+- Owner: ears, taste, Reaper/VST/analog sound design, ACCEPTANCE verdicts,
+  the 17 listen-sheet scores. The owner's ears outrank every model and every
+  metric on taste; metrics outrank impressions on facts (peaks, timing).
+- Dev (you): all tooling and ceremony - MIDI/RPP scaffolds, format
+  normalization, duration exactness, sha pinning, manifest edits, renders,
+  reports, regression guards. Design calls are yours to make and defend
+  (dev of record); presentation scores are never yours.
+
+REPO STATE AT HANDOFF (measured 2026-08-19, after commit 96c15dc on master,
+pushed; one docs commit lands after it - trust git log over this note):
+- bundle exec rake: 67 runs / 323 assertions green.
+- rake spike: 5/5 (spike-01 sha 51d9020db2c8433a... = pinned M1 floor).
+- rake gate: 6/6, md5 set UNCHANGED through all M4 work:
+    replay_cues 6e52c7cb... duck_overlap 306f5a41... music 34f9c630...
+    churn 22840322... spatial 39e7aec5... ui_cap 478e5a5c...
+- rake listen (musical track, data/audio_listen): 6/6 clean, cross-process
+  identical; wav sha256 heads: cues bb31bcb8, duck 55226d68, music 5f16eaf8,
+  churn d595f3d7, spatial 9ea89c72, ui_cap 611e72cb. Worst peak -10.21 dBFS,
+  over-1.0 = 0 everywhere.
+- rake midi: 7 SMF files in data/audio_listen/midi/ (deterministic,
+  committed). type="file" fixture import exists in src/gta/fixtures.rb
+  (sha-pinned, format- and duration-validated; tested).
+- Owner feedback trail (verbatim, drafts/_m4-owner-scores.md): take 1 sines
+  falsified ("constant hum"); take 2 musical track approved as prototype
+  placeholder, "still too simple for my taste"; wants plugin/analog
+  processing with dev automating the tech; "constant string-like sound"
+  investigated = calm pad's sustained A2 root drone, intended, churn silence
+  window verified float-zero (knob named in docs/listen-track.md).
+- The 17 score boxes in drafts/_m4-listen-sheet.md: ALL STILL OPEN.
+- Working tree may contain foreign uncommitted Itexo files (another
+  session's: docs/itexo-audio-vocabulary.md + PARKING_LOT/
+  integration-readiness edits). NOT yours: never commit, never revert.
+- Git hooks pre-commit/pre-push = bundle exec rake. Junior (juniormaciel10)
+  has write access: git pull --ff-only before EVERY push.
+- Ruby 3.4.10: export PATH="/c/Ruby34-x64/bin:$PATH" per shell.
+
+LOAD FIRST (in order):
+1. AGENTS.md - laws 1-7 + the M4 scope/status block (roles + lanes).
+2. docs/listen-track.md - the listen track contract, mirror law, file-type
+   import spec, production loop as built so far.
+3. drafts/_m4-owner-scores.md - the verbatim feedback trail (what the owner
+   already said; do not re-ask answered questions).
+4. drafts/_next-session-m4-listen-closure.txt SECTION 2 ONLY - the
+   pre-thought sub-3 fix designs (steal micro-fade dying-ring, sfx restage
+   arithmetic, duck retune, pan-law/crossfade re-ask boundaries). Still the
+   playbook when scores land.
+5. src/gta/fixtures.rb + harness/export_midi.rb + test/listen_track_test.rb
+   - the surfaces you will extend.
+6. PARKING_LOT.md - limiter/LUFS/pan-law triggers you must not silently
+   unpark.
+
+FIRST ACTION (floor check, cheap): git pull --ff-only; bundle exec rake;
+bundle exec rake gate (md5 set must equal the table above); bundle exec rake
+listen (sha set must equal unless data/audio_listen changed since handoff -
+if changed, a named reason must exist in git log). Spike run optional unless
+touching src/gta core. All green before anything else.
+
+PLAN (phased; each phase commits separately; owner interaction points marked
+[OWNER]):
+
+Phase 1 - RPP scaffold, falsification-first. The goal: a generated Reaper
+project so the owner NEVER configures format/tempo/regions by hand.
+  a. [OWNER] Ask the owner to produce two reference files in their Reaper
+     (any location; they paste paths or drop them in drafts/reaper_ref/):
+     (1) an empty project saved as-is; (2) the same project after dragging
+     data/audio_listen/midi/mstem_calm_6s.mid onto a track, saved. These are
+     GROUND TRUTH for the .rpp text schema. NEVER fabricate RPP internals
+     from memory or the web - sample the owner's real install (version
+     drift is real; their files are the spec).
+  b. Read both references; derive the minimal generator: tempo 120 4/4, one
+     named track per slot (7), MIDI items placed at position 0 with correct
+     lengths, region markers per slot spanning [0, dur_s] (regions are the
+     render unit), render config sampled from the reference (target: 48 kHz
+     WAV; region render matrix; $region file naming if the reference
+     supports it). Generator = harness/export_rpp.rb + rake reaper task;
+     output data/audio_listen/reaper/scaffold.rpp (committed). Compare
+     structures only against the sampled references; anything the samples
+     do not show, leave to Reaper defaults rather than guessing.
+  c. [OWNER] Owner opens scaffold.rpp; verify together: tracks load, MIDI
+     items sound on a default synth, regions exist, a region render
+     produces WAVs named per slot. Iterate at most twice; if MIDI item
+     embedding fails twice, FALL BACK deliberately: scaffold carries
+     tracks + regions + render config only, owner drags the 7 .mid files in
+     once (document the fallback in docs/listen-track.md - it is
+     acceptable, not a failure).
+  d. The owner's working project (their FX chains, their instruments) is
+     saved as data/audio_listen/reaper/owner_project.rpp - committed
+     (in-house, text format). The generated scaffold NEVER overwrites it;
+     rake reaper refuses if owner_project.rpp would be touched.
+
+Phase 2 - inbox importer: rake stems:import. The techy half of the loop.
+  a. Contract: owner renders into data/audio_listen/inbox/ (any subset of
+     the 7 slot names; unknown filenames get a loud skip report). For each
+     inbox WAV: validate sample rate == 48000 (REFUSE otherwise with the
+     one-line Reaper fix - the scaffold pins it, so this only fires on
+     manual renders); stereo -> mono downmix (L+R)/2 with a report line;
+     24-bit int / 32-bit int / 32-bit float -> PCM16 (round + clamp; plain
+     rounding first - TPDF dither only if the owner HEARS truncation, do
+     not gold-plate); duration: exact-frame conformance to the slot's
+     dur_s - pad trailing zeros if short by <= pad_tolerance_s, trim
+     trailing content if long by <= trim_tolerance_s AND the overhang is
+     below silence_floor (both tolerances + floor in a new
+     data/audio_listen/import.json - data-driven law, no constants in
+     code); refuse gross mismatch with measured-vs-expected frames.
+  b. On accept: write data/audio_listen/stems/<slot>.wav, compute sha256,
+     update the slot's fixtures.json entry to
+     {type:"file", dur_s, path:"stems/<slot>.wav", sha256, _what preserved}
+     via JSON.pretty_generate (key order preserved; _comment keys survive),
+     then run the full rake listen and print per-slot report: peak dBFS,
+     rms dBFS, and the KB relative band it should sit in (music bed mid /
+     drone lowest / sfx cutting / ui polite - cite
+     music-production/production-fundamentals.md Game Audio Targets).
+     Reports are owner-facing: human-facing-output rules apply (plain
+     words, the number, the meaning, the action if any).
+  c. Tests for EVERY refusal and conversion path (real WAV bytes in
+     tmpdir; no mocks): wrong sr, stereo downmix correctness (known
+     samples), 24/32-bit conversion round-trip on known values, pad/trim
+     boundaries (just-inside and just-outside tolerance), gross length
+     refuse, unknown slot name skip. The mirror-law test and the file-type
+     validations already in test/ stay green.
+  d. Determinism note for the verdict: every accepted import legitimately
+     moves that slot's listen sha - the importer prints old->new sha heads,
+     and the M4 verdict pins the final set. A listen sha that moves WITHOUT
+     an import or data commit is still a stop-the-line event.
+
+Phase 3 - the interactive tweak loop [OWNER, repeated]:
+  owner tweaks in Reaper -> renders to inbox -> says "rendered" -> you run
+  rake stems:import (auto listen render) -> owner plays tmp/listen WAVs ->
+  verbal notes -> repeat. Rules of the loop: every import reported (slot,
+  conversions applied, sha head, peak/rms vs band); never queue silent
+  batches; capture owner prose verbatim into drafts/_m4-owner-scores.md as
+  it arrives (append-only trail); placeholder synthesis slots and owner
+  stems mix freely - partial replacement is the expected state, not an
+  error. If the owner asks for a composition change in a slot still on
+  synthesis (different notes/rhythm), that is a fixtures.json notes edit +
+  rake midi re-export (the .mid must stay in sync with the JSON - state
+  this in the commit).
+
+Phase 4 - scores + triage (the M4 core, unchanged rules):
+  a. [OWNER] When the material stops moving, walk the owner through
+     drafts/_m4-listen-sheet.md - all 17 boxes, per file, timestamps are
+     unchanged (mirror law). Scores land VERBATIM in
+     drafts/_m4-owner-scores.md with date + material state (which slots
+     were owner stems vs synthesis at scoring time + listen sha set).
+  b. Triage matrix per box: 5..3 pass (pin, note prose); < 3 =
+     presentation-gate FAIL -> fix from the pre-thought designs (loaded
+     file 4), each fix landing with the replay/expectation change that
+     would catch its regression. Owner prose without a failing score =
+     discuss, dev decides and defends. NEVER weaken an accuracy pin to fit
+     a taste fix; bounds move only with arithmetic shown in the replay
+     JSON itself.
+  c. Sub-3 boxes whose fix needs a DLL rebuild (limiter, pan-law, fade
+     curves) = STOP and re-ask with the score as evidence (vendor law;
+     PARKING_LOT triggers).
+Phase 5 - headroom closure + verdict + cycle:
+  a. Close the -10 dB sfx balance question with the owner's stated answer
+     (keep -10 / restage to -X with the -8 dB aligned-bound arithmetic from
+     drafts/_next-session-m4-listen-closure.txt 2b re-derived against the
+     CURRENT material / limiter re-ask). The -1 dBFS ceiling itself moves
+     only via explicit re-ask.
+  b. drafts/_m4-verdict-YYYYMMDD.md: verbatim-scores pointer, triage
+     outcomes per box, per-fix evidence (hashes, peaks, new expectations),
+     headroom closure statement, final gate md5 set + listen sha set (with
+     import provenance), loop tooling inventory (rpp generator state,
+     importer, fallbacks taken). Update AGENTS.md current-cycle block
+     (M4 -> M5 scope: remaining opens + hold-for-integration posture;
+     integration stays PARKED unless the owner lifts the order in
+     writing). Commit per phase; pull --ff-only before every push.
+
+BUDGET (Rule 7): single interactive session; council = 0 (owner ears
+outrank); hub kb <= 2 queries and ONLY for a genuinely new mixing/production
+question the M3/M4 citations do not cover; NO web research for RPP format -
+the owner's sampled files are the primary evidence, full stop. If context
+runs low mid-loop: compact-checkpoint skill, state into
+drafts/_m4b-checkpoint.md first (include: which slots imported, last sha
+set, which boxes scored).
+
+LAWS THAT BITE IN M4B (this session's temptations):
+- Fabricated Reaper knowledge. RPP internals come from the owner's sampled
+  files ONLY. A scaffold that corrupts the owner's project trust is worse
+  than the manual fallback.
+- Fabricated listens. Verbatim scores, provenance, material-state stamp -
+  or the box stays open. A machine cannot score presentation.
+- Silent manifest churn. Every fixtures.json change (import or notes edit)
+  = commit with the slot named + sha head in the message; .mid files stay
+  in sync with the JSON via rake midi in the same commit.
+- Touching the accuracy corpus. data/audio/, harness/replays expectations,
+  and the gate md5 set are NOT this session's surface unless a sub-3 fix
+  explicitly lands there (then: arithmetic shown, gate x2, re-pin).
+- Owner-file overwrites. owner_project.rpp and inbox WAVs are the owner's
+  documents: generators refuse to overwrite; the importer never deletes
+  inbox files (report + leave).
+- In-house audio only: owner renders through commercial plugins/synths are
+  in-house performances (fine); raw sample-pack/loop-library content with
+  redistribution restrictions does NOT get committed. Ask if provenance is
+  unclear. No fiction names anywhere (mechanical slot ids).
+- One pending fade slot per node; zero per-tick allocations; data-driven -
+  unchanged and non-negotiable if Phase 4 fixes touch src/gta.
+- Foreign Itexo files: not yours. Explicit-path commits only.
+
+COORDINATION: integration stays PARKED (docs/integration-readiness.md is a
+runway, not permission); game-two / game-two-assets / game-two-lore /
+~/knowledge untouched; the knowledge-correction queue stays queued. The
+listen-stems lane (data/audio_listen/stems/) is evaluation-only - it never
+substitutes for the game-two-assets runtime export lane.
+
+STOP CONDITIONS: loop tooling verified with at least ONE real owner render
+round-tripped end-to-end (or the documented fallback in place) + every
+arriving score recorded verbatim + sub-3 boxes fixed-with-guard or
+explicitly re-asked + headroom closed or re-asked + verdict + AGENTS
+updated + pushed. Partial score coverage is an acceptable outcome IF the
+recorded trail names exactly which boxes remain and why; invented coverage
+is not.
