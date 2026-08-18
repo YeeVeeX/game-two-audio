@@ -1,0 +1,11 @@
+{
+  "_comment": "Generated-tone fixture manifest (no third-party audio, ever — AGENTS law 6/coordination). Cue and stem 'file' fields reference keys here; GTA::Fixtures renders them deterministically (same formula as the M1 spike fixtures: amp * 32767 * sin(2*pi*(freq*i/sr + phase)), PCM16 mono). phase 0.25 = cosine start (sample 0 nonzero, needed by first-audible-frame assertions). Real assets from game-two-assets replace this manifest at integration time.",
+  "tones": {
+    "stem_0400_6s":    { "freq_hz": 400.0,  "dur_s": 6.0, "amp": 0.5,  "phase": 0.0 },
+    "stem_1000_6s":    { "freq_hz": 1000.0, "dur_s": 6.0, "amp": 0.5,  "phase": 0.25 },
+    "tone_0500_4s":    { "freq_hz": 500.0,  "dur_s": 4.0, "amp": 0.3,  "phase": 0.0 },
+    "tone_1500_2s":    { "freq_hz": 1500.0, "dur_s": 2.0, "amp": 0.3,  "phase": 0.25 },
+    "tone_2100_4s":    { "freq_hz": 2100.0, "dur_s": 4.0, "amp": 0.02, "phase": 0.0 },
+    "tone_0880_200ms": { "freq_hz": 880.0,  "dur_s": 0.2, "amp": 0.4,  "phase": 0.25 }
+  }
+}

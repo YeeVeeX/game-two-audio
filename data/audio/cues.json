@@ -1,5 +1,5 @@
 {
-  "_comment": "Cue tables: sim event -> cue decision. Data-driven law: no tunables in code. Placeholder mechanical names only (owner order). Schema grows with M2; M1 spike uses generated tones.",
+  "_comment": "Cue tables: sim event -> cue decision. Data-driven law: no tunables in code. Placeholder mechanical names only (owner order). M2 schema: each cue declares its triggering event (identity-mapped until integration), fixture file ref, bus routing, voice params, and an optional duck rule. duck.hold_frames >= engine tick_frames is a structural constraint (one pending fade slot per group node — the release fade is issued from update() after the attack window elapses).",
   "buses": {
     "master": { "children": ["music", "sfx", "ui"] },
     "music": { "volume_db": -6.0 },
@@ -12,7 +12,48 @@
     "steal_order": ["lowest_priority", "furthest", "oldest"]
   },
   "cues": {
-    "boss1_spawn": { "bus": "sfx", "priority": 90, "spatial": true },
-    "toll_paid": { "bus": "ui", "priority": 50, "spatial": false }
+    "boss1_spawn": {
+      "event": "boss1_spawn",
+      "file": "tone_1500_2s",
+      "bus": "sfx",
+      "priority": 90,
+      "gain": 1.0,
+      "pan": 0.0,
+      "spatial": true,
+      "duck": {
+        "bus": "music",
+        "duck_db": -12.0,
+        "attack_frames": 2400,
+        "hold_frames": 24000,
+        "release_frames": 9600
+      }
+    },
+    "toll_paid": {
+      "event": "toll_paid",
+      "file": "tone_0880_200ms",
+      "bus": "ui",
+      "priority": 50,
+      "gain": 1.0,
+      "pan": 0.0,
+      "spatial": false
+    },
+    "drone_low": {
+      "event": "drone_low",
+      "file": "tone_0500_4s",
+      "bus": "sfx",
+      "priority": 10,
+      "gain": 1.0,
+      "pan": 0.0,
+      "spatial": true
+    },
+    "filler_blip": {
+      "event": "filler_blip",
+      "file": "tone_2100_4s",
+      "bus": "sfx",
+      "priority": 20,
+      "gain": 1.0,
+      "pan": 0.0,
+      "spatial": true
+    }
   }
 }

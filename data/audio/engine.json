@@ -1,0 +1,6 @@
+{
+  "_comment": "Engine/timebase table (data-driven law: no tunables in code). tick_frames maps sim ticks to PCM frames: 48000 Hz / 60 fps = 800. The gate harness and AudioSystem read the tick->frame map from here only.",
+  "sample_rate": 48000,
+  "channels": 2,
+  "tick_frames": 800
+}
