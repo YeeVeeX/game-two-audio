@@ -1,0 +1,56 @@
+{
+  "_comment": "Gate replay 5 (M3): music state churn with STEM REUSE rendered end-to-end. calm -> combat (boundary 96000), combat -> silent (stem_b stopped 201600, float-exact silence), silent -> calm: stem_a - fully stopped 105600 - comes BACK through the seek-0 + stop-time-NEVER + restart path at boundary 288000. Two churn requests must be ignored: calm at tick 125 (a transition is pending until 105600) and combat at tick 140 (already the state); the per-stem log counts pin their absence (any processed extra request adds seek/fade/stop_at lines). The pre-boundary absence window [280000) is the stale-state trap: sound_start is issued at request time (tick 270) but the start_time gate must hold the reused stem silent until 288000.",
+  "name": "replay_music_churn",
+  "duration_ticks": 420,
+  "events": [
+    [30, "music_set_state", { "state": "combat" }],
+    [125, "music_set_state", { "state": "calm" }],
+    [140, "music_set_state", { "state": "combat" }],
+    [150, "music_set_state", { "state": "silent" }],
+    [270, "music_set_state", { "state": "calm" }]
+  ],
+  "expectations": {
+    "goertzel": [
+      { "_calm_before_churn": "stem_a full level",
+        "freq_hz": 400.0, "ch": 0, "from_frame": 80000, "frames": 4800, "min_amp": 0.1 },
+      { "_combat_full_after_boundary": "crossfade done at 105600",
+        "freq_hz": 1000.0, "ch": 0, "from_frame": 112000, "frames": 4800, "min_amp": 0.1 },
+      { "_stem_a_fully_stopped": "stopped at 105600",
+        "freq_hz": 400.0, "ch": 0, "from_frame": 112000, "frames": 4800, "max_amp": 0.005 },
+      { "_reuse_start_time_gate_holds": "sound_start issued at tick 270; no 400 Hz may leak before boundary 288000",
+        "freq_hz": 400.0, "ch": 0, "from_frame": 280000, "frames": 4800, "max_amp": 0.005 },
+      { "_reused_stem_back_at_full_level": "fade-in done at 297600",
+        "freq_hz": 400.0, "ch": 0, "from_frame": 304000, "frames": 4800, "min_amp": 0.1 },
+      { "_combat_stem_stays_dead": "",
+        "freq_hz": 1000.0, "ch": 0, "from_frame": 304000, "frames": 4800, "max_amp": 0.005 }
+    ],
+    "silence": [
+      { "_silent_state_is_exact": "stem_b stopped at 201600; bus graph renders float-exact silence",
+        "from_frame": 208000, "frames": 16800, "max_rms": 1e-9 }
+    ],
+    "ratio": [
+      { "_reuse_lands_at_the_boundary": "mid-fade window centered at t=0.42 of the fade-in; a bar-late landing reads ~0, a bar-early one ~1",
+        "freq_hz": 400.0, "ch": 0,
+        "a": { "from_frame": 304000, "frames": 4800 },
+        "b": { "from_frame": 289600, "frames": 4800 },
+        "min_ratio": 0.3, "max_ratio": 0.55 }
+    ],
+    "log": [
+      { "_initial_start_plus_reuse_restart_only": "ignored requests add no starts",
+        "op": "sound_start", "id": "stem_a", "count": 2 },
+      { "op": "sound_start", "id": "stem_b", "count": 1 },
+      { "_one_seek_per_incoming_stem": "",
+        "op": "sound_seek", "id": "stem_a", "count": 1 },
+      { "op": "sound_seek", "id": "stem_b", "count": 1 },
+      { "_four_stem_fades_total": "out+in, out only, in only",
+        "op": "sound_fade_at", "count": 4 },
+      { "_stop_schedules_stem_a": "one real stop + one NEVER clear on reuse",
+        "op": "sound_stop_at", "id": "stem_a", "count": 2 },
+      { "_stop_schedules_stem_b": "one NEVER clear as incoming + one real stop",
+        "op": "sound_stop_at", "id": "stem_b", "count": 2 }
+    ],
+    "peak": [
+      { "max_peak": 0.8913 }
+    ]
+  }
+}

@@ -115,6 +115,38 @@ class AudioSystemTest < Minitest::Test
     assert release_tick * TF <= duck_end, "release start frame in the past"
   end
 
+  def test_duck_overlap_is_a_pure_hold_extension_single_release_then_reattack
+    duck = CUES_TBL["cues"]["boss1_spawn"]["duck"]
+    gain = 10.0**(duck["duck_db"] / 20.0)
+    run_tick(0)
+    run_tick(1, [["boss1_spawn", nil]])
+    assert_equal 1, ops("group_fade_at").size, "first duck must attack"
+    run_tick(2)
+    run_tick(3, [["boss1_spawn", nil]]) # inside the hold: extension only
+    assert_equal 1, ops("group_fade_at").size,
+                 "same-depth overlap must not issue a fade (one pending fade slot per node)"
+
+    duck_end = 3 * TF + duck["attack_frames"] + duck["hold_frames"] # the EXTENDED end
+    release_tick = nil
+    (4..((duck_end / TF) + 2)).each do |t|
+      before = ops("group_fade_at").size
+      run_tick(t)
+      if ops("group_fade_at").size > before
+        release_tick = t
+        break
+      end
+    end
+    refute_nil release_tick, "release never issued"
+    assert_equal 2, ops("group_fade_at").size, "exactly one release for the merged episode"
+    release = ops("group_fade_at").last.strip
+    assert_equal "#{release_tick * TF} group_fade_at bus_#{duck['bus']} #{fhex(gain)},#{fhex(1.0)},#{duck['release_frames']},#{duck_end}", release
+
+    run_tick(release_tick + 1, [["boss1_spawn", nil]]) # mid-release: re-attack
+    assert_equal 3, ops("group_fade_at").size, "re-attack during release must issue"
+    assert ops("group_fade_at").last.include?("#{fhex(-1.0)},#{fhex(gain)}"),
+           "re-attack must start from current volume (beg=-1)"
+  end
+
   def test_steal_stops_and_destroys_victim_before_loading_stealer
     run_tick(0, [["drone_low", nil]]) # priority 10 victim -> sound_001
     cap = CUES_TBL["voice_pool"]["per_category_caps"]["sfx"]

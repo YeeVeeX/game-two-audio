@@ -1,0 +1,49 @@
+{
+  "_comment": "Gate replay 3 (M3): per_category_caps enforcement, rendered. The ui bus fills exactly to its cap (8 hud_pings, 3-tick spacing = 44 cycles at 880 Hz -> phase-coherent sum), while a priority-10 sfx drone - the GLOBAL steal chain's preferred victim - and two sfx fillers sit in the pool with 50+ free slots. The 9th ui cue (toll_paid, priority 50) must steal IN-CATEGORY: victim = oldest ping, not the drone, and never a free slot. The 7/8 ratio window sits AFTER the short toll ends: with caps unenforced the toll would take a free slot, all 8 pings would survive, and the ratio would read 1.0 (> 0.92, FAIL). Windows are 4800-frame Goertzel bins (10 Hz); 880/500/2100/400 all bin-aligned.",
+  "name": "replay_ui_cap",
+  "duration_ticks": 120,
+  "events": [
+    [2, "drone_low", { "pan": 0.0, "distance": 0.9 }],
+    [4, "filler_blip", { "distance": 0.0 }],
+    [6, "filler_blip", { "distance": 0.1 }],
+    [10, "hud_ping", null],
+    [13, "hud_ping", null],
+    [16, "hud_ping", null],
+    [19, "hud_ping", null],
+    [22, "hud_ping", null],
+    [25, "hud_ping", null],
+    [28, "hud_ping", null],
+    [31, "hud_ping", null],
+    [40, "toll_paid", null]
+  ],
+  "expectations": {
+    "goertzel": [
+      { "_all_8_pings_coherent": "8 * 0.08 * ui(-6 dB) = 0.32",
+        "freq_hz": 880.0, "ch": 0, "from_frame": 26400, "frames": 4800, "min_amp": 0.25 },
+      { "_toll_played_over_7_pings": "(7*0.08 + 0.4) * ui = 0.48",
+        "freq_hz": 880.0, "ch": 0, "from_frame": 33600, "frames": 4800, "min_amp": 0.4 },
+      { "_drone_survives_the_steal": "in-category selection ignored the global-best victim",
+        "freq_hz": 500.0, "ch": 0, "from_frame": 40000, "frames": 4800, "min_amp": 0.05 }
+    ],
+    "rms": [
+      { "from_frame": 0, "frames": 4800, "min": 0.1 }
+    ],
+    "ratio": [
+      { "_steal_leaves_7_of_8": "post-toll window vs pre-steal window = 7/8 = 0.875; 1.0 here means the cap did not bind",
+        "freq_hz": 880.0, "ch": 0,
+        "a": { "from_frame": 26400, "frames": 4800 },
+        "b": { "from_frame": 42400, "frames": 4800 },
+        "min_ratio": 0.83, "max_ratio": 0.92 }
+    ],
+    "log": [
+      { "_the_steal_tick": "exactly one victim stop at tick 40",
+        "op": "sound_stop", "from_tick": 40, "ticks": 1, "count": 1 },
+      { "_and_nowhere_else": "no other voice in any category is ever stopped",
+        "op": "sound_stop", "count": 1 },
+      { "op": "sound_load", "from_tick": 10, "ticks": 22, "count": 8 }
+    ],
+    "peak": [
+      { "max_peak": 0.8913 }
+    ]
+  }
+}

@@ -1,9 +1,9 @@
 {
-  "_comment": "Cue tables: sim event -> cue decision. Data-driven law: no tunables in code. Placeholder mechanical names only (owner order). M2 schema: each cue declares its triggering event (identity-mapped until integration), fixture file ref, bus routing, voice params, and an optional duck rule. duck.hold_frames >= engine tick_frames is a structural constraint (one pending fade slot per group node — the release fade is issued from update() after the attack window elapses).",
+  "_comment": "Cue tables: sim event -> cue decision. Data-driven law: no tunables in code. Placeholder mechanical names only (owner order). M2 schema: each cue declares its triggering event (identity-mapped until integration), fixture file ref, bus routing, voice params, and an optional duck rule. duck.hold_frames >= engine tick_frames is a structural constraint (one pending fade slot per group node — the release fade is issued from update() after the attack window elapses). M3 headroom policy (data-staged, no limiter in the graph): bus volume_db is budgeted so the engineered worst case in the replay corpus (phase-coherent sfx pressure, replay_cues) stays under -1 dBFS sample peak — the ceiling every gate replay pins with a peak expectation (KB music-production: master ceiling -1 dBTP; mix bus headroom). sfx moved -3 -> -10 dB for that budget on 2026-08-19.",
   "buses": {
     "master": { "children": ["music", "sfx", "ui"] },
     "music": { "volume_db": -6.0 },
-    "sfx": { "volume_db": -3.0 },
+    "sfx": { "volume_db": -10.0 },
     "ui": { "volume_db": -6.0 }
   },
   "voice_pool": {
@@ -54,6 +54,15 @@
       "gain": 1.0,
       "pan": 0.0,
       "spatial": true
+    },
+    "hud_ping": {
+      "event": "hud_ping",
+      "file": "tone_0880_1200ms",
+      "bus": "ui",
+      "priority": 50,
+      "gain": 1.0,
+      "pan": 0.0,
+      "spatial": false
     }
   }
 }

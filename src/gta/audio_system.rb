@@ -246,12 +246,21 @@ module GTA
     # rendered after handle_event returns — tick loop contract). beg = -1.0 is
     # miniaudio's "from current volume": a re-duck mid-release re-attacks
     # smoothly, and the constant serializes identically in the command log.
+    #
+    # Overlap while already ducked at the same depth is a PURE HOLD EXTENSION:
+    # duck_end moves, no fade is issued (the group already sits at the target
+    # gain — a redundant flat fade would only occupy the node's one pending
+    # fade slot), and the single release still issues from update() at the
+    # EXTENDED end. A different depth re-issues the attack (last-writer-wins,
+    # deterministic).
     def apply_duck(frame, rule)
       ds = rule.state
       end_frame = frame + rule.attack + rule.hold
       ds.duck_end = ds.duck_end > end_frame ? ds.duck_end : end_frame
-      ds.duck_gain = rule.gain
       ds.release_frames = rule.release
+      return if ds.phase == :ducked && ds.duck_gain == rule.gain
+
+      ds.duck_gain = rule.gain
       ds.phase = :ducked
       @io.group_set_fade_start_pcm(@group_log_ids[ds.bus_id], ds.group,
                                    -1.0, rule.gain, rule.attack, frame)

@@ -6,6 +6,7 @@
     "tone_0500_4s":    { "freq_hz": 500.0,  "dur_s": 4.0, "amp": 0.3,  "phase": 0.0 },
     "tone_1500_2s":    { "freq_hz": 1500.0, "dur_s": 2.0, "amp": 0.3,  "phase": 0.25 },
     "tone_2100_4s":    { "freq_hz": 2100.0, "dur_s": 4.0, "amp": 0.02, "phase": 0.0 },
-    "tone_0880_200ms": { "freq_hz": 880.0,  "dur_s": 0.2, "amp": 0.4,  "phase": 0.25 }
+    "tone_0880_200ms": { "freq_hz": 880.0,  "dur_s": 0.2, "amp": 0.4,  "phase": 0.25 },
+    "tone_0880_1200ms": { "freq_hz": 880.0, "dur_s": 1.2, "amp": 0.08, "phase": 0.25 }
   }
 }

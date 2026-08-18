@@ -1,0 +1,38 @@
+{
+  "_comment": "Gate replay 6 (M3): payload-driven spatial sweep. One spatial cue (drone_low, 500 Hz, 4 s) fired three times at pan extremes (-1, 0, +1) with no overlap (240-tick tone, 250-tick spacing); distance payload varies to exercise the pool-metadata plumbing. Balance-mode law (spike 05, pinned): a hard-panned mono source leaves the opposite channel at float-exact zero and the center leaves BOTH channels at full amplitude. ch0 = left; pan -1 -> right channel ~0; pan +1 -> left channel ~0. Music (400 Hz) runs throughout - bin-separated from 500 Hz.",
+  "name": "replay_spatial",
+  "duration_ticks": 760,
+  "events": [
+    [10, "drone_low", { "pan": -1.0, "distance": 0.2 }],
+    [260, "drone_low", { "pan": 0.0, "distance": 0.5 }],
+    [510, "drone_low", { "pan": 1.0, "distance": 0.8 }]
+  ],
+  "expectations": {
+    "goertzel": [
+      { "_pan_left_left_full": "",
+        "freq_hz": 500.0, "ch": 0, "from_frame": 16000, "frames": 4800, "min_amp": 0.05 },
+      { "_pan_left_right_silent": "",
+        "freq_hz": 500.0, "ch": 1, "from_frame": 16000, "frames": 4800, "max_amp": 0.005 },
+      { "_center_both_full_balance_mode": "",
+        "freq_hz": 500.0, "ch": 0, "from_frame": 216000, "frames": 4800, "min_amp": 0.05 },
+      { "freq_hz": 500.0, "ch": 1, "from_frame": 216000, "frames": 4800, "min_amp": 0.05 },
+      { "_pan_right_left_silent": "",
+        "freq_hz": 500.0, "ch": 0, "from_frame": 416000, "frames": 4800, "max_amp": 0.005 },
+      { "_pan_right_right_full": "",
+        "freq_hz": 500.0, "ch": 1, "from_frame": 416000, "frames": 4800, "min_amp": 0.05 },
+      { "_gap_between_sweeps_is_clean": "drone 1 ends at 200000",
+        "freq_hz": 500.0, "ch": 0, "from_frame": 201600, "frames": 4800, "max_amp": 0.005 }
+    ],
+    "rms": [
+      { "from_frame": 0, "frames": 4800, "min": 0.1 }
+    ],
+    "log": [
+      { "op": "sound_set_pan", "count": 3 },
+      { "op": "sound_load", "from_tick": 1, "ticks": 759, "count": 3 },
+      { "op": "sound_stop", "count": 0 }
+    ],
+    "peak": [
+      { "max_peak": 0.8913 }
+    ]
+  }
+}

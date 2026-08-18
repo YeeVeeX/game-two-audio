@@ -389,11 +389,12 @@
         "min_amp": 0.05
       },
       {
+        "_comment": "47 coherent fillers at -10 dB sfx = 0.297",
         "freq_hz": 2100.0,
         "ch": 0,
         "from_frame": 152000,
         "frames": 4800,
-        "min_amp": 0.3
+        "min_amp": 0.25
       }
     ],
     "rms": [
@@ -405,7 +406,7 @@
     ],
     "ratio": [
       {
-        "_steal_collapse": "500 Hz victim cut at frame 168000 (spike 04 analog)",
+        "_steal_collapse": "500 Hz victim cut at frame 168000 (spike 04 analog, now via the in-category chain). Numerator is the bin's spectral-leakage floor from the other tones (~0.002 absolute, does not scale with the drone), so the bound rescaled with the -10 dB sfx staging; a surviving victim reads ~1.0.",
         "freq_hz": 500.0,
         "ch": 0,
         "a": {
@@ -416,7 +417,7 @@
           "from_frame": 168800,
           "frames": 4800
         },
-        "max_ratio": 0.02
+        "max_ratio": 0.05
       },
       {
         "_duck_depth": "-12 dB = 0.2512 on the music bus during hold",
@@ -447,6 +448,12 @@
         },
         "min_ratio": 0.85,
         "max_ratio": 1.15
+      }
+    ],
+    "peak": [
+      {
+        "_headroom_policy": "engineered worst case under -1 dBFS sample peak (data-staged, no limiter)",
+        "max_peak": 0.8913
       }
     ]
   }

@@ -1,0 +1,53 @@
+{
+  "_comment": "Gate replay 4 (M3): duck overlap on the music bus. boss1_spawn at tick 20 opens the duck (attack 16000-18400, duck_end 42400); a second boss at tick 40 lands inside the hold and must be a PURE EXTENSION (duck_end -> 58400, NO new fade - one pending fade slot per node); the single release issues from update() at the extended end (58400, done 68000); a third boss at tick 76 arrives mid-release and re-attacks from current volume (beg=-1), duck_end 87200, final release 87200->96800. group_fade_at on bus_music == 4 is the contract: attack, release, re-attack, final release - a 5th line means the extension re-issued, a 3rd missing means the re-attack was swallowed. 1500 Hz spacing is always coherent (25 cycles/tick); 400 Hz ratio windows discriminate each phase against the counterfactual.",
+  "name": "replay_duck_overlap",
+  "duration_ticks": 220,
+  "events": [
+    [20, "boss1_spawn", null],
+    [40, "boss1_spawn", null],
+    [76, "boss1_spawn", null]
+  ],
+  "expectations": {
+    "goertzel": [
+      { "freq_hz": 1500.0, "ch": 0, "from_frame": 16800, "frames": 4800, "min_amp": 0.06 },
+      { "_two_bosses_coherent": "0.19 expected",
+        "freq_hz": 1500.0, "ch": 0, "from_frame": 32800, "frames": 4800, "min_amp": 0.15 },
+      { "_three_bosses_coherent": "0.28 expected",
+        "freq_hz": 1500.0, "ch": 0, "from_frame": 61600, "frames": 4800, "min_amp": 0.22 }
+    ],
+    "rms": [
+      { "from_frame": 0, "frames": 4800, "min": 0.1 }
+    ],
+    "ratio": [
+      { "_hold_depth": "-12 dB = 0.2512 during the first hold",
+        "freq_hz": 400.0, "ch": 0,
+        "a": { "from_frame": 8000, "frames": 4800 },
+        "b": { "from_frame": 24000, "frames": 4800 },
+        "min_ratio": 0.2, "max_ratio": 0.32 },
+      { "_extension_holds": "past the FIRST duck_end (42400): without the extension the release would already be recovering here (~0.87)",
+        "freq_hz": 400.0, "ch": 0,
+        "a": { "from_frame": 8000, "frames": 4800 },
+        "b": { "from_frame": 48000, "frames": 4800 },
+        "min_ratio": 0.2, "max_ratio": 0.32 },
+      { "_reattack_holds": "release1 ended at 68000; 1.0 here means boss 3's mid-release re-attack was swallowed",
+        "freq_hz": 400.0, "ch": 0,
+        "a": { "from_frame": 8000, "frames": 4800 },
+        "b": { "from_frame": 72000, "frames": 4800 },
+        "min_ratio": 0.2, "max_ratio": 0.32 },
+      { "_full_recovery": "final release ends at 96800",
+        "freq_hz": 400.0, "ch": 0,
+        "a": { "from_frame": 8000, "frames": 4800 },
+        "b": { "from_frame": 100000, "frames": 4800 },
+        "min_ratio": 0.85, "max_ratio": 1.15 }
+    ],
+    "log": [
+      { "_the_overlap_contract": "attack, single extended release, re-attack, final release",
+        "op": "group_fade_at", "id": "bus_music", "count": 4 },
+      { "_no_steals": "three sfx voices never pressure any cap",
+        "op": "sound_stop", "count": 0 }
+    ],
+    "peak": [
+      { "max_peak": 0.8913 }
+    ]
+  }
+}

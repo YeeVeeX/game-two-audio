@@ -29,6 +29,10 @@
     "silence": [
       { "_tail": "stem_b stopped at 297600; the bus graph renders float-exact silence",
         "from_frame": 300000, "frames": 16800, "max_rms": 1e-9 }
+    ],
+    "peak": [
+      { "_headroom_policy": "whole render under -1 dBFS sample peak",
+        "max_peak": 0.8913 }
     ]
   }
 }
