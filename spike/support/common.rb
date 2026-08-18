@@ -5,6 +5,7 @@ $LOAD_PATH.unshift File.expand_path("../../src", __dir__) unless $LOAD_PATH.incl
 
 require "gta/native"
 require "gta/wav"
+require "gta/analysis"
 require "digest"
 require "fileutils"
 require "json"
@@ -83,53 +84,19 @@ module Spike
   end
 
   # samples: interleaved Float array; window in FRAMES over channel ch.
+  # Delegates to GTA::Analysis (promoted there in M2; same arithmetic).
   def rms(samples, from_frame, frames, channels: CHANNELS, ch: nil)
-    acc = 0.0
-    count = 0
-    frames.times do |i|
-      base = (from_frame + i) * channels
-      if ch
-        v = samples[base + ch] || 0.0
-        acc += v * v
-        count += 1
-      else
-        channels.times do |c|
-          v = samples[base + c] || 0.0
-          acc += v * v
-          count += 1
-        end
-      end
-    end
-    Math.sqrt(acc / count)
+    GTA::Analysis.rms(samples, from_frame, frames, channels: channels, ch: ch)
   end
 
   # Goertzel single-bin amplitude of freq over [from_frame, from_frame+frames) on channel ch.
   # Returns sine peak amplitude estimate (2*|X|/N).
   def goertzel_amp(samples, freq, from_frame, frames, channels: CHANNELS, ch: 0, sr: SR)
-    w = 2.0 * Math::PI * freq / sr
-    coeff = 2.0 * Math.cos(w)
-    s0 = 0.0
-    s1 = 0.0
-    s2 = 0.0
-    frames.times do |i|
-      x = samples[(from_frame + i) * channels + ch] || 0.0
-      s0 = x + coeff * s1 - s2
-      s2 = s1
-      s1 = s0
-    end
-    power = s1 * s1 + s2 * s2 - coeff * s1 * s2
-    2.0 * Math.sqrt(power.abs) / frames
+    GTA::Analysis.goertzel_amp(samples, freq, from_frame, frames, channels: channels, ch: ch, sr: sr)
   end
 
   # Least-squares line fit: ys over xs => [slope, intercept]
   def linear_fit(xs, ys)
-    n = xs.size.to_f
-    sx = xs.sum(0.0)
-    sy = ys.sum(0.0)
-    sxx = xs.sum(0.0) { |x| x * x }
-    sxy = 0.0
-    xs.each_index { |i| sxy += xs[i] * ys[i] }
-    slope = (n * sxy - sx * sy) / (n * sxx - sx * sx)
-    [slope, (sy - slope * sx) / n]
+    GTA::Analysis.linear_fit(xs, ys)
   end
 end
