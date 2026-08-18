@@ -37,31 +37,36 @@ reconciliation `drafts/_council-reconciliation-adr1.md`). Evidence:
 7. **Per-tick allocation discipline**: zero Ruby allocations on the steady-state audio
    path; cue tables parse at load; `GC.stat` deltas watched in the perf harness.
 
-## Current cycle: M2 — AudioSystem event-sink + gate harness
+## Current cycle: M3 — replay corpus + critic listen + integration-readiness
 
-M1 closed 2026-08-17: 5/5 spike items PASS (`rake spike` stays green as the regression
-floor; measurements in `drafts/_m1-spike-verdict-20260817.md`). Headlines: double-render
-byte-identical; SDL=dummy verified via SDL_GetCurrentAudioDriver (control=wasapi);
-64-voice batch p95 0.036 ms (14x inside the 0.5 ms bound), 0 allocs/tick; steal 13557:1
-collapse at the exact frame; transition midpoint offset 0.0 frames.
+M2 closed 2026-08-18: AudioSystem event sink + `rake gate` harness + bus graph with
+ducking, both scripted replays green through the FULL gate (replay → command log md5 →
+noDevice render → WAV → double-render byte-compare → feature assertions); recorder
+on/off byte-identical; steady-state 0 allocs/tick (scaling proof). Evidence:
+`drafts/_m2-gate-verdict-20260818.md`. One deliberate DLL rebuild added the sound-group
+shim surface (all symbols header-verified; `vendor/VERSION` bumped; floor rerun green).
+New pinned facts live in `test/native_smoke_test.rb`: bus graph never starves the
+render loop (groups started by default); scheduled group fades land sample-exact; one
+pending fade slot per node → duck release issues from update() after the hold.
 
-M2 scope:
-1. **AudioSystem event sink** (`src/`): consumes sim-event tuples against
-   `data/audio/cues.json` (schema grows: cue→file mapping, bus routing, per-cue voice
-   params); emits the bit-exact command log; drives the voice pool + music state machine.
-2. **Gate harness** (`harness/` + `rake gate`): scripted replay → command log (md5) →
-   `noDevice` render → WAV artifact → double-render byte-compare + feature assertions
-   (RMS windows, cue timing, silence floors) — non-negotiable 3 mechanized.
-3. Bus graph (master/music/sfx/ui) with ducking (schedule-ahead fades only).
-4. Spike-pinned facts stay encoded in tests (empty-graph read, NO_THREADING job pump,
-   stop-with-fade window, clock_gettime allocation).
-
-Knowledge-repo correction queue (SDL_AUDIODRIVER timing verdict, empty-graph read
-semantics) lives in the verdict doc — owned by a later knowledge session, not this repo.
+M3 scope:
+1. **Replay corpus growth**: more scripted replays under `harness/replays/` (pool-cap
+   pressure incl. `per_category_caps` enforcement, duck overlap/re-attack, music
+   state churn, payload-driven spatial sweeps); every new audio behavior lands with a
+   replay that would catch its regression.
+2. **Critic listen** (Rule 2 presentation axis): scored listen pass on the gate WAVs,
+   separate from accuracy; includes the mix-headroom question flagged in the M2
+   verdict (replay_cues peaks ~1.3 in f32 — limiter/headroom policy decision).
+3. **Integration-readiness checklist** (still PARKED on owner order — prepare, do not
+   integrate): event-name/payload mapping table against game-two `EventBus::EVENTS`,
+   real-device mode notes, asset-pipeline handshake with game-two-assets
+   (exports/ formats + LUFS targets).
+4. Knowledge-repo correction queue (owned by a knowledge session, not this repo):
+   SDL_AUDIODRIVER timing, empty-graph read semantics, started-groups starvation
+   change (M2 fact 1).
 
 **OUT of scope (→ PARKING_LOT.md):** integration into game-two (gated on owner order);
-HRTF/binaural; audio occlusion raycasts; runtime asset hot-reload; network-synced audio;
-anything the spike doesn't need.
+HRTF/binaural; audio occlusion raycasts; runtime asset hot-reload; network-synced audio.
 
 ## Environment (mirrors game-two, verified there 2026-08-09)
 
@@ -73,10 +78,12 @@ anything the spike doesn't need.
 
 ## Commands
 
-- `rake` — run tests (minitest).
+- `rake` — run tests (minitest; includes a mini-replay gate smoke).
 - `rake spike` — M1 falsification runner (5/5 green 2026-08-17; kept as regression
   floor; spike 02 needs the :spike bundler group — gosu — and a desktop session).
-- Gate tasks (`rake gate`) arrive with the harness once M1 proves the render path.
+- `rake gate` — M2 deterministic replay gate (harness/replays/*.json → command-log
+  md5 + WAV artifacts under tmp/gate/ + double-render byte-compare + assertions;
+  2/2 green 2026-08-18). The ship gate for all audio work.
 - swarmforge: `PATH="/c/Users/gabri/workspace/swarm-forge/.venv/Scripts:$PATH"
   swarmforge gauntlet --repo .` (test stage = rake, see swarmforge.toml).
 
@@ -94,10 +101,11 @@ anything the spike doesn't need.
 
 ## Layout
 
-- `src/` — AudioSystem (event sink, voice pool, music state machine) + FFI bindings
+- `src/` — AudioSystem (event sink, voice pool, music state machine), CommandIO
+  recorder, analysis, renderer + FFI bindings
 - `spike/` — M1 falsification scripts (one per ADR list item)
-- `harness/` — replay → render → assert gate tooling (post-M1)
-- `data/audio/` — cue/bus/music JSON tables
+- `harness/` — gate runner + CLI + `replays/*.json` (rake gate)
+- `data/audio/` — engine/cue/bus/music/fixture JSON tables
 - `vendor/` — pinned miniaudio (source + DLL + VERSION)
 - `docs/adr/` — decisions; `drafts/` — council records, verdicts, session notes
 - `test/` — minitest
