@@ -1,0 +1,181 @@
+Session goal: game-two-audio M4 - owner-listen feedback incorporation + headroom
+closure. This session is FEEDBACK-DRIVEN, not execute-end-to-end: its input is the
+owner's scored listen sheet, and its entry gate is that those scores EXIST. Accuracy
+is green and pinned; this session closes (or fails and fixes) the presentation axis.
+Work in C:/Users/gabri/workspace/game-two-audio.
+
+Repo state at handoff (measured 2026-08-19, HEAD 5f4180f on master, pushed):
+- rake: 50 runs / 228 assertions green. rake spike: 5/5 (spike-01 render sha
+  51d9020db2c8433a... is THE pinned M1 floor, unchanged; spike-04 artifact sha is
+  f1927e8c... SINCE THE M2 DLL REBUILD - provenance documented in the M3 verdict,
+  do not chase it). rake gate: 6/6 green, three consecutive separate-process runs
+  with identical hash sets:
+    replay_cues         md5 6e52c7cb9b636388269ad02840a7eee8  peak -3.94 dBFS
+    replay_duck_overlap md5 306f5a41231b9f42be2a884542fb66f6  peak -5.45 dBFS
+    replay_music        md5 34f9c630493d4a318d1dc517132ffacf  peak -6.92 dBFS
+    replay_music_churn  md5 228403226b6581606047df35b53670b5  peak -12.02 dBFS
+    replay_spatial      md5 39e7aec56b8bf247bf48882990f318ef  peak -9.25 dBFS
+    replay_ui_cap       md5 478e5a5c0ca35479ca534b73488ca10e  peak -1.76 dBFS
+- Headroom staging live: sfx bus -10 dB, ui -6, music -6; ceiling 0.8913 (-1 dBFS
+  sample peak) pinned by a "peak" expectation on EVERY replay; over-1.0 = 0 everywhere.
+  No limiter in the graph (parked with a named trigger).
+- M3 pinned facts: same-depth duck overlap issues NO fade (pure duck_end extension;
+  one pending fade slot per node); with sum(caps) == max_voices the global steal path
+  is unreachable for capped categories; collapse-ratio numerators are spectral-leakage
+  floors - they do NOT scale with bus staging (rescale bounds when staging moves).
+- Artifacts: tmp/gate/*.wav + .log regenerate bit-identically via rake gate (tmp/ is
+  not committed). Listen sheet: drafts/_m3-listen-sheet.md (all score boxes BLANK).
+- Git hooks pre-commit/pre-push = bundle exec rake. Junior (juniormaciel10) has write
+  access: git pull --ff-only before EVERY push.
+- Ruby 3.4.10: export PATH="/c/Ruby34-x64/bin:$PATH" per shell.
+
+ENTRY GATE (before any plan execution - this is the session's defining constraint):
+The owner's scores are the input. Three cases:
+a) Scores provided (in this prompt, in chat, or as edits to _m3-listen-sheet.md -
+   check the file): record them VERBATIM into drafts/_m4-owner-scores.md (source,
+   date, every box + free-form notes) BEFORE acting on any of them. Then proceed.
+b) Owner present but has not listened: offer the walkthrough (the sheet is
+   self-contained: player recommendations for f32 WAV, timestamps, what to listen
+   for; regenerate WAVs with rake gate if tmp/gate is empty). Collect scores in
+   chat, record per (a), proceed.
+c) No owner input available this session: run the floor check, confirm repo health,
+   write drafts/_m4-checkpoint.md ("waiting on owner listen", floor status, date),
+   commit it, and STOP. There is no other M4 work: do not invent replays for
+   already-proven behaviors, do not tune data on taste grounds without ears, do not
+   touch parked items. A short honest session is the correct outcome here.
+NEVER score a box yourself, never summarize "probably fine", never treat the
+mechanical metrics as a substitute for the listen. Machine metrics + owner ears are
+the two presentation inputs; you own neither pair of ears.
+
+LOAD FIRST (in order, before any action):
+1. AGENTS.md - laws 1-7 + the M4 current-cycle block (the contract).
+2. drafts/_m3-verdict-20260819.md - all M3 measurements, staging arithmetic,
+   corpus inventory, notes-for-M4 queue.
+3. drafts/_m3-listen-sheet.md - the score boxes and per-replay timestamps (also:
+   check it for owner edits - that IS a valid score-return channel).
+4. drafts/_m2-gate-verdict-20260818.md + drafts/_m1-spike-verdict-20260817.md -
+   the pinned-fact registry (one fade slot per node; stop-with-fade window
+   [stop-len, stop]; NO_THREADING job pump; clock_gettime allocates ~1 obj/call).
+5. Surfaces you will likely touch: src/gta/audio_system.rb, voice_pool.rb,
+   command_io.rb, harness/gate_runner.rb, data/audio/cues.json,
+   harness/replays/replay_ui_cap.json + replay_cues.json.
+6. PARKING_LOT.md - the limiter / LUFS / distance-DSP / pan-law triggers you must
+   not silently unpark.
+
+FIRST ACTION (cheap floor check): git pull --ff-only, bundle exec rake, bundle exec
+rake spike, bundle exec rake gate. All green before touching anything. Spike 02
+needs a desktop session; if it fails for that reason, note and continue.
+
+PLAN (score-triage; execute end-to-end per Rule 5 ONLY after scores are recorded
+and the triage is agreed with the owner in one exchange):
+
+1. TRIAGE MATRIX (write it into drafts/_m4-owner-scores.md under the verbatim
+   scores): per box - score 5..3 = pass, pin as-is (note anything the owner
+   flagged in prose); score < 3 = presentation-gate FAIL, gets a fix row with the
+   design sketch below; owner prose wishes without a failing score = discuss,
+   dev-of-record decides and defends (design calls are the dev's; the owner's
+   ACCEPTANCE verdict is the owner's). Every fix lands with the replay or
+   expectation change that would catch its regression - no exceptions.
+
+2. PRE-THOUGHT FIX DESIGNS (gated on the matching box actually failing - do NOT
+   build these speculatively):
+   a) STEAL TRANSIENT (click at the victim cut - cues/ui_cap sheets): micro-fade
+      steal. Victim gets sound_set_stop_time_with_fade_pcm(now + N, N) (pinned
+      fact: fade spans [stop-len, stop]) instead of immediate stop; slot frees
+      IMMEDIATELY for the stealer, victim handle moves to a PREALLOCATED fixed-size
+      dying-ring {ptr, id, destroy_frame = now + N}; update() destroys ring entries
+      when frame >= destroy_frame (pure tick math, no extra FFI polling). N comes
+      from data (voice_pool.steal_fade_frames, ~240-480 = 5-10 ms). Consequences to
+      encode honestly: engine concurrency bound becomes max_voices + ring size
+      (document + assert); ring overflow policy = hard-stop the oldest ring entry
+      (loud, counted); log ops change sound_stop -> sound_stop_fade_at + deferred
+      sound_destroy, so ui_cap/cues log expectations and md5s shift (expected);
+      zero-alloc law: ring slots preallocated, tick-path bookkeeping alloc-free,
+      rerun the scaling test. Existing ratio windows survive (checked in M3
+      planning: collapse window starts 800 frames post-steal; 7/8 window 10400
+      frames post-steal - a <=480-frame fade is invisible to both), but VERIFY by
+      gate, and add a goertzel/log assertion that pins the fade actually happening.
+   b) SFX-TOO-QUIET (balance boxes): re-stage sfx bus upward IN DATA. Derived in
+      M3 and re-derivable: replay_cues aligned worst case = 1.54*sfx_factor +
+      0.2506 <= 0.8913 -> sfx_factor <= 0.416 -> -7.6 dB is the aligned-bound
+      limit; -8 dB is the safe round step (ui_cap re-check at -8: ~0.867, still
+      under). So the movable range without touching anything else is -10 -> -8.
+      Louder than -8 requires either re-engineering the synthetic filler pressure
+      in replay_cues DATA (fewer/quieter fillers, with stated reason - it is a
+      deliberately artificial coherent-sum case) or the master limiter, which is a
+      DLL-rebuild scope break: STOP and re-ask (parking-lot trigger). Peak
+      expectations on all six replays are the safety net either way; gate x2.
+   c) RE-ATTACK FEEL (duck_overlap 1.27 s moment): data-only candidates first -
+      duck attack_frames / release_frames retune in cues.json (md5 churn expected).
+      A separate re-attack-specific attack length is a schema addition; only if the
+      owner's complaint is specifically the mid-release catch, and it lands with an
+      AudioData validation + unit test + the overlap replay bound updated.
+   d) CENTER-VS-SIDE LOUDNESS (spatial sheet): balance-mode pan is a PINNED
+      spike-05 law and the shim exposes no pan-mode switch (verify against
+      src/gta/native.rb + vendor/gta_shim.c before saying anything) - a pan-law
+      change is a DLL rebuild = scope break, re-ask with the owner's score as
+      evidence. Likely honest outcome: accept for tones, revisit with real assets
+      at integration; record that verdict rather than hacking gain-by-pan logic.
+   e) CROSSFADE SMOOTHNESS (music/churn sheets): miniaudio fades are linear; an
+      equal-power curve is engine-level work (fade slot is single per sound - no
+      stacking micro-fades to fake a curve). If scored < 3: record as a known
+      limitation + parking-lot entry with trigger "real music stems make it
+      audible", or re-ask if the owner wants it NOW. Do not improvise DSP.
+   f) HEADROOM CLOSURE (the standing M3 question): whatever the balance outcome,
+      write the closure decision into the M4 verdict: keep -10 / moved to -X /
+      limiter re-asked. The -1 dBFS ceiling itself is NOT up for debate without a
+      re-ask (it is the KB-cited policy pinned in data comments + every replay).
+
+3. VERIFY + RE-PIN: after any change - bundle exec rake, rake spike, rake gate
+   TWICE (separate invocations, hash sets must match); update every md5/sha/peak
+   the M4 verdict cites; recorder-equivalence and steady-state alloc tests are in
+   rake and must stay green (the dying-ring, if built, is exactly the kind of
+   update()-path change the scaling test exists to catch).
+
+4. EVIDENCE + CLOSE: drafts/_m4-verdict-YYYYMMDD.md - verbatim-scores pointer,
+   triage matrix outcome per box, per-fix before/after evidence (hashes, peaks,
+   new expectations), headroom closure statement, updated corpus inventory if it
+   grew; update AGENTS.md current-cycle block (M4 done -> M5 scope: whatever
+   remains open + hold-for-integration-order posture; integration STAYS PARKED
+   unless the owner has lifted the order in writing); commit per phase
+   (conventional messages, explicit paths, never git add -A), pull --ff-only
+   before every push.
+
+BUDGET (Rule 7): single session, local deterministic work, no research quota,
+council = 0 (the owner's ears outrank any model on this product's taste; there is
+no decision here a cross-vendor consult improves). hub kb only if a NEW mixing
+question appears that the M3 citations do not cover (max 2 queries). Stop
+condition: scores recorded verbatim + every sub-3 box fixed-with-regression-guard
+or explicitly re-asked + headroom closed + verdict + AGENTS updated + pushed. If
+case (c) hit: checkpoint file committed and clean stop. If context runs low
+mid-fix: compact-checkpoint skill, state into drafts/_m4-checkpoint.md first.
+
+LAWS THAT BITE IN M4 (this milestone's specific temptations):
+- Fabricated listens. The whole session exists because a machine cannot score
+  presentation. Verbatim scores first, provenance recorded, or case (c) stop.
+- Fixing taste complaints by weakening accuracy pins (loosening a ratio/peak bound
+  to make a subjective fix fit). Bounds move only with arithmetic shown (the M3
+  leakage-floor rescale is the template: reason stated in the replay JSON itself).
+- DLL rebuild creep: limiter, pan-mode, fade curves all live behind the vendor
+  law. Any of them = re-ask with the failing score as evidence. NO rebuild on
+  taste alone.
+- One pending fade slot per node/sound - the dying-ring design respects it (one
+  stop-fade per victim, nothing stacked); if a fix seems to need two scheduled
+  fades on one handle, the design is wrong.
+- Zero per-tick allocations on the production path (dying-ring bookkeeping
+  included); prove by the scaling test, not by inspection.
+- Data-driven: steal_fade_frames, any restaging dB, retuned duck frames - all in
+  data/audio/*.json or replay JSON, never code constants.
+- Every md5/WAV pin that moves gets re-pinned in the verdict with the reason; a
+  hash that moved WITHOUT a named reason is a stop-the-line event.
+- Placeholder mechanical names; generated tones only; no third-party audio.
+- Multi-line ad-hoc scripts in temp files (run, delete); read files before
+  editing; silent-on-pass output.
+
+COORDINATION - do not overstep: integration stays PARKED until the owner lifts
+the order IN THIS OR A FUTURE SESSION'S CHAT - docs/integration-readiness.md is
+the prepared runway, not permission. game-two / game-two-assets / game-two-lore /
+~/knowledge remain read-only or untouched. The knowledge-correction queue (M1-M3
+items incl. the spike-04 sha provenance note) stays queued for a knowledge-repo
+session. Check git status + pull --ff-only before every push; Junior's commits
+are not yours to rewrite.
