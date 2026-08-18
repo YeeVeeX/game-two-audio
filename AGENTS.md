@@ -56,9 +56,16 @@ collapse-ratio numerators are leakage floors — they don't scale with staging.
 
 M4 scope:
 1. **Owner listen** (presentation axis, Rule 2's second score — accuracy is
-   green, presentation is UNSCORED): owner plays the six gate WAVs against
-   `drafts/_m3-listen-sheet.md`, returns scores; incorporate feedback. A
-   sub-3 box fails the presentation gate and its fix lands with a replay.
+   green, presentation is UNSCORED): take 1 (sine fixtures) was falsified by
+   the owner's ears 2026-08-19 ("constant hum" — verbatim + triage in
+   `drafts/_m4-owner-scores.md`): raw sines swamp the behaviors. The musical
+   **listen track** answers it (owner-agreed direction): `data/audio_listen/`
+   mirror tables + deterministic note-synthesis fixtures (A minor, 120 bpm)
+   + `rake listen` → `tmp/listen/*.wav`; mirror law pinned by
+   `test/listen_track_test.rb`; gate corpus untouched (md5 set verified
+   identical). Owner scores `drafts/_m4-listen-sheet.md`; a sub-3 box fails
+   the presentation gate and its fix lands with a replay/expectation guard.
+   Reaper stem replacement spec: `docs/listen-track.md`.
 2. **Headroom closure**: the −1 dBFS ceiling holds mechanically; the open
    half is the balance question (does sfx sit too quiet at −10 dB?). Close
    with the owner's ears; a limiter stays out unless listening demands it
@@ -91,6 +98,9 @@ distance-attenuation DSP (payload plumbed; needs a cue-table field + replay).
   md5 + WAV artifacts under tmp/gate/ + double-render byte-compare + assertions
   incl. log op-counts and −1 dBFS peak ceilings; 6/6 green ×3 2026-08-19). The
   ship gate for all audio work.
+- `rake listen` — M4 listen track: same replays through the same runner against
+  `data/audio_listen/` (musical fixtures; mirror law) → tmp/listen/*.wav for
+  the owner's ears; peak ceiling + determinism still gate (docs/listen-track.md).
 - swarmforge: `PATH="/c/Users/gabri/workspace/swarm-forge/.venv/Scripts:$PATH"
   swarmforge gauntlet --repo .` (test stage = rake, see swarmforge.toml).
 
