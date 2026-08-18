@@ -11,19 +11,34 @@
 #   "oldest"          -> tie-break: smallest start order (monotonic counter)
 # A steal is REFUSED (acquire returns nil) when the best victim outranks the
 # incoming cue (victim.priority > incoming priority).
+#
+# Per-category caps (M3; data/audio/cues.json voice_pool.per_category_caps,
+# keys ARE bus names — the cue's bus is its category):
+#   - acquire(category:) with the category AT its cap steals WITHIN the
+#     category using the same chain, candidates restricted to that category —
+#     even when free slots exist (a cap is a ceiling, not a reservation).
+#     Refused (nil) when the best in-category victim outranks the incoming.
+#   - category nil, or a category without a cap entry: global-only behavior,
+#     byte-for-byte the M1/M2 contract (spike 04 floor).
+#   - The global max always binds on top. Structural consequence (documented,
+#     not enforced): with sum(caps) == max_voices a full pool means every
+#     category sits exactly at its cap, so the global steal path is only
+#     reachable for capless/nil categories.
 
 module GTA
   class VoicePool
-    Voice = Struct.new(:slot, :priority, :distance, :order, :active)
+    Voice = Struct.new(:slot, :priority, :distance, :order, :active, :category)
 
-    attr_reader :max_voices, :steal_order
+    attr_reader :max_voices, :steal_order, :per_category_caps
 
-    def initialize(max_voices:, steal_order:)
+    def initialize(max_voices:, steal_order:, per_category_caps: nil)
       @max_voices = Integer(max_voices)
       @steal_order = steal_order.map(&:to_s).freeze
       unknown = @steal_order - %w[lowest_priority furthest oldest]
       raise ArgumentError, "unknown steal rule(s): #{unknown.join(', ')}" unless unknown.empty?
-      @voices = Array.new(@max_voices) { |i| Voice.new(i, 0, 0.0, 0, false) }
+      @per_category_caps = validate_caps(per_category_caps)
+      @category_counts = Hash.new(0)
+      @voices = Array.new(@max_voices) { |i| Voice.new(i, 0, 0.0, 0, false, nil) }
       @counter = 0
     end
 
@@ -31,39 +46,63 @@ module GTA
       @voices.count(&:active)
     end
 
+    def category_count(category)
+      @category_counts[category]
+    end
+
     # => { slot: Integer, stolen: nil | { slot:, priority:, distance:, order: } }
-    #    or nil when the pool is full and no active voice may be stolen.
-    def acquire(priority:, distance: 0.0)
+    #    or nil when no slot may be taken (pool/category full and the best
+    #    victim outranks the incoming cue).
+    def acquire(priority:, distance: 0.0, category: nil)
       @counter += 1
+
+      cap = category && @per_category_caps ? @per_category_caps[category] : nil
+      if cap && @category_counts[category] >= cap
+        return steal(priority, distance, category, scope: category)
+      end
+
       free = @voices.find { |v| !v.active }
       if free
-        occupy(free, priority, distance)
+        occupy(free, priority, distance, category)
         return { slot: free.slot, stolen: nil }
       end
 
-      victim = steal_candidate
-      return nil if victim.nil? || victim.priority > priority
-
-      stolen = { slot: victim.slot, priority: victim.priority, distance: victim.distance, order: victim.order }
-      occupy(victim, priority, distance)
-      { slot: victim.slot, stolen: stolen }
+      steal(priority, distance, category, scope: nil)
     end
 
     def release(slot)
-      @voices.fetch(slot).active = false
+      voice = @voices.fetch(slot)
+      if voice.active && voice.category
+        @category_counts[voice.category] -= 1
+      end
+      voice.active = false
     end
 
     private
 
-    def occupy(voice, priority, distance)
+    def steal(priority, distance, category, scope:)
+      victim = steal_candidate(scope)
+      return nil if victim.nil? || victim.priority > priority
+
+      stolen = { slot: victim.slot, priority: victim.priority, distance: victim.distance, order: victim.order }
+      @category_counts[victim.category] -= 1 if victim.category
+      occupy(victim, priority, distance, category)
+      { slot: victim.slot, stolen: stolen }
+    end
+
+    def occupy(voice, priority, distance, category)
       voice.priority = priority
       voice.distance = distance
       voice.order = @counter
       voice.active = true
+      voice.category = category
+      @category_counts[category] += 1 if category
     end
 
-    def steal_candidate
-      candidates = @voices.select(&:active)
+    # scope nil = all active voices (global); scope = category name restricts
+    # candidates to that category (in-category steal, same data-driven chain).
+    def steal_candidate(scope)
+      candidates = @voices.select { |v| v.active && (scope.nil? || v.category == scope) }
       return nil if candidates.empty?
       @steal_order.each do |rule|
         break if candidates.size == 1
@@ -85,6 +124,18 @@ module GTA
     def keep_max(voices)
       best = voices.map { |v| yield(v) }.max
       voices.select { |v| yield(v) == best }
+    end
+
+    def validate_caps(caps)
+      return nil if caps.nil?
+      caps.each do |cat, cap|
+        raise ArgumentError, "per_category_caps: #{cat} must be an Integer >= 1" unless cap.is_a?(Integer) && cap >= 1
+      end
+      total = caps.values.sum
+      if total > @max_voices
+        raise ArgumentError, "per_category_caps sum (#{total}) exceeds max_voices (#{@max_voices})"
+      end
+      caps.freeze
     end
   end
 end

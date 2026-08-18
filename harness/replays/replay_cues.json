@@ -1,5 +1,5 @@
 {
-  "_comment": "Gate replay 1: cue spam, 64-voice pool pressure, one engineered steal (drone_low prio 10 vs boss1_spawn prio 90 at tick 210), one duck window on the music bus. All windows are 4800-frame Goertzel bins (10 Hz); fixture freqs are bin-aligned. Filler starts are 800 frames apart = integer cycles at 2100 Hz (coherent sum, deterministic).",
+  "_comment": "Gate replay 1: cue spam, sfx category filled exactly to its cap (drone + 47 fillers = 48, per_category_caps.sfx), one engineered in-category steal (drone_low prio 10 vs boss1_spawn prio 90 at tick 210 — same victim/frame the M2 global steal produced), one duck window on the music bus. All windows are 4800-frame Goertzel bins (10 Hz); fixture freqs are bin-aligned. Filler starts are 800 frames apart = integer cycles at 2100 Hz (coherent sum, deterministic).",
   "name": "replay_cues",
   "duration_ticks": 360,
   "events": [
@@ -343,118 +343,6 @@
       "filler_blip",
       {
         "distance": 0.6
-      }
-    ],
-    [
-      168,
-      "filler_blip",
-      {
-        "distance": 0.7
-      }
-    ],
-    [
-      169,
-      "filler_blip",
-      {
-        "distance": 0.8
-      }
-    ],
-    [
-      170,
-      "filler_blip",
-      {
-        "distance": 0.9
-      }
-    ],
-    [
-      171,
-      "filler_blip",
-      {
-        "distance": 0.0
-      }
-    ],
-    [
-      172,
-      "filler_blip",
-      {
-        "distance": 0.1
-      }
-    ],
-    [
-      173,
-      "filler_blip",
-      {
-        "distance": 0.2
-      }
-    ],
-    [
-      174,
-      "filler_blip",
-      {
-        "distance": 0.3
-      }
-    ],
-    [
-      175,
-      "filler_blip",
-      {
-        "distance": 0.4
-      }
-    ],
-    [
-      176,
-      "filler_blip",
-      {
-        "distance": 0.5
-      }
-    ],
-    [
-      177,
-      "filler_blip",
-      {
-        "distance": 0.6
-      }
-    ],
-    [
-      178,
-      "filler_blip",
-      {
-        "distance": 0.7
-      }
-    ],
-    [
-      179,
-      "filler_blip",
-      {
-        "distance": 0.8
-      }
-    ],
-    [
-      180,
-      "filler_blip",
-      {
-        "distance": 0.9
-      }
-    ],
-    [
-      181,
-      "filler_blip",
-      {
-        "distance": 0.0
-      }
-    ],
-    [
-      182,
-      "filler_blip",
-      {
-        "distance": 0.1
-      }
-    ],
-    [
-      183,
-      "filler_blip",
-      {
-        "distance": 0.2
       }
     ],
     [

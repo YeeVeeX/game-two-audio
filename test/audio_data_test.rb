@@ -51,6 +51,23 @@ class AudioDataTest < Minitest::Test
     end
   end
 
+  def test_per_category_cap_keys_must_be_declared_buses
+    with_patched_data("cues.json", ->(d) { d["voice_pool"]["per_category_caps"]["ghost"] = 1 }) do |dir|
+      err = assert_raises(ArgumentError) { GTA::AudioData.load(dir) }
+      assert_match(/not a declared bus/, err.message)
+    end
+  end
+
+  def test_per_category_caps_must_be_positive_and_fit_max_voices
+    with_patched_data("cues.json", ->(d) { d["voice_pool"]["per_category_caps"]["ui"] = 0 }) do |dir|
+      assert_raises(ArgumentError) { GTA::AudioData.load(dir) }
+    end
+    with_patched_data("cues.json", ->(d) { d["voice_pool"]["per_category_caps"]["ui"] = 24 }) do |dir|
+      err = assert_raises(ArgumentError) { GTA::AudioData.load(dir) }
+      assert_match(/exceeds max_voices/, err.message)
+    end
+  end
+
   def test_fixture_generation_is_deterministic_and_idempotent
     manifest = File.join(DATA_DIR, "fixtures.json")
     Dir.mktmpdir do |dir|

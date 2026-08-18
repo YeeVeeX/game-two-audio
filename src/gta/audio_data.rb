@@ -78,6 +78,7 @@ module GTA
 
     def validate_cues!(cues_tbl, fixtures, engine)
       buses = cues_tbl["buses"]
+      validate_voice_pool!(cues_tbl["voice_pool"], buses)
       cues_tbl["cues"].each do |id, cue|
         %w[event file bus priority gain pan].each do |field|
           raise ArgumentError, "cues.json: cue #{id} missing #{field}" unless cue.key?(field)
@@ -98,6 +99,21 @@ module GTA
         if duck["hold_frames"] < engine["tick_frames"]
           raise ArgumentError, "cues.json: cue #{id} duck hold_frames < tick_frames (release fade would start in the past — one pending fade slot per group node)"
         end
+      end
+    end
+
+    # Per-category caps: keys ARE bus names (the cue's bus is its category);
+    # each cap >= 1; caps may never promise more voices than the pool holds.
+    def validate_voice_pool!(pool, buses)
+      caps = pool["per_category_caps"]
+      return if caps.nil?
+      caps.each do |cat, cap|
+        raise ArgumentError, "cues.json: per_category_caps key #{cat} is not a declared bus" unless buses.key?(cat)
+        raise ArgumentError, "cues.json: per_category_caps #{cat} must be an Integer >= 1" unless cap.is_a?(Integer) && cap >= 1
+      end
+      total = caps.values.sum
+      if total > pool["max_voices"]
+        raise ArgumentError, "cues.json: per_category_caps sum (#{total}) exceeds max_voices (#{pool['max_voices']})"
       end
     end
 

@@ -188,7 +188,8 @@ module GTA
     def build_voice_pool
       pool_cfg = @cfg.voice_pool
       @max_voices = pool_cfg["max_voices"]
-      @pool = VoicePool.new(max_voices: @max_voices, steal_order: pool_cfg["steal_order"])
+      @pool = VoicePool.new(max_voices: @max_voices, steal_order: pool_cfg["steal_order"],
+                            per_category_caps: pool_cfg["per_category_caps"])
       @slot_sounds = Array.new(@max_voices)
       @slot_ids = Array.new(@max_voices)
     end
@@ -215,8 +216,8 @@ module GTA
     def start_cue(frame, cue_id, payload)
       cue = @cfg.cues[cue_id]
       distance = payload && payload[:distance] ? payload[:distance] : 0.0
-      res = @pool.acquire(priority: cue["priority"], distance: distance)
-      if res.nil? # pool full and the best victim outranks the cue: drop, count
+      res = @pool.acquire(priority: cue["priority"], distance: distance, category: cue["bus"])
+      if res.nil? # pool/category full and the best victim outranks the cue: drop, count
         @dropped_cues += 1
         return
       end

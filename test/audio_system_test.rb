@@ -117,16 +117,16 @@ class AudioSystemTest < Minitest::Test
 
   def test_steal_stops_and_destroys_victim_before_loading_stealer
     run_tick(0, [["drone_low", nil]]) # priority 10 victim -> sound_001
-    max = CUES_TBL["voice_pool"]["max_voices"]
-    (max - 1).times { |i| @audio.handle_event(1, "filler_blip", { distance: i / 100.0 }) }
+    cap = CUES_TBL["voice_pool"]["per_category_caps"]["sfx"]
+    (cap - 1).times { |i| @audio.handle_event(1, "filler_blip", { distance: i / 100.0 }) }
     @audio.update(1)
     @renderer.advance(TF)
-    assert_equal max, @audio.active_voices
-    run_tick(2, [["boss1_spawn", nil]])
-    assert_equal max, @audio.active_voices, "steal must reuse the slot, not grow the pool"
+    assert_equal cap, @audio.active_voices
+    run_tick(2, [["boss1_spawn", nil]]) # sfx at cap -> in-category steal
+    assert_equal cap, @audio.active_voices, "steal must reuse the slot, not grow the category"
     stop_idx = @log.lines.index { |l| l.include?("sound_stop sound_001") }
     destroy_idx = @log.lines.index { |l| l.include?("sound_destroy sound_001") }
-    stealer_load_idx = @log.lines.index { |l| l.include?("sound_load sound_0#{max + 1}") }
+    stealer_load_idx = @log.lines.index { |l| l.include?("sound_load sound_0#{cap + 1}") }
     refute_nil stop_idx, "victim not stopped"
     refute_nil destroy_idx, "victim not destroyed"
     refute_nil stealer_load_idx, "stealer not loaded"
@@ -134,14 +134,13 @@ class AudioSystemTest < Minitest::Test
   end
 
   def test_refused_steal_drops_cue_and_counts_it
-    max = CUES_TBL["voice_pool"]["max_voices"]
-    @audio.handle_event(0, "boss1_spawn", nil) # priority 90 occupies one slot
-    (max - 1).times { @audio.handle_event(0, "boss1_spawn", nil) }
+    cap = CUES_TBL["voice_pool"]["per_category_caps"]["sfx"]
+    cap.times { @audio.handle_event(0, "boss1_spawn", nil) } # priority 90 fills the sfx cap
     @audio.update(0)
     @renderer.advance(TF)
-    assert_equal max, @audio.active_voices
+    assert_equal cap, @audio.active_voices
     before = @log.lines.size
-    @audio.handle_event(1, "drone_low", nil) # priority 10 cannot steal priority 90
+    @audio.handle_event(1, "drone_low", nil) # priority 10 cannot steal priority 90 in-category
     assert_equal before, @log.lines.size, "refused cue must issue no commands"
     assert_equal 1, @audio.dropped_cues
   end
