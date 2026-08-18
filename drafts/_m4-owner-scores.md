@@ -70,3 +70,24 @@ Two-track fixture split:
 Constraints that hold regardless: no copyrighted audio ever; placeholder
 mechanical names; tunables in data, not code; engine/DLL untouched (no
 rebuild on taste grounds); integration stays PARKED.
+
+## Owner feedback — take 2, musical listen track (verbatim, 2026-08-19)
+
+> they sound better, still too simple for my taste, I would like to be able
+> to select and tweak my sounds on my plugins or run the midi through my
+> analog synths, what is the best approach? we can use those you made as
+> placeholders in the meanwhile for the prototype, but I still here some
+> constant string-like sound in the back of each of those sounds not sure if
+> that is intended or not
+
+Reading (dev of record): (1) direction improved; material still too simple —
+per-box scores STILL OPEN; (2) owner wants a plugin/analog-synth production
+loop (MIDI out of the repo, rendered audio back in) — design question,
+answered + built same session (MIDI export of the placeholder compositions +
+file-type fixture return seam); (3) synthesis placeholders ACCEPTED as the
+prototype interim — material-quality complaint does NOT gate the behaviors
+re-listen; (4) possible defect report: "constant string-like sound in the
+back of each" — investigated mechanically same session; verdict recorded in
+the M4 verdict + explained to the owner (calm-pad sustained root drone —
+intended composition, with the churn silent-window ear-discriminator offered
+and a data knob named if it still bothers).

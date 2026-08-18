@@ -95,4 +95,41 @@ class FixturesSynthTest < Minitest::Test
                    "gain drift did not re-render the fixture"
     end
   end
+
+  def test_file_type_imports_pinned_owner_render
+    Dir.mktmpdir do |dir|
+      stem = File.join(dir, "stems", "owner_render.wav")
+      FileUtils.mkdir_p(File.dirname(stem))
+      samples = Array.new((0.1 * SR).round) { |i| (0.3 * 32_767 * Math.sin(2.0 * Math::PI * 220.0 * i / SR)).round }
+      GTA::Wav.write_pcm16(stem, samples, channels: 1, sample_rate: SR)
+      sha = Digest::SHA256.file(stem).hexdigest
+
+      manifest = File.join(dir, "fixtures.json")
+      entry = { "type" => "file", "dur_s" => 0.1, "path" => "stems/owner_render.wav", "sha256" => sha }
+      File.write(manifest, JSON.generate({ "tones" => { "slot_a" => entry } }))
+      out = File.join(dir, "out")
+
+      GTA::Fixtures.ensure!(manifest, out, sample_rate: SR)
+      imported = File.join(out, "slot_a.wav")
+      assert_equal Digest::SHA256.file(stem).hexdigest, Digest::SHA256.file(imported).hexdigest,
+                   "import must be byte-identical to the owner render"
+
+      # sha pin: tampered file refuses
+      File.write(manifest, JSON.generate({ "tones" => { "slot_a" => entry.merge("sha256" => "0" * 64) } }))
+      e = assert_raises(ArgumentError) { GTA::Fixtures.ensure!(manifest, out, sample_rate: SR) }
+      assert_match(/sha256 mismatch/, e.message)
+
+      # duration law: manifest dur_s must equal the file exactly
+      File.write(manifest, JSON.generate({ "tones" => { "slot_a" => entry.merge("dur_s" => 0.2) } }))
+      e = assert_raises(ArgumentError) { GTA::Fixtures.ensure!(manifest, out, sample_rate: SR) }
+      assert_match(/duration drift/, e.message)
+
+      # format law: stereo/float/wrong-rate refused
+      GTA::Wav.write_pcm16(stem, samples + samples, channels: 2, sample_rate: SR)
+      entry2 = entry.merge("sha256" => Digest::SHA256.file(stem).hexdigest)
+      File.write(manifest, JSON.generate({ "tones" => { "slot_a" => entry2 } }))
+      e = assert_raises(ArgumentError) { GTA::Fixtures.ensure!(manifest, out, sample_rate: SR) }
+      assert_match(/PCM16 mono/, e.message)
+    end
+  end
 end

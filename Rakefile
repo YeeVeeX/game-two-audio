@@ -22,6 +22,11 @@ task :listen do
   sh "ruby -Isrc -Iharness harness/run_listen.rb #{replays.join(' ')}"
 end
 
+desc "Export listen-track placeholder compositions as MIDI (data/audio_listen/midi/) for the owner's DAW/analog re-voicing loop"
+task :midi do
+  sh "ruby -Isrc -Iharness harness/export_midi.rb"
+end
+
 desc "M1 spike falsification runner (one script per ADR item under spike/)"
 task :spike do
   scripts = Dir["spike/[0-9]*_*.rb"].sort

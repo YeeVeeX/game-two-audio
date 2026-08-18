@@ -14,6 +14,13 @@
 #     law). Waveform harmonic tables below are formula, not tunables — the
 #     per-asset knobs are all in data.
 #
+#   "file" — owner-produced render (Reaper/VST/analog, in-house original
+#     material only) dropped in as { dur_s, path, sha256 }. path resolves
+#     relative to the manifest; sha256 is the provenance pin (mismatch =
+#     refuse); format must be PCM16 mono at the engine rate and the frame
+#     count must equal dur_s exactly (durations are choreography-load-bearing
+#     — see docs/listen-track.md and test/listen_track_test.rb).
+#
 # No third-party audio, ever. Staleness: each WAV gets a .sig sidecar (sha256
 # of the manifest entry + sample rate); the WAV re-renders when its entry
 # drifts, so data retunes propagate without manual tmp/ cleanup.
@@ -47,13 +54,16 @@ module GTA
         sig_path = "#{path}.sig"
         sig = entry_signature(spec, sample_rate)
         next if File.exist?(path) && File.exist?(sig_path) && File.read(sig_path) == sig
-        samples =
-          case spec["type"] || "sine"
-          when "sine" then render_sine(spec, sample_rate)
-          when "notes" then render_notes(name, spec, sample_rate)
-          else raise ArgumentError, "fixtures: #{name} unknown type #{spec['type']}"
-          end
-        GTA::Wav.write_pcm16(path, samples, channels: 1, sample_rate: sample_rate)
+        case spec["type"] || "sine"
+        when "sine"
+          GTA::Wav.write_pcm16(path, render_sine(spec, sample_rate), channels: 1, sample_rate: sample_rate)
+        when "notes"
+          GTA::Wav.write_pcm16(path, render_notes(name, spec, sample_rate), channels: 1, sample_rate: sample_rate)
+        when "file"
+          import_file(name, spec, manifest_path, path, sample_rate)
+        else
+          raise ArgumentError, "fixtures: #{name} unknown type #{spec['type']}"
+        end
         File.write(sig_path, sig)
       end
       out_dir
@@ -61,6 +71,26 @@ module GTA
 
     def entry_signature(spec, sample_rate)
       Digest::SHA256.hexdigest("#{JSON.generate(spec)}|sr=#{sample_rate}|v1")
+    end
+
+    # Owner-render import: provenance-pinned, format-validated, duration-exact.
+    def import_file(name, spec, manifest_path, dest, sample_rate)
+      src = File.expand_path(spec.fetch("path"), File.dirname(manifest_path))
+      raise ArgumentError, "fixture #{name}: missing file #{src}" unless File.exist?(src)
+      sha = Digest::SHA256.file(src).hexdigest
+      unless sha == spec.fetch("sha256")
+        raise ArgumentError, "fixture #{name}: sha256 mismatch (manifest pin #{spec['sha256'][0, 12]}…, file #{sha[0, 12]}…) — re-pin deliberately or restore the file"
+      end
+      w = GTA::Wav.read(src)
+      unless w[:format] == 1 && w[:bits] == 16 && w[:channels] == 1 && w[:sample_rate] == sample_rate
+        raise ArgumentError, "fixture #{name}: need PCM16 mono @#{sample_rate} Hz, got fmt=#{w[:format]}/#{w[:bits]}bit #{w[:channels]}ch @#{w[:sample_rate]}"
+      end
+      frames = w[:data].bytesize / 2
+      expected = (spec.fetch("dur_s") * sample_rate).round
+      unless frames == expected
+        raise ArgumentError, "fixture #{name}: duration drift — #{frames} frames, manifest dur_s demands #{expected} (durations are choreography-load-bearing)"
+      end
+      FileUtils.cp(src, dest)
     end
 
     # The M1 spike formula, unchanged (shared fixture names stay byte-identical).

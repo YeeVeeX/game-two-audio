@@ -65,9 +65,10 @@ class ListenTrackTest < Minitest::Test
     end
   end
 
-  def test_listen_fixtures_are_notes_type
+  def test_listen_fixtures_are_musical_material
     @listen.fixtures["tones"].each do |name, spec|
-      assert_equal "notes", spec["type"], "listen fixture #{name} is not musical synthesis"
+      assert_includes %w[notes file], spec["type"],
+                      "listen fixture #{name} must be synthesis or a pinned owner render — never a raw sine"
     end
   end
 end

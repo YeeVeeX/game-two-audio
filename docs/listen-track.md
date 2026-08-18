@@ -65,17 +65,53 @@ choreography (steal/duck/transition moments) rides on cue lengths;
 UI clear-not-jarring; keep per-file peaks conservative — the render gate
 enforces −1 dBFS on the mixed result.
 
-Delivery seam (when stems arrive): `fixtures.json` grows a `"files"` entry
-type carrying a repo-relative path + sha256 pin instead of synthesis params —
-small `GTA::Fixtures` extension, not built until the first real stem lands.
-Real *runtime* assets still arrive via the game-two-assets `exports/` pipeline
-at integration time; this track is only this repo's evaluation instrument.
+## Owner production loop (plugins / analog synths) — IMPLEMENTED
+
+The composition source of truth is `data/audio_listen/fixtures.json`. The
+round trip:
+
+1. **`rake midi`** → `data/audio_listen/midi/<slot>.mid` — each placeholder
+   composition as a standard MIDI file (format 0, 120 bpm, division 480;
+   deterministic, committed). Pitches are the ET notes of the composition;
+   velocity ≈ 127·√amp; wave/envelope/tremolo/glide/noise carried as text
+   markers (params stay authoritative in the JSON). Detuned pairs collapse
+   to one note + marker — re-create the detune on the instrument.
+2. Owner re-voices in Reaper (VSTs) or drives analog gear via MIDI/CV — KB
+   `music-production/moog-dfam.md` §6 has game-audio patch recipes (Patch 3
+   "alien texture loop" fits the `msfx_drone_4s` slot directly); records/
+   renders to the spec above (48 kHz mono PCM16 WAV, exact slot duration).
+3. Drop the render under `data/audio_listen/stems/` and swap the manifest
+   entry to the **file type**:
+   `{ "type": "file", "dur_s": <slot>, "path": "stems/<slot>.wav", "sha256": "<pin>" }`
+   — sha256 is the provenance pin (mismatch refuses to load); format and
+   exact duration are validated at import (durations are load-bearing).
+4. `rake listen` re-renders the six WAVs with the new material; the mirror
+   law + peak ceiling + determinism all still gate.
+
+In-house original renders only (no third-party audio, no sample-pack content
+with redistribution restrictions committed to the repo). Real *runtime*
+assets still arrive via the game-two-assets `exports/` pipeline at
+integration time; this track is only this repo's evaluation instrument.
 
 ## Commands
 
 ```
 rake listen   # render the 6 replays with musical fixtures -> tmp/listen/*.wav
+rake midi     # export placeholder compositions -> data/audio_listen/midi/*.mid
 rake gate     # the accuracy ship-gate (sine corpus) — unchanged
 ```
 
 Owner listens against `drafts/_m4-listen-sheet.md`.
+
+## Known material notes (owner reports, mechanically verified)
+
+- "Constant string-like sound in the back of each file" (owner, take 2):
+  **intended composition** — the calm pad's whole-stem sustained A2 root
+  drone (tri, slow tremolo), present wherever calm music plays (every replay
+  opens in state `calm`), thickened in `spatial`/`ui_cap`/`cues` by the sfx
+  drone sitting on the same A root. Verified: churn's programmed-silence
+  window renders float-exact rms=0 (nothing leaks when the system is
+  silent); 110 Hz reads constant only in music-on windows. Ear
+  discriminator: `replay_music_churn` 4.2–6.0 s must be dead silent. Knob if
+  it bothers: the root-drone note's amp in `mstem_calm_6s` (data-only, one
+  line) — or the owner's replacement stem simply composes a different bed.
