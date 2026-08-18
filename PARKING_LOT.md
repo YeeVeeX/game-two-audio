@@ -18,3 +18,11 @@
   2026-08-17, JS-walled).
 - **game-two-assets audio export lane** — TRIGGER: first real (non-tone, non-MIDI-stem)
   asset need; coordinate with that repo's manifest pipeline, don't improvise formats.
+- **Master limiter (custom C node)** — TRIGGER: owner listen verdict says the data-staged
+  headroom (M3: sfx −10 dB, −1 dBFS ceiling pinned per replay) audibly hurts the mix, or
+  real assets overflow the budget. A limiter = DLL rebuild = vendor-law ceremony; re-ask.
+- **LUFS (K-weighted) metering in the gate** — TRIGGER: asset handshake with
+  game-two-assets decides loudness conformance is gated here rather than in the export
+  pipeline (docs/integration-readiness.md §4).
+- **Distance-attenuation DSP** — TRIGGER: game design asks for it; :distance payload is
+  already plumbed as pool-steal metadata; the DSP needs a cue-table field + gate replay.
