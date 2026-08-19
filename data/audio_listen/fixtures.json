@@ -37,32 +37,11 @@
       "_what": "filler_blip: soft E6 bell pip every 250 ms. Replays stack up to 47 voices at 1-tick offsets -> shimmering rain texture instead of a coherent sine wall; per-pip amp keeps the stack in the texture band."
     },
     "mui_confirm_200ms": {
-      "type": "notes",
+      "type": "file",
       "dur_s": 0.2,
-      "gain": 1.0,
-      "_what": "toll_paid: bright two-note confirm pluck A5 -> E6 (bell). UI band: clear but not jarring (KB).",
-      "notes": [
-        {
-          "t": 0.0,
-          "dur": 0.09,
-          "freq_hz": 880.0,
-          "amp": 0.3,
-          "wave": "bell",
-          "attack_s": 0.002,
-          "decay_tau_s": 0.03,
-          "release_s": 0.02
-        },
-        {
-          "t": 0.09,
-          "dur": 0.11,
-          "freq_hz": 1318.51,
-          "amp": 0.34,
-          "wave": "bell",
-          "attack_s": 0.002,
-          "decay_tau_s": 0.035,
-          "release_s": 0.03
-        }
-      ]
+      "path": "stems/mui_confirm_200ms.wav",
+      "sha256": "8b960e8f06d545bfa7333eee73779049c01c17de49d4e6130187c077b1717464",
+      "_what": "toll_paid: bright two-note confirm pluck A5 -> E6 (bell). UI band: clear but not jarring (KB)."
     },
     "mui_ping_1200ms": {
       "type": "notes",
