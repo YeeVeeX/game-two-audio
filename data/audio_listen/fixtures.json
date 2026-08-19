@@ -44,22 +44,11 @@
       "_what": "toll_paid: bright two-note confirm pluck A5 -> E6 (bell). UI band: clear but not jarring (KB)."
     },
     "mui_ping_1200ms": {
-      "type": "notes",
+      "type": "file",
       "dur_s": 1.2,
-      "gain": 1.0,
-      "_what": "hud_ping: single soft E5 sonar bell with a long tail; 8 stack at 150 ms spacing in the cap replay -> a rising cascade.",
-      "notes": [
-        {
-          "t": 0.0,
-          "dur": 1.2,
-          "freq_hz": 659.255,
-          "amp": 0.08,
-          "wave": "bell",
-          "attack_s": 0.003,
-          "decay_tau_s": 0.28,
-          "release_s": 0.25
-        }
-      ]
+      "path": "stems/mui_ping_1200ms.wav",
+      "sha256": "948b8b7935b8b2f2ecc885db5916726d2caf9f5adcbe5485927a76c92b37b87d",
+      "_what": "hud_ping: single soft E5 sonar bell with a long tail; 8 stack at 150 ms spacing in the cap replay -> a rising cascade."
     }
   }
 }
