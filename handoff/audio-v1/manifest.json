@@ -1,0 +1,133 @@
+{
+  "_what": "game-two-audio -> game-two-assets audio handoff, batch v1 (M4b, 2026-08-18). Owner-performed in-house renders (Reaper 7.79 + owner VSTs, driven through the bridge loop; compositions authored in data/audio_listen/fixtures.json, exported as MIDI scaffolds). NO third-party audio, NO sample-pack content. These are the production source files; the sha-verified PCM16 evaluation twins live in data/audio_listen/stems/ and never ship. Consumer: the game-two-assets exports pipeline (its manifest/provenance/loudness law governs runtime files; LUFS is deliberately unmeasured here - the assets pipeline measures at ingest per music-production/game-audio-pipeline.md). Loop stems are bar-exact at 120 bpm 4/4 (bar = 96000 frames @ 48 kHz) per docs/integration-readiness.md section 4.",
+  "produced_by": "game-two-audio M4b bridge loop session, 2026-08-18",
+  "engine_rate_hz": 48000,
+  "assets": [
+    {
+      "id": "mstem_calm_6s",
+      "role": "calm-state music loop (seamless at the 120bpm bar grid)",
+      "level_band": "music bed (mid) — under the sfx, over the drone",
+      "file": "mstem_calm_6s.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 6.0,
+      "frames": 288000,
+      "sha256": "fbfe224bf4feb899c6a205961f6f65c098f330ebb18d6b7de1c357427fc5df8d",
+      "peak_dbfs": -19.45,
+      "rms_dbfs": -31.96,
+      "evaluation_twin": {
+        "path": "data/audio_listen/stems/mstem_calm_6s.wav",
+        "sha256": "5562a026e26f99d24e67460c1db717bcde950da89b98d2c8a62e4fb6572c67cf",
+        "pinned_commit": "9f780ec"
+      },
+      "source_revision": "20260818-202446-10464-mstem_calm_6s"
+    },
+    {
+      "id": "mstem_combat_6s",
+      "role": "combat-state music loop (seamless)",
+      "level_band": "music bed (mid) — under the sfx, over the drone",
+      "file": "mstem_combat_6s.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 6.0,
+      "frames": 288000,
+      "sha256": "ae6e8729d5876b7e1b84eca61889a2671a501d274df6031d27337d5197f7c20a",
+      "peak_dbfs": -10.93,
+      "rms_dbfs": -19.43,
+      "evaluation_twin": {
+        "path": "data/audio_listen/stems/mstem_combat_6s.wav",
+        "sha256": "16b84f4721897aa5b48dc84d77333bab358f04548d060e0a929d4d05ac36efe1",
+        "pinned_commit": "def2cc3"
+      },
+      "source_revision": "20260818-204403-18540-mstem_combat_6s"
+    },
+    {
+      "id": "msfx_drone_4s",
+      "role": "low ambient drone (sits below everything)",
+      "level_band": "ambient drone — lowest layer, sits below everything",
+      "file": "msfx_drone_4s.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 4.0,
+      "frames": 192000,
+      "sha256": "465b447afcd3e21ec3eaa984e48b1cb2a4026e588d00afb89a77daddc4edb35c",
+      "peak_dbfs": -8.65,
+      "rms_dbfs": -20.47,
+      "evaluation_twin": {
+        "path": "data/audio_listen/stems/msfx_drone_4s.wav",
+        "sha256": "74175c1650ff1af007e9ff48483151c4205b65b01fdfb067e9f94a4d31607794",
+        "pinned_commit": "a166b32"
+      },
+      "source_revision": "20260818-204831-15260-msfx_drone_4s"
+    },
+    {
+      "id": "msfx_stinger_2s",
+      "role": "boss-spawn stinger (cuts above the music bed; engine ducks music under it)",
+      "level_band": "sfx — must cut above the music bed",
+      "file": "msfx_stinger_2s.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 2.0,
+      "frames": 96000,
+      "sha256": "cbba621d9e98afc80e688ffd48ec18ed2e16032e4cf3b4ecfb90aeb6da0a0b22",
+      "peak_dbfs": -13.99,
+      "rms_dbfs": -32.02,
+      "evaluation_twin": {
+        "path": "data/audio_listen/stems/msfx_stinger_2s.wav",
+        "sha256": "0b1c8fef89a555b484831ba1419c017e8796b35f0f6f2342aecf1ee4407ebdf4",
+        "pinned_commit": "92c4ce6"
+      },
+      "source_revision": "20260818-205207-6092-msfx_stinger_2s"
+    },
+    {
+      "id": "msfx_swarmpip_4s",
+      "role": "soft repeating pip; engine stacks up to 47 copies at 1-tick offsets",
+      "level_band": "sfx texture — very quiet per pip (replays stack up to 47 copies)",
+      "file": "msfx_swarmpip_4s.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 4.0,
+      "frames": 192000,
+      "sha256": "40c6913c8624e1e8e731e50f5a8fac64a7ac68334f245890e406cfc80675d87e",
+      "peak_dbfs": -21.86,
+      "rms_dbfs": -43.79,
+      "evaluation_twin": {
+        "path": "data/audio_listen/stems/msfx_swarmpip_4s.wav",
+        "sha256": "9c7fe0d400223a77622879cc8af7e72bfee28fbe50865163cc09a7cabcce4bd0",
+        "pinned_commit": "6cbde5f"
+      },
+      "source_revision": "20260818-205824-21840-msfx_swarmpip_4s"
+    },
+    {
+      "id": "mui_confirm_200ms",
+      "role": "UI confirm blip",
+      "level_band": "ui — clear but not jarring",
+      "file": "mui_confirm_200ms.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.2,
+      "frames": 9600,
+      "sha256": "acfd4776056f723b2209b60fc2cdc47b5367a69a368e8f7d516b0787e7a0e945",
+      "peak_dbfs": -21.15,
+      "rms_dbfs": -31.55,
+      "evaluation_twin": {
+        "path": "data/audio_listen/stems/mui_confirm_200ms.wav",
+        "sha256": "8b960e8f06d545bfa7333eee73779049c01c17de49d4e6130187c077b1717464",
+        "pinned_commit": "92ff3c8"
+      },
+      "source_revision": "20260818-210117-19516-mui_confirm_200ms"
+    },
+    {
+      "id": "mui_ping_1200ms",
+      "role": "soft UI ping with tail (8-stack at 150 ms in the cap replay)",
+      "level_band": "ui — clear but not jarring (8 stack at 150 ms in the cap replay)",
+      "file": "mui_ping_1200ms.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 1.2,
+      "frames": 57600,
+      "sha256": "90a7ee5c09f77665b5e338c632ad16c406e91f1f45bf2a088b63ba9b1440299d",
+      "peak_dbfs": -15.79,
+      "rms_dbfs": -30.74,
+      "evaluation_twin": {
+        "path": "data/audio_listen/stems/mui_ping_1200ms.wav",
+        "sha256": "948b8b7935b8b2f2ecc885db5916726d2caf9f5adcbe5485927a76c92b37b87d",
+        "pinned_commit": "d68cfe6"
+      },
+      "source_revision": "20260818-210310-19700-mui_ping_1200ms"
+    }
+  ]
+}

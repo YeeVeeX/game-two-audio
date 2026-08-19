@@ -116,3 +116,26 @@ music-state-machine schema + game-two zone events, i.e. the
 stays PARKED with integration (recorded here so the idea isn't lost; the
 listen track's mirror law keeps exactly the two pinned music states).
 No presentation scores given yet; the 17 boxes remain open.
+
+## Owner verdict — all-owner-stems listen + in-game direction (verbatim, 2026-08-18)
+
+Context: all seven slots owner-designed (bridge loop, same session); full-set
+listen sha set da2a62a1/ec8303fe/d644b61e/7229d606/f5d13763/cf2e0d99; owner
+played tmp/listen renders, then:
+
+> they sound good, I would like to test them in game so please stage them in
+> a way we can merge them into the main game-two project, or what is the
+> best approach? How did we plan this?
+
+Reading (dev of record): (1) global presentation verdict POSITIVE ("they
+sound good") on the all-owner material — recorded as such; the 17 per-box
+scores were not returned; owner direction supersedes box-by-box scoring with
+IN-GAME listening as the presentation instrument of record (the M4 verdict
+names the boxes as open-by-owner-choice, not invented). (2) "stage for
+merge into game-two" = the integration question — answered from the pinned
+plan: evaluation stems never copy into game-two (listen-stems lane law);
+runtime path = game-two-assets exports lane (its named trigger — first real
+asset need — fired with this request); hearing them in game requires the
+parked integration order to lift (docs/integration-readiness.md is the
+runway). Handoff package staged this session; explicit order-lift question
+put to the owner.
