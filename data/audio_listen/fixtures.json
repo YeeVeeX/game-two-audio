@@ -19,7 +19,7 @@
       "type": "file",
       "dur_s": 4.0,
       "path": "stems/msfx_drone_4s.wav",
-      "sha256": "ca9fa9a939cad8d165745fcdd7dace8ee891f7d39fac316d1f206a672d85fec3",
+      "sha256": "74175c1650ff1af007e9ff48483151c4205b65b01fdfb067e9f94a4d31607794",
       "_what": "drone_low sfx: dark detuned-saw pair on A2 (+/-4 cents) over E2 + A1, slow tremolo. Ambient band: sits below everything (KB)."
     },
     "msfx_stinger_2s": {
