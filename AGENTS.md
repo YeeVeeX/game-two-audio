@@ -37,7 +37,40 @@ reconciliation `drafts/_council-reconciliation-adr1.md`). Evidence:
 7. **Per-tick allocation discipline**: zero Ruby allocations on the steady-state audio
    path; cue tables parse at load; `GC.stat` deltas watched in the perf harness.
 
-## Current cycle: M4 — owner-listen feedback + headroom closure
+## Current cycle: M5 — integration (owner order LIFTED 2026-08-18)
+
+**The audio order is lifted** — owner, in writing, 2026-08-18: "audio order
+lifted" (verbatim + context: `drafts/_m4-owner-scores.md`). Integration
+proceeds from `docs/integration-readiness.md` (the prepared runway). M4b
+closed same day: `drafts/_m4b-verdict-20260818.md`.
+
+M4b outcome (2026-08-18): live Reaper bridge co-processing loop shipped
+(bridge client + reaper:setup + per-slot reaper:render + selective import);
+**all seven listen slots are owner VST renders** (bridge loop, one session);
+full-set listen sha set pinned (cues da2a62a1, duck ec8303fe, music
+d644b61e, churn 7229d606, spatial f5d13763, ui_cap cf2e0d99); gate md5 set
+UNCHANGED all session; owner global verdict "they sound good" — the 17
+per-box scores stay open BY OWNER CHOICE with **in-game listening as the
+presentation instrument of record**; production handoff staged + verified
+(`handoff/audio-v1/`, seven 24-bit originals + provenance manifest).
+
+M5 scope:
+1. **Assets lane**: game-two-assets ingests `handoff/audio-v1` through its
+   exports/manifest law (its seat's work; LUFS measured at its gate — never
+   here). The listen-stems lane stays evaluation-only, unchanged.
+2. **Engine integration** (game-two seat, per integration-readiness.md):
+   scope-doc update there, ~15-line adapter, boot/teardown order, real-device
+   smoke, gate re-pin on the integration machine, the clock-domain anchor
+   measurement, music_set_state derivation decision (recommendation on file:
+   audio-side, data-driven), and an initial ~6-event cue mapping chosen with
+   the owner (full 44-row table decided iteratively after the first in-game
+   listen).
+3. **Presentation closure**: the first in-game listen is the verdict of
+   record for the open boxes + the −10 dB sfx balance question (headroom
+   ceiling held mechanically all session; worst peak −11.82 dBFS).
+4. Foreign-dirty files (PARKING_LOT.md, docs/integration-readiness.md —
+   another session's uncommitted edits): their PARKED wording is superseded
+   by the trail record; edit the status lines only after that work lands.
 
 M3 closed 2026-08-19: replay corpus 2 → 6 (per_category_caps enforced +
 rendered — in-category steal past a global-best decoy, 7/8 coherent proof; duck
@@ -54,7 +87,7 @@ overlap issues NO fade (extension moves duck_end only); with sum(caps) ==
 max_voices the global steal path is unreachable for capped categories;
 collapse-ratio numerators are leakage floors — they don't scale with staging.
 
-M4 scope + status (2026-08-19):
+M4 scope + status (2026-08-19) — CLOSED except where moved to M5 above:
 1. **Owner listen** (presentation axis, Rule 2's second score — accuracy is
    green, presentation is UNSCORED): take 1 (sine fixtures) falsified by the
    owner's ears ("constant hum"); take 2 (musical listen track,
@@ -85,14 +118,16 @@ M4 scope + status (2026-08-19):
 4. Whatever the listen sheet surfaces (steal transient, re-attack feel,
    center-vs-side pan loudness are the flagged candidates; pre-thought fix
    designs live in `drafts/_next-session-m4-listen-closure.txt` §2).
-5. **Integration stays PARKED** on owner order; when it lifts, work from
-   `docs/integration-readiness.md` (music_set_state derivation decision +
-   real-device clock-domain measurement are its two open design items).
+5. ~~**Integration stays PARKED** on owner order~~ — **order lifted
+   2026-08-18** (see M5 block; `docs/integration-readiness.md` is now the
+   active runway; its two open design items move to M5).
 
-**OUT of scope (→ PARKING_LOT.md):** integration into game-two (gated on owner
-order); HRTF/binaural; audio occlusion raycasts; runtime asset hot-reload;
-network-synced audio; LUFS metering in the gate (decide at asset handshake);
-distance-attenuation DSP (payload plumbed; needs a cue-table field + replay).
+**OUT of scope (→ PARKING_LOT.md):** HRTF/binaural; audio occlusion
+raycasts; runtime asset hot-reload; network-synced audio; LUFS metering in
+the gate (lives in the assets pipeline); distance-attenuation DSP (payload
+plumbed; needs a cue-table field + replay). Integration is NO LONGER parked
+(order lifted 2026-08-18; PARKING_LOT.md line pending edit — foreign-dirty
+file).
 
 ## Environment (mirrors game-two, verified there 2026-08-09)
 
@@ -128,9 +163,10 @@ distance-attenuation DSP (payload plumbed; needs a cue-table field + replay).
 
 ## Coordination contract
 
-- **game-two** (read-only reference): event names/payloads must match its
-  `EventBus::EVENTS` whitelist at integration time; integration itself is PARKED until
-  the owner lifts the audio order. Never write into that repo from here.
+- **game-two** (integration target; order lifted 2026-08-18): event
+  names/payloads must match its `EventBus::EVENTS` whitelist; integration
+  work lands via that repo's seat per `docs/integration-readiness.md`.
+  Never write into that repo from here — coordination through its seat.
 - **game-two-assets**: runtime audio files will arrive via its `exports/` pipeline
   (formats/loudness per `music-production/game-audio-pipeline.md` LUFS targets). Until
   then, spike audio = generated tones/synthesis (no copyrighted audio in this repo,

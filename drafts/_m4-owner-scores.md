@@ -139,3 +139,18 @@ asset need — fired with this request); hearing them in game requires the
 parked integration order to lift (docs/integration-readiness.md is the
 runway). Handoff package staged this session; explicit order-lift question
 put to the owner.
+
+## OWNER ORDER: audio integration order LIFTED (verbatim, 2026-08-18)
+
+Asked explicitly whether the standing order ("audio is OUT of game-two") is
+lifted for integration. Owner, in writing:
+
+> audio order lifted
+
+Effect: the PARKING_LOT integration trigger ("owner lifts the audio order")
+has FIRED, in writing, this session. Integration proceeds per
+`docs/integration-readiness.md`. PARKING_LOT.md and
+integration-readiness.md status lines carry uncommitted foreign edits
+(another session's work sits in those files), so their PARKED wording is
+superseded by THIS record and AGENTS.md until that session's changes land
+and the lines can be edited cleanly.
