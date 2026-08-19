@@ -2,4 +2,7 @@
 /captures/
 *.wav
 !spike/fixtures/*.wav
+!data/audio_listen/stems/*.wav
+/data/audio_listen/reaper/Backups/
+/data/audio_listen/reaper/Media/
 /.bundle/

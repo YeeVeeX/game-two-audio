@@ -40,20 +40,30 @@ module GTA
 
     module_function
 
-    # Imports every file in <listen_dir>/inbox. Returns
-    # { accepted: ["slot", ...], refused: [[basename, reason], ...],
+    # Imports every top-level file in <listen_dir>/inbox by default. A bridge
+    # render can select only_slots and pass explicit nested sources (fresh
+    # per-render run dirs avoid ever overwriting the owner's inbox files).
+    # Returns { accepted: ["slot", ...], refused: [[basename, reason], ...],
     #   noted: [basename, ...] }. Writes stems/ + fixtures.json on accept.
-    def run!(listen_dir, io: $stdout)
+    def run!(listen_dir, io: $stdout, only_slots: nil, sources: nil)
       manifest_path = File.join(listen_dir, "fixtures.json")
       manifest = JSON.parse(File.read(manifest_path))
       slots = manifest.fetch("tones")
+      requested = only_slots&.map(&:to_s)&.uniq
+      invalid = requested&.reject { |slot| slots.key?(slot) } || []
+      raise ArgumentError, "unknown requested slot(s): #{invalid.join(', ')}" unless invalid.empty?
       cfg = JSON.parse(File.read(File.join(listen_dir, "import.json")))
       sr = JSON.parse(File.read(File.join(listen_dir, "engine.json"))).fetch("sample_rate")
 
       inbox = File.join(listen_dir, "inbox")
-      files = File.directory?(inbox) ? Dir[File.join(inbox, "*")].sort : []
-      io.puts "stems:import — inbox: #{inbox}"
+      files = if sources
+                sources.values.map { |p| File.expand_path(p) }.sort
+              else
+                File.directory?(inbox) ? Dir[File.join(inbox, "*")].sort : []
+              end
+      io.puts "stems:import — #{sources ? 'explicit render source(s)' : "inbox: #{inbox}"}"
       result = { accepted: [], refused: [], noted: [] }
+      seen_requested = []
       io.puts "  (empty — render stems there as <slot>.wav)" if files.empty?
 
       files.each do |path|
@@ -69,6 +79,12 @@ module GTA
           io.puts "  #{base}: REFUSED — no slot named #{slot.inspect}. Valid slots: #{slots.keys.join(', ')}. File left in inbox."
           next
         end
+        if requested && !requested.include?(slot)
+          result[:noted] << base
+          io.puts "  #{base}: known slot, not requested in this import — left in place"
+          next
+        end
+        seen_requested << slot
         begin
           import_one(path, slot, slots, cfg, listen_dir, sr, io)
           result[:accepted] << slot
@@ -76,6 +92,11 @@ module GTA
           result[:refused] << [base, e.message]
           io.puts "  #{slot}: REFUSED — #{e.message} File left in inbox."
         end
+      end
+
+      (requested.to_a - seen_requested).each do |slot|
+        result[:refused] << ["#{slot}.wav", "requested file missing"]
+        io.puts "  #{slot}: REFUSED — requested render file is missing. No manifest change for this slot."
       end
 
       unless result[:accepted].empty?

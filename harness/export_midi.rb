@@ -68,6 +68,28 @@ module GTA
       [0xFF, type].pack("CC") + vlq(payload.bytesize) + payload.b
     end
 
+    # Canonical note-event mapping shared by SMF export AND the live Reaper
+    # bridge project builder. Keeping it here prevents the committed .mid
+    # scaffolds from drifting from bridge-created MIDI items.
+    def fixture_note_events(spec)
+      notes = spec.fetch("notes").map do |n|
+        pitch = n["wave"] == "noise" ? 36 : freq_to_note(n.fetch("freq_hz"))
+        on = (n.fetch("t") * TICKS_PER_SECOND).round
+        off = ((n.fetch("t") + n.fetch("dur")) * TICKS_PER_SECOND).round
+        { pitch: pitch, on: on, off: [off, on + 1].max, vel: amp_to_velocity(n.fetch("amp")), src: n }
+      end
+      # Clip same-pitch overlaps: for each pitch, note-off may not reach the
+      # next note-on of the same pitch (same-channel overlap is ambiguous on
+      # hardware gates and in some VST instruments).
+      notes.group_by { |n| n[:pitch] }.each_value do |group|
+        sorted = group.sort_by { |n| n[:on] }
+        sorted.each_cons(2) do |a, b|
+          a[:off] = [b[:on] - 1, a[:on] + 1].max if a[:off] >= b[:on]
+        end
+      end
+      notes
+    end
+
     def fixture_to_smf(name, spec)
       # events: [tick, order, bytes] — order sorts offs (0) before ons (2),
       # markers (1) between, at equal ticks.
@@ -76,21 +98,7 @@ module GTA
       events << [0, 1, meta(0x51, [500_000].pack("N")[1, 3])] # 120 bpm
       events << [0, 1, meta(0x01, "placeholder composition; authoritative params in data/audio_listen/fixtures.json")]
 
-      # Clip same-pitch overlaps: for each pitch, note-off may not reach the
-      # next note-on of the same pitch.
-      notes = spec.fetch("notes").map do |n|
-        pitch = n["wave"] == "noise" ? 36 : freq_to_note(n.fetch("freq_hz"))
-        on = (n.fetch("t") * TICKS_PER_SECOND).round
-        off = ((n.fetch("t") + n.fetch("dur")) * TICKS_PER_SECOND).round
-        { pitch: pitch, on: on, off: [off, on + 1].max, vel: amp_to_velocity(n.fetch("amp")), src: n }
-      end
-      notes.group_by { |n| n[:pitch] }.each_value do |group|
-        sorted = group.sort_by { |n| n[:on] }
-        sorted.each_cons(2) do |a, b|
-          a[:off] = [b[:on] - 1, a[:on] + 1].max if a[:off] >= b[:on]
-        end
-      end
-
+      notes = fixture_note_events(spec)
       notes.each do |n|
         src = n[:src]
         marks = []

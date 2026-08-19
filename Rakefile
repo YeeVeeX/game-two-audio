@@ -22,6 +22,21 @@ task :listen do
   sh "ruby -Isrc -Iharness harness/run_listen.rb #{replays.join(' ')}"
 end
 
+namespace :reaper do
+  desc "One-time: build the owner listen project through the live Reaper bridge (refuses to overwrite owner_project.rpp)"
+  task :setup do
+    sh "ruby -Isrc -Iharness harness/reaper_setup_listen.rb"
+  end
+
+  desc "Owner loop: render/import ONE slot (SLOT=<mechanical id>); VERIFY=1 renders without manifest/stem changes"
+  task :render do
+    slot = ENV["SLOT"] or abort "usage: rake reaper:render SLOT=mstem_calm_6s [VERIFY=1]"
+    args = ["ruby", "-Isrc", "-Iharness", "harness/render_reaper_slot.rb", slot]
+    args << "--verify-only" if ENV["VERIFY"] == "1"
+    sh(*args)
+  end
+end
+
 namespace :stems do
   desc "Owner production loop: import inbox renders (data/audio_listen/inbox) -> validated stems + manifest sha pins + listen re-render"
   task :import do

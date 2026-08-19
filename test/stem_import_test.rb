@@ -65,9 +65,9 @@ class StemImportTest < Minitest::Test
     File.binwrite(File.join(@inbox, name), bytes)
   end
 
-  def run_import
+  def run_import(only_slots: nil, sources: nil)
     io = StringIO.new
-    result = GTA::StemImport.run!(@dir, io: io)
+    result = GTA::StemImport.run!(@dir, io: io, only_slots: only_slots, sources: sources)
     [result, io.string]
   end
 
@@ -247,5 +247,48 @@ class StemImportTest < Minitest::Test
     assert_equal 1, result[:refused].size
     assert_equal "file", manifest_entry("slot_a")["type"]
     assert_equal "notes", manifest_entry("slot_b")["type"]
+  end
+
+  def test_selected_import_ignores_other_known_slots
+    drop("slot_a.wav", wav_bytes(tag: 1, channels: 1, bits: 16,
+                                 payload: Array.new(SLOT_A_FRAMES, 250).pack("s<*")))
+    drop("slot_b.wav", wav_bytes(tag: 1, channels: 1, bits: 16,
+                                 payload: Array.new(SLOT_B_FRAMES, 500).pack("s<*")))
+    result, out = run_import(only_slots: ["slot_a"])
+    assert_equal ["slot_a"], result[:accepted]
+    assert_equal ["slot_b.wav"], result[:noted]
+    assert_empty result[:refused]
+    assert_includes out, "known slot, not requested"
+    assert_equal "file", manifest_entry("slot_a")["type"]
+    assert_equal "notes", manifest_entry("slot_b")["type"]
+    refute File.exist?(File.join(@dir, "stems", "slot_b.wav"))
+  end
+
+  def test_explicit_nested_source_imports_one_fresh_revision
+    run_dir = File.join(@inbox, "runs", "r1")
+    FileUtils.mkdir_p(run_dir)
+    source = File.join(run_dir, "slot_b.wav")
+    File.binwrite(source, wav_bytes(tag: 1, channels: 1, bits: 16,
+                                    payload: Array.new(SLOT_B_FRAMES, 700).pack("s<*")))
+    result, out = run_import(only_slots: ["slot_b"], sources: { "slot_b" => source })
+    assert_equal ["slot_b"], result[:accepted]
+    assert_empty result[:refused]
+    assert_includes out, "explicit render source(s)"
+    assert File.exist?(source), "fresh inbox revision is never deleted"
+    assert_equal "file", manifest_entry("slot_b")["type"]
+    assert_equal "notes", manifest_entry("slot_a")["type"]
+  end
+
+  def test_requested_missing_file_refuses_without_manifest_change
+    result, out = run_import(only_slots: ["slot_a"])
+    assert_empty result[:accepted]
+    assert_equal [["slot_a.wav", "requested file missing"]], result[:refused]
+    assert_includes out, "requested render file is missing"
+    assert_equal "notes", manifest_entry("slot_a")["type"]
+  end
+
+  def test_unknown_requested_slot_is_programmer_error
+    error = assert_raises(ArgumentError) { run_import(only_slots: ["slot_z"]) }
+    assert_includes error.message, "unknown requested slot(s): slot_z"
   end
 end
