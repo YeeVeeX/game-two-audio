@@ -16,56 +16,11 @@
       "_what": "combat state music: driving eighth-note square bass riff (Am), offbeat saw power-chord stabs, throbbing A1 pulse, bar-3 riser. Loops at 3 bars."
     },
     "msfx_drone_4s": {
-      "type": "notes",
+      "type": "file",
       "dur_s": 4.0,
-      "gain": 1.0,
-      "_what": "drone_low sfx: dark detuned-saw pair on A2 (+/-4 cents) over E2 + A1, slow tremolo. Ambient band: sits below everything (KB).",
-      "notes": [
-        {
-          "t": 0.0,
-          "dur": 4.0,
-          "freq_hz": 109.746,
-          "amp": 0.12,
-          "wave": "saw",
-          "attack_s": 0.15,
-          "release_s": 0.35,
-          "trem": {
-            "rate_hz": 0.4,
-            "depth": 0.25
-          }
-        },
-        {
-          "t": 0.0,
-          "dur": 4.0,
-          "freq_hz": 110.254,
-          "amp": 0.12,
-          "wave": "saw",
-          "attack_s": 0.15,
-          "release_s": 0.35,
-          "trem": {
-            "rate_hz": 0.4,
-            "depth": 0.25
-          }
-        },
-        {
-          "t": 0.0,
-          "dur": 4.0,
-          "freq_hz": 82.407,
-          "amp": 0.08,
-          "wave": "sine",
-          "attack_s": 0.15,
-          "release_s": 0.35
-        },
-        {
-          "t": 0.0,
-          "dur": 4.0,
-          "freq_hz": 55.0,
-          "amp": 0.06,
-          "wave": "sine",
-          "attack_s": 0.15,
-          "release_s": 0.35
-        }
-      ]
+      "path": "stems/msfx_drone_4s.wav",
+      "sha256": "ca9fa9a939cad8d165745fcdd7dace8ee891f7d39fac316d1f206a672d85fec3",
+      "_what": "drone_low sfx: dark detuned-saw pair on A2 (+/-4 cents) over E2 + A1, slow tremolo. Ambient band: sits below everything (KB)."
     },
     "msfx_stinger_2s": {
       "type": "notes",
