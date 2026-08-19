@@ -23,75 +23,11 @@
       "_what": "drone_low sfx: dark detuned-saw pair on A2 (+/-4 cents) over E2 + A1, slow tremolo. Ambient band: sits below everything (KB)."
     },
     "msfx_stinger_2s": {
-      "type": "notes",
+      "type": "file",
       "dur_s": 2.0,
-      "gain": 1.0,
-      "_what": "boss1_spawn stinger: noise impact + pitch-drop hit (A3->A2) + decaying Am saw swell + high E5 tail. SFX band: must cut above the music bed (KB).",
-      "notes": [
-        {
-          "t": 0.0,
-          "dur": 0.14,
-          "freq_hz": 1.0,
-          "amp": 0.24,
-          "wave": "noise",
-          "seed": 11,
-          "attack_s": 0.002,
-          "decay_tau_s": 0.035,
-          "release_s": 0.04
-        },
-        {
-          "t": 0.0,
-          "dur": 0.4,
-          "freq_hz": 220.0,
-          "glide_to_hz": 110.0,
-          "glide_s": 0.09,
-          "amp": 0.4,
-          "wave": "sine",
-          "attack_s": 0.002,
-          "decay_tau_s": 0.12,
-          "release_s": 0.08
-        },
-        {
-          "t": 0.02,
-          "dur": 1.9,
-          "freq_hz": 220.0,
-          "amp": 0.13,
-          "wave": "saw",
-          "attack_s": 0.012,
-          "decay_tau_s": 0.55,
-          "release_s": 0.45
-        },
-        {
-          "t": 0.02,
-          "dur": 1.9,
-          "freq_hz": 261.626,
-          "amp": 0.11,
-          "wave": "saw",
-          "attack_s": 0.012,
-          "decay_tau_s": 0.55,
-          "release_s": 0.45
-        },
-        {
-          "t": 0.02,
-          "dur": 1.9,
-          "freq_hz": 329.628,
-          "amp": 0.1,
-          "wave": "saw",
-          "attack_s": 0.012,
-          "decay_tau_s": 0.55,
-          "release_s": 0.45
-        },
-        {
-          "t": 0.02,
-          "dur": 0.8,
-          "freq_hz": 659.255,
-          "amp": 0.07,
-          "wave": "sine",
-          "attack_s": 0.005,
-          "decay_tau_s": 0.2,
-          "release_s": 0.2
-        }
-      ]
+      "path": "stems/msfx_stinger_2s.wav",
+      "sha256": "0b1c8fef89a555b484831ba1419c017e8796b35f0f6f2342aecf1ee4407ebdf4",
+      "_what": "boss1_spawn stinger: noise impact + pitch-drop hit (A3->A2) + decaying Am saw swell + high E5 tail. SFX band: must cut above the music bed (KB)."
     },
     "msfx_swarmpip_4s": {
       "type": "notes",
