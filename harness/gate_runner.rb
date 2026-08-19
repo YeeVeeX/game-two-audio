@@ -66,7 +66,8 @@ module GTA
 
         name = @replay.fetch("name")
         FileUtils.mkdir_p(@out_dir)
-        GTA::Wav.write_f32(File.join(@out_dir, "#{name}.wav"), bytes_a, channels: @channels, sample_rate: @sr)
+        wav_path = File.join(@out_dir, "#{name}.wav")
+        GTA::Wav.write_f32(wav_path, bytes_a, channels: @channels, sample_rate: @sr)
         log_a.write(File.join(@out_dir, "#{name}.log"))
 
         checks = []
@@ -79,7 +80,12 @@ module GTA
         (want(expectations, "log") || []).each { |e| checks << check_log(log_a, e) }
         (want(expectations, "peak") || []).each { |e| checks << check_peak(samples, e) }
 
-        Result.new(name, log_a.md5, Digest::SHA256.hexdigest(bytes_a),
+        # wav_sha256 hashes the WAV FILE on disk (header + payload) — the
+        # externally verifiable artifact identity. Hashing only the raw
+        # sample buffer here while other tooling hashed the file produced
+        # two hash domains for one identical render (M4b false alarm:
+        # "determinism break" that was byte-identical audio). One domain.
+        Result.new(name, log_a.md5, Digest::SHA256.file(wav_path).hexdigest,
                    bytes_a == bytes_b, log_a.md5 == log_b.md5, checks, diag, metrics(samples))
       end
 
