@@ -1,5 +1,16 @@
 Session goal: game-two M5a - audio integration phase 1: scope lift, boot
-seam, real-device smoke, event adapter, first in-game listen. Paste this
+seam, real-device smoke, event adapter, first in-game listen.
+
+TIMING GATE (added 2026-08-18 after game-two's receipt,
+from-game-two-re-audio-order-lifted.md): game-two QUEUED this integration
+behind its own v18 sequencing law - "nothing new starts until v18 is
+fun-verified (the SEVENTEENTH)", an owner-paced ritual (0/8 at receipt
+time). Paste this prompt into the game-two seat ONLY AFTER that trigger
+adjudicates. Their scope docs are ALREADY updated (their Ask-1 receipt:
+AGENTS.md ban -> lift recorded; PARKING_LOT.md queued-integration entry) -
+Phase 1 below therefore VERIFIES the lift rather than performing it.
+
+Paste this
 into the game-two seat's chat (resume its newest session, or a fresh one -
 one writing seat per workspace). OWNER-PRESENT for: the device ear-check,
 the v1 cue-mapping choice, and the in-game listen. Work in
@@ -59,11 +70,11 @@ LOAD FIRST (in order):
 
 PLAN (each phase commits separately in YOUR repo; [OWNER] = owner moment):
 
-Phase 1 - scope lift (small, unblocks everything):
-  Update your AGENTS.md: audio integration IN scope (owner order lifted
-  2026-08-18, provenance above); library = ../game-two-audio (consumption
-  mechanism = Phase 2's D1); contract pointer (pinned commit); the five
-  library laws digest from LOAD-FIRST #4. Commit.
+Phase 1 - scope verification (game-two committed the lift already, per its
+  Ask-1 receipt): confirm your AGENTS.md + PARKING_LOT.md carry the lift,
+  the trail citation, and the contract pointer; fix only what is missing or
+  drifted (e.g., add the five library-laws digest from LOAD-FIRST #4 if
+  absent). Commit only if a gap existed.
 
 Phase 2 - boot seam + device smoke [OWNER ear-check]:
   D1 (decide and defend in one commit paragraph): how game-two loads the

@@ -58,8 +58,13 @@ M5 scope:
 1. **Assets lane**: game-two-assets ingests `handoff/audio-v1` through its
    exports/manifest law (its seat's work; LUFS measured at its gate — never
    here). The listen-stems lane stays evaluation-only, unchanged.
-2. **Engine integration** (game-two seat, per integration-readiness.md):
-   scope-doc update there, ~15-line adapter, boot/teardown order, real-device
+2. **Engine integration** (game-two seat, per integration-readiness.md) —
+   **QUEUED by game-two's dev of record behind its v18 fun-verification
+   ritual ("the SEVENTEENTH", owner-paced; receipt 2026-08-18, archived in
+   mail done/)**; its scope docs already carry the lift. When the trigger
+   adjudicates (spark-up ready:
+   `drafts/_next-session-m5a-game-two-integration.txt`): scope-doc
+   verification, ~15-line adapter, boot/teardown order, real-device
    smoke, gate re-pin on the integration machine, the clock-domain anchor
    measurement, music_set_state derivation decision (recommendation on file:
    audio-side, data-driven), and an initial ~6-event cue mapping chosen with
