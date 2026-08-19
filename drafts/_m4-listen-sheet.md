@@ -1,10 +1,15 @@
 # M4 owner listen sheet — musical listen track (presentation axis, take 2)
 
-**Status: WAITING FOR OWNER LISTEN.** Take 1 (sine fixtures,
-`drafts/_m3-listen-sheet.md`) was falsified as listen material by the owner
-(2026-08-19): raw tones swamped the behaviors. This sheet scores the SAME six
-behaviors on the **musical listen track** — same replays, same choreography,
-same timestamps (mirror law, `test/listen_track_test.rb`), musical material.
+**Status: READY FOR OWNER SCORING — material is 100% owner VST stems
+(2026-08-18 bridge-loop session).** Take 1 (sine fixtures,
+`drafts/_m3-listen-sheet.md`) was falsified as listen material by the owner;
+take 2 ran on synthesis placeholders (approved in direction, unscored). This
+pass scores the SAME six behaviors on **your own renders** — same replays,
+same choreography, same timestamps (mirror law, `test/listen_track_test.rb`),
+all seven slots owner-designed (calm/combat beds, drone take 2, stinger,
+swarmpip, confirm, ping). Listen sha set at scoring time: cues `da2a62a1`,
+duck `ec8303fe`, music `d644b61e`, churn `7229d606`, spatial `f5d13763`,
+ui_cap `cf2e0d99`.
 
 ## How to play
 
@@ -12,30 +17,36 @@ same timestamps (mirror law, `test/listen_track_test.rb`), musical material.
   (bit-identical; hashes in the M4 verdict once cut).
 - Format: **stereo float32 WAV, 48 kHz** — Audacity, VLC, foobar2000; stock
   Windows Media Player may refuse f32. Headphones for `replay_spatial`.
-- Renders sit conservative under the −1 dBFS ceiling (peaks ≈ −10 to −15
+- Renders sit conservative under the −1 dBFS ceiling (peaks ≈ −12 to −22
   dBFS): set your playback volume comfortably and keep it FIXED across files
-  — two boxes are balance judgments.
-- The material: calm music = warm slow pad (A minor, 3 chords + soft top
-  notes); combat music = driving bass riff with stabs; drone sfx = dark low
-  drone; boss stinger = impact hit + falling pitch + decaying swell; UI =
-  bell plucks/pings; the swarm = soft bell-pip rain. All placeholder
-  synthesis, all in A minor at 120 bpm — real stems come later (Reaper spec:
-  `docs/listen-track.md`). Judge the **behaviors**; prose-note any material
-  taste too, it feeds the Reaper stem specs.
+  — several boxes are balance judgments.
+- **Note your playback chain when scoring** (HS7/HS8S monitors vs
+  headphones): the room-calibration rig exists but no correction is active,
+  so low-frequency balance judgments (drone, combat bass, 55–220 Hz) carry
+  the room's fingerprint on monitors. For the two balance boxes, a quick
+  second pass on headphones is a cheap cross-check — if the chains disagree,
+  we suspect the room, not the mix. Headphones for `replay_spatial` always.
+- The material is YOURS now — judge both axes: the **behaviors** (ducks,
+  steals, crossfades, timing) and how your stems sit in the game mix
+  (levels, masking, fatigue). Prose-note anything; verbatim capture is the
+  law.
 - Score 1–5 per box (1 = broken/unpleasant, 3 = acceptable, 5 = right).
   A box under 3 anywhere = presentation gate fails; the fix lands with a
   regression guard.
 
-## Mechanical metrics (measured, 2026-08-19 listen run)
+## Mechanical metrics (measured 2026-08-18, all-owner-stems render)
 
 | replay | peak (dBFS) | rms (dBFS) | crest | samples > 1.0 |
 |---|---|---|---|---|
-| replay_cues | −11.21 | −24.67 | 13.46 dB | 0 |
-| replay_duck_overlap | −12.38 | −25.96 | 13.58 dB | 0 |
-| replay_music | −11.39 | −26.65 | 15.26 dB | 0 |
-| replay_music_churn | −15.10 | −28.14 | 13.04 dB | 0 |
-| replay_spatial | −12.03 | −24.63 | 12.60 dB | 0 |
-| replay_ui_cap | −10.21 | −23.42 | 13.21 dB | 0 |
+| replay_cues | −17.85 | −34.08 | 16.23 dB | 0 |
+| replay_duck_overlap | −21.58 | −36.96 | 15.38 dB | 0 |
+| replay_music | −17.24 | −30.22 | 12.97 dB | 0 |
+| replay_music_churn | −17.24 | −30.61 | 13.37 dB | 0 |
+| replay_spatial | −16.52 | −31.37 | 14.85 dB | 0 |
+| replay_ui_cap | −11.82 | −24.01 | 12.19 dB | 0 |
+
+(Synthesis-era table for comparison lives in git history; the owner material
+renders ~5 dB more conservative overall.)
 
 Bus staging is IDENTICAL to the gate corpus (music −6, sfx −10, ui −6 dB) —
 the standing question from M3 is still: **does sfx sit too quiet under the
