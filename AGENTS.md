@@ -64,15 +64,20 @@ M4 scope + status (2026-08-19):
    lands with a replay/expectation guard). Verbatim feedback trail:
    `drafts/_m4-owner-scores.md`. Mirror law pinned by
    `test/listen_track_test.rb`; gate corpus untouched (md5 set verified).
-2. **Owner production loop — live, growing**: roles pinned — **owner = ears +
-   sound design (Reaper/VST/analog); dev = ALL format/validation/render
-   automation and never scores presentation**. Built: `rake midi` (composition
-   → SMF scaffolds) + sha-pinned `type="file"` fixture import
-   (docs/listen-track.md). Next (M4b, spark-up
-   `drafts/_next-session-m4b-reaper-loop.txt`): Reaper project scaffold
-   sampled from the owner's REAL .rpp files (never fabricate the schema) +
-   `rake stems:import` inbox pipeline (format normalize → duration-exact →
-   auto-pin → auto listen render), then the interactive tweak loop.
+2. **Owner production loop — LIVE end-to-end, waiting on owner VST choices**:
+   roles pinned — **owner = ears + sound design (Reaper/VST/analog); dev = ALL
+   format/validation/render automation and never scores presentation**. Built:
+   `rake midi`; live Reaper-MCP bridge (the owner's installed auto-start Lua
+   server, no `.rpp` fabrication); `rake reaper:setup` → protected
+   `owner_project.rpp` + generated `scaffold.rpp`, 7 canonical MIDI items /
+   exact non-overlapping regions, disposable ReaSynth audition FX; per-slot
+   `rake reaper:render SLOT=<id>` → fresh never-overwritten inbox revision →
+   48 kHz/duration verification → selective sha-pinned import → auto listen
+   render; manual `rake stems:import` still handles batches. Real Reaper 7.79
+   proof: all-regions 7/7 exact and sandbox-imported; per-slot calm render
+   exact 288000 frames; production manifest/listen hashes untouched. Current
+   owner action: replace ReaSynths with chosen VSTs and tune while each region
+   loops; then import the first owner-designed revision.
 3. **Headroom closure**: the −1 dBFS ceiling holds mechanically; the open
    half is the balance question (does sfx sit too quiet at −10 dB?). Close
    with the owner's ears; a limiter stays out unless listening demands it
@@ -111,6 +116,13 @@ distance-attenuation DSP (payload plumbed; needs a cue-table field + replay).
   the owner's ears; peak ceiling + determinism still gate (docs/listen-track.md).
 - `rake midi` — export the listen compositions as SMF scaffolds →
   `data/audio_listen/midi/*.mid` (owner re-voices in Reaper/analog; deterministic).
+- `rake reaper:setup` — one-time live-bridge scaffold build; refuses to
+  overwrite `owner_project.rpp`; Reaper serializes + verifies WAV render config.
+- `rake reaper:render SLOT=<mechanical_id>` — fresh per-slot revision (never
+  overwrites inbox audio) → selective import → full listen re-render; `VERIFY=1`
+  proves the real render without changing the manifest/stems.
+- `rake stems:import` — manual/batch inbox validation, normalization, sha pin,
+  and listen render; inbox source files are reported and left in place.
 - swarmforge: `PATH="/c/Users/gabri/workspace/swarm-forge/.venv/Scripts:$PATH"
   swarmforge gauntlet --repo .` (test stage = rake, see swarmforge.toml).
 

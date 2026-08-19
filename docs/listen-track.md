@@ -57,7 +57,9 @@ third-party audio in this repo, ever; mechanical filenames):
 | `mui_confirm_200ms` | 0.200 s | UI confirm blip |
 | `mui_ping_1200ms` | 1.200 s | soft UI ping with tail (8 stack at 150 ms spacing) |
 
-Format: 48 kHz mono WAV PCM16. **Durations are load-bearing** — the replay
+Canonical imported format: 48 kHz mono WAV PCM16. The Reaper inbox may be
+mono/stereo PCM16, 24/32-bit integer, or float32; `rake stems:import`
+downmixes/converts it deterministically. **Durations are load-bearing** — the replay
 choreography (steal/duck/transition moments) rides on cue lengths;
 `test/listen_track_test.rb` fails on drift. Relative level bands follow KB
 `music-production/production-fundamentals.md` (Game Audio Targets, verified
@@ -76,12 +78,26 @@ round trip:
    velocity ≈ 127·√amp; wave/envelope/tremolo/glide/noise carried as text
    markers (params stay authoritative in the JSON). Detuned pairs collapse
    to one note + marker — re-create the detune on the instrument.
-2. Owner re-voices in Reaper (VSTs) or drives analog gear via MIDI/CV — KB
+2. **`rake reaper:setup`** (once) drives the already-installed Reaper-MCP
+   file bridge: backs up the open project; builds 7 named tracks, MIDI items
+   from the SAME canonical mapping as `rake midi`, and 7 exact non-overlapping
+   render regions; configures 120 bpm + all-regions `$region` render to the
+   inbox at 48 kHz mono; asks Reaper itself to serialize/verify WAV format;
+   adds disposable ReaSynth instruments; saves generated `scaffold.rpp` and
+   editable `owner_project.rpp`. It refuses if `owner_project.rpp` exists —
+   the owner's project is never overwritten. No `.rpp` internals are
+   fabricated; Reaper serializes every project file.
+3. Owner replaces each ReaSynth with a chosen VST and tweaks while its region
+   loops, or drives analog gear via MIDI/CV. KB
    `music-production/moog-dfam.md` §6 has game-audio patch recipes (Patch 3
-   "alien texture loop" fits the `msfx_drone_4s` slot directly); records/
-   renders to the spec above (48 kHz mono PCM16 WAV, exact slot duration).
-3. Render into `data/audio_listen/inbox/<slot>.wav` and run
-   **`rake stems:import`** (M4b). Per file it: refuses wrong sample rates
+   "alien texture loop" fits `msfx_drone_4s`). The bridge handles transport,
+   regions, saves, and render; the owner handles only sound design and ears.
+4. **`rake reaper:render SLOT=<slot>`** renders only the slot being tuned
+   (partial replacement is expected; untouched ReaSynth slots never become
+   stems). Every pass gets a fresh, never-overwritten revision under
+   `data/audio_listen/inbox/runs/<timestamp>-<slot>/<slot>.wav`; the bridge
+   restores canonical all-regions settings afterward, imports that exact
+   revision, and rebuilds the listen track. Per file the importer refuses wrong sample rates
    (engine.json is the authority) with the one-line Reaper fix; downmixes
    stereo (L+R)/2; converts 24-bit / 32-bit int / 32-bit float to PCM16
    (round + clamp; PCM16 passes through sample-exact); conforms duration to
@@ -95,7 +111,7 @@ round trip:
    (Manual path still works: drop under `stems/`, swap the manifest entry
    to `{ "type": "file", "dur_s": <slot>, "path": "stems/<slot>.wav",
    "sha256": "<pin>" }` yourself — same validations apply at load.)
-4. `rake listen` re-renders the six WAVs with the new material any time; the
+5. `rake listen` re-renders the six WAVs with the new material any time; the
    mirror law + peak ceiling + determinism all still gate. An accepted
    import legitimately moves that slot's listen shas (the M4 verdict pins
    the final set); a listen sha that moves WITHOUT an import or data commit
@@ -109,6 +125,8 @@ integration time; this track is only this repo's evaluation instrument.
 ## Commands
 
 ```
+rake reaper:setup  # one-time live-bridge project build; refuses owner overwrite
+rake reaper:render SLOT=mstem_calm_6s # fresh revision -> import + listen re-render
 rake listen        # render the 6 replays with musical fixtures -> tmp/listen/*.wav
 rake midi          # export placeholder compositions -> data/audio_listen/midi/*.mid
 rake stems:import  # inbox -> validated stems + manifest sha pins + listen re-render
