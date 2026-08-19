@@ -6,6 +6,28 @@ integration readiness. Dev agent is the **dev of record** (design calls are the 
 make and defend); owner is the tester. Nothing here touches game-two until the owner
 lifts the audio order.
 
+## Workspace family (game-two program) — synced 2026-08-19
+
+- **Peers:** Gabriel (owner-founder, es-CR) + Junior (co-creator,
+  pt-br) co-direct the whole program with equal creative standing —
+  design, code, audio/assets, ideas flow from BOTH; neither is the
+  other's worker. Owner overrides are law and get RECORDED (one line)
+  in the affected repo.
+- **Hub-and-spoke:** the game-two dev chat is the HUB; work in this
+  repo runs as bounded sessions under its own dev-of-record.
+  Cross-repo asks travel by SEAT MAIL (`~/.pi/agent/mail/<repo>/`),
+  digest-stamped (md5), answered with `RECEIPT:` lines. Deliveries
+  INTO game-two obey game-two's intake rules (owner-approved +
+  digest-grounded + docs-only banking).
+- **Seat-lease law:** no session ever writes into a sibling workspace
+  tree — read tool for reading, mail for asking, md5 as the
+  byte-identity arbiter.
+- **Sovereignty:** this block never overrides local law — this repo's
+  own invariants win inside this repo.
+- **Contract mirror:** AGENTS.md is ground truth; CLAUDE.md is a thin
+  pointer to it so Claude sessions load the same contract (AGENTS.md
+  wins on any disagreement).
+
 ## The decision (pinned)
 
 **miniaudio (engine API) bridged via ruby-ffi; Gosu audio bypassed entirely.**
