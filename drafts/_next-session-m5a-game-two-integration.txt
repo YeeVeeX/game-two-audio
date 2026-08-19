@@ -1,0 +1,177 @@
+Session goal: game-two M5a - audio integration phase 1: scope lift, boot
+seam, real-device smoke, event adapter, first in-game listen. Paste this
+into the game-two seat's chat (resume its newest session, or a fresh one -
+one writing seat per workspace). OWNER-PRESENT for: the device ear-check,
+the v1 cue-mapping choice, and the in-game listen. Work in
+C:/Users/gabri/workspace/game-two. The audio library repo
+(../game-two-audio) and the assets repo (../game-two-assets) are READ-ONLY
+from this seat - their seats are held; anything needed THERE travels by
+seat mail (~/.pi/agent/mail/<workspace>/from-game-two-<topic>.md).
+
+AUTHORITY + PROVENANCE (verify before acting; STOP on any md5 mismatch):
+- Owner order, in writing 2026-08-18: "audio order lifted" - recorded at
+  game-two-audio commit 69b73ec (drafts/_m4-owner-scores.md, md5
+  d740e9ad1377947e413f370e8522bb1b). Your seat mail
+  from-game-two-audio-audio-order-lifted.md carries the bounded asks -
+  read it first, md5-check the cited files against it.
+- THE INTEGRATION CONTRACT: docs/integration-readiness.md AT COMMIT 69b73ec
+  in ../game-two-audio. Read it via:
+    git -C ../game-two-audio show 69b73ec:docs/integration-readiness.md
+  (the WORKING-TREE copy carries another session's uncommitted edits - do
+  not trust it; the pinned commit is the spec). All five sections are the
+  spec: event table, payload conventions, boot/teardown order, asset
+  handshake, invariants.
+- Context/evidence: ../game-two-audio/drafts/_m4b-verdict-20260818.md (same
+  commit) - what the audio program shipped and pinned.
+
+REPO STATE (game-two side - measure, don't trust): this spark-up was
+written from the game-two-audio seat, which does NOT know your tree's
+current state. FIRST ACTION: read your own AGENTS.md; git status (expect
+possibly-foreign edits - touch nothing not yours); run your repo's check
+command; all green before anything else.
+Known from pinned cross-repo reads: World::EVENTS whitelist (44 symbols) in
+src/game/world.rb; Core::EventBus (emit -> queued -> #process once per
+frame) in src/core/event_bus.rb; Gosu window; SDL audio present.
+
+THE INTEGRATION MACHINE IS THIS MACHINE: game-two-audio's rake + rake gate
+ran green here 2026-08-18 (87 runs / 435 assertions; gate md5 set
+6e52c7cb / 306f5a41 / 34f9c630 / 22840322 / 39e7aec5 / 478e5a5c), so the
+contract's "re-pin hashes on the integration machine" acceptance item is
+ALREADY SATISFIED. Do NOT run game-two-audio's rake from this seat (held
+workspace); if you need a fresh verification, mail its seat.
+
+LOAD FIRST (in order):
+1. Your AGENTS.md - your laws + check command are ground truth here.
+2. The seat mail: ~/.pi/agent/mail/game-two/from-game-two-audio-audio-order-lifted.md
+3. The integration contract at the pinned commit (command above), ALL of it.
+4. ../game-two-audio/AGENTS.md - the library's laws travel with it. The five
+   that bind game-two code: (1) the audio thread never enters Ruby - no FFI
+   callbacks, control is poll + schedule-ahead; (2) audio is a pure event
+   sink - never feed audio state back into sim, saves, or netplay; (3) the
+   sim tick is the only clock you feed audio; (4) cue ids stay mechanical -
+   no fiction names anywhere; (5) runtime audio files come ONLY from
+   game-two-assets exports - the evaluation stems in
+   data/audio_listen/stems are FORBIDDEN at runtime (pinned lane law).
+5. src/game/world.rb + src/core/event_bus.rb - your own seam surfaces.
+6. Library surfaces, read-only: ../game-two-audio/src/gta/audio_system.rb
+   (handle_event/update/destroy), native.rb (FFI + DLL load), and note
+   render.rb exists for offline gates only - never used at runtime.
+
+PLAN (each phase commits separately in YOUR repo; [OWNER] = owner moment):
+
+Phase 1 - scope lift (small, unblocks everything):
+  Update your AGENTS.md: audio integration IN scope (owner order lifted
+  2026-08-18, provenance above); library = ../game-two-audio (consumption
+  mechanism = Phase 2's D1); contract pointer (pinned commit); the five
+  library laws digest from LOAD-FIRST #4. Commit.
+
+Phase 2 - boot seam + device smoke [OWNER ear-check]:
+  D1 (decide and defend in one commit paragraph): how game-two loads the
+  library. Audio-seat recommendation: $LOAD_PATH path dependency on
+  ../game-two-audio/src for the PoC (documented constant; same-machine
+  program pair; no gemspec exists today); package properly later only if
+  your repo's laws demand it. The DLL loads from
+  ../game-two-audio/vendor/miniaudio.dll - verify its sha256 against
+  ../game-two-audio/vendor/VERSION at boot and REFUSE on mismatch (the
+  vendor law travels with the DLL).
+  Wire boot EXACTLY per contract section 3:
+    ENV["SDL_AUDIODRIVER"] = "dummy" at process entry, BEFORE require
+    "gosu"; gta_engine_create(1, channels, sample_rate) (use_device=1, ONE
+    engine per process); AudioSystem.new immediately after; per frame: sim
+    update -> bus.process -> audio.update(world.frame); NO render loop (the
+    device thread pulls). Teardown: AudioSystem#destroy ->
+    gta_engine_destroy -> window close/exit.
+  Smoke = deterministic + ear: a dev flag/script that boots the game and
+  plays one generated-tone cue through the real device. PASS = log receipt
+  (engine created use_device=1; no SDL audio-init error; Gosu Sample#play
+  does not crash on the dummy backend; clean teardown, exit 0) + [OWNER]
+  confirms sound audibly. Save the log excerpt - it is a receipt.
+
+Phase 3 - adapter + v1 event mapping [OWNER chooses]:
+  The ~15-line adapter from contract sections 1-2: for each mapped event,
+  bus.subscribe(type) { |ev| audio.handle_event(world.frame, ev.type,
+  ev.payload) }; payload keys stay symbols; :pan -1..+1 only meaningful on
+  spatial cues; :distance is pool-steal metadata only. Unmapped events
+  return nil BY DESIGN (audio is a sink; today all 44 are unmapped and that
+  is correct). Adapter must not touch sim state - zero game-logic changes.
+  [OWNER] picks the v1 mapping (~6 events). Audio-seat shortlist to offer:
+    challenger_engaged -> stinger archetype + music -> combat
+    fight_resolved    -> music -> calm
+    zone_entered      -> music/ambience state candidate
+    banked (or tribute_paid) -> ui confirm archetype
+    seal_breached (or pack_wiped) -> stinger + duck archetype
+    drop_picked_up    -> ui confirm, secondary
+  Music state: contract recommendation (a) stands - an audio-side,
+  data-driven derivation (game-two publishes NOTHING new); the derivation
+  table lives in the audio repo's data.
+  CROSS-SEAT REALITY: cue-table entries + the derivation table live in
+  ../game-two-audio/data/ - that seat lands them behind its gate. Send ONE
+  mail: ~/.pi/agent/mail/game-two-audio/from-game-two-m5-cue-spec.md
+  containing the exact v1 mapping (event -> archetype -> payload fields
+  used -> music-state effect), so the audio seat can land cue entries + its
+  smoke replay and mail back the commit hash. Until that lands, prove the
+  adapter on the no-op path: fire real events, assert no raise and a quiet
+  frame loop (audio.update called every frame; no allocation explosion).
+
+Phase 4 - audio-files decision gate (lawful sources only):
+  (a) generated-tone fixtures - immediate, smoke-grade;
+  (b) game-two-assets exports of the owner's real sounds (their seat has
+      the ingest mail for game-two-audio/handoff/audio-v1; check progress,
+      md5-verify their manifest before consuming).
+  The evaluation stems are FORBIDDEN at runtime. If (b) is not ready, run
+  Phase 5's listen on tones and schedule the swap - the manifest-swap seam
+  is contract section 4 (cue "file" keys re-point; loader unchanged).
+
+Phase 5 - first in-game listen [OWNER] + clock measurement + close:
+  [OWNER] plays the game with audio v1. Capture EVERY word verbatim into
+  your drafts/ - this listen is the presentation verdict of record for the
+  whole audio program (the audio seat's 17 open listen-sheet boxes close
+  against it). Mail the verbatim + receipts back:
+  ~/.pi/agent/mail/game-two-audio/from-game-two-m5-listen-verdict.md.
+  Clock domains (contract section 3 open item): on the real device, log
+  engine frames (gta_engine_time_pcm at anchor points, control thread only)
+  vs tick*800 across >= 60 s of gameplay; record the drift numbers. If
+  drift exceeds one tick (800 frames), implement the contract's candidate
+  fix: anchor engine_time_at_tick0 at boot, schedule against anchor +
+  tick*800, re-anchor at music boundaries ONLY. Never read the engine clock
+  per-command; Process.clock_gettime allocates ~1 obj/call on this Ruby
+  build - keep instrumentation out of hot loops.
+  Close: verdict doc in your drafts/ (D1 decision, smoke log, mapping
+  chosen, drift numbers + decision, owner verbatim, mails sent, every sha);
+  AGENTS cycle block updated; explicit-path commits; git pull --ff-only
+  before every push.
+
+BUDGET (Rule 7): one session. Council = 0 (owner ears + the pinned contract
+outrank). No web research - the contract commit and repo sources are the
+evidence base. <= 2 mails to the audio seat (cue spec, listen verdict),
+<= 1 to the assets seat (status query only if their receipt is silent).
+Phases 1 and 3-adapter are solo-capable; 2, 3-choice, and 5 need the owner.
+If context runs low: compact-checkpoint skill, state into
+drafts/_m5a-checkpoint.md first (phase reached, D1 decision, mapping state,
+drift numbers so far).
+
+LAWS THAT BITE (this session's specific temptations):
+- Writing into ../game-two-audio or ../game-two-assets: their seats are
+  held - mail only, never route around. Copying evaluation stems into your
+  tree "just to hear something" is the cardinal violation of the lane law.
+- Fabricating library internals: everything needed is in the pinned
+  contract commit + readable source. A symbol you can't find = mail, not
+  memory.
+- DLL drift: load from the library's vendor path + verify sha; never vendor
+  a silent second copy; never rebuild (vendor-law ceremony lives in the
+  audio seat).
+- Ruby in the audio thread: no FFI callbacks of any kind; no per-frame
+  engine-clock reads; the sim tick is the only time source you feed audio.
+- Sim purity: the adapter is one-way. Any temptation to read audio state
+  into game logic, saves, or netplay = STOP and re-ask (pinned law 2).
+- Owner listen words: verbatim capture or it didn't happen; a machine never
+  scores presentation.
+- Foreign edits in your tree: not yours - explicit-path commits only; never
+  git add -A.
+
+STOP CONDITIONS: scope lifted in AGENTS + D1 decided + boot smoke green
+(log receipt + owner ear) + adapter landed with no-op-path proof + cue-spec
+mail sent + (in-game listen done on lawful audio OR explicitly deferred
+with the assets-exports gate named) + clock-drift numbers recorded with the
+anchor decision + verdict committed + return mails sent + pushed. Honest
+partials with named gaps beat invented completeness.
