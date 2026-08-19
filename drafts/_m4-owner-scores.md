@@ -91,3 +91,28 @@ back of each" — investigated mechanically same session; verdict recorded in
 the M4 verdict + explained to the owner (calm-pad sustained root drone —
 intended composition, with the churn silent-window ear-discriminator offered
 and a data knob named if it still bothers).
+
+## Owner feedback — M4b Reaper loop, calm slot session (verbatim, 2026-08-18)
+
+Context: live bridge loop running; owner replaced the disposable ReaSynth on
+track 1 (`mstem_calm_6s`) with their instrument of choice and tweaked it
+while the region looped, then ordered the render:
+
+> ok done I replaced vst on channel 1 for my sound of choice, already
+> tweaked it while it loops, haven't test the rest, we can render this calm
+> layer (maybe get different sound layers for reference or different rooms
+> inside the same area, etc
+
+Reading (dev of record): (1) first owner-designed stem enters the listen
+track — `mstem_calm_6s` rendered/imported (sha `5562a026e26f…`, stem peak
+−19.45 dBFS, rms −31.96 dBFS); remaining six slots stay on synthesis
+placeholders (partial replacement is the loop's expected state). (2) "different
+sound layers for reference" = A/B exploration — served by the existing
+revision retention (`inbox/runs/<stamp>-<slot>/`, every take kept, any
+retained revision re-pinnable on request). (3) "different rooms inside the
+same area" = runtime music/ambience variation per zone — that is
+music-state-machine schema + game-two zone events, i.e. the
+`music_set_state` derivation design item in docs/integration-readiness.md;
+stays PARKED with integration (recorded here so the idea isn't lost; the
+listen track's mirror law keeps exactly the two pinned music states).
+No presentation scores given yet; the 17 boxes remain open.
