@@ -8,9 +8,21 @@
 # Structural laws honored here:
 #  - The audio thread never enters Ruby: control is schedule-ahead absolute
 #    PCM frames + polling in update(); no callbacks anywhere.
-#  - All timing derives from (event stream, tick): frame = tick * tick_frames
-#    (tick_frames from data/audio/engine.json). The engine clock is never read
-#    on the control path.
+#  - All timing derives from (event stream, tick) through an ANCHORED linear
+#    map: frame = anchor_frame + (tick - anchor_tick) * tick_frames
+#    (tick_frames from data/audio/engine.json). The engine clock is read at
+#    exactly two anchor points — once at boot, and at a music transition
+#    that is about to schedule (integration-readiness §3) — never per-command,
+#    never per-tick. Rationale: on a real device the tick clock and the device
+#    clock are different oscillators (measured 2026-08-18 on the integration
+#    machine: ~800 frames/s linear drift, tick clock ~1.7% fast); a boot-time
+#    anchor alone cannot absorb a linear rate, so the anchor re-snaps at music
+#    boundaries when |engine_now - frame_for(tick)| exceeds one tick. In
+#    noDevice gate mode the harness advances the clock in lockstep (engine
+#    time == tick * tick_frames at every control moment), drift is 0 by
+#    construction and the anchor never moves — the gate corpus is mechanically
+#    inert to this path (md5 pins unchanged; replay_clock_drift skews the
+#    harness clock deterministically to exercise the re-anchor).
 #  - One pending fade slot per engine node (miniaudio fadeSettings): the duck
 #    release fade is issued from update() on the last tick before the hold
 #    expires — never pre-stacked with the attack. AudioData validates
@@ -50,6 +62,8 @@ module GTA
       @crossfade = @cfg.music["transition"]["crossfade_frames"]
 
       @io.frame = 0
+      @anchor_tick = 0
+      @anchor_frame = Native.gta_engine_time_pcm(@engine) # boot anchor (0 in noDevice)
       build_buses
       build_duck_states
       build_voice_pool
@@ -62,12 +76,12 @@ module GTA
 
     def handle_event(tick, name, payload = nil)
       key = name.is_a?(Symbol) ? name.name : name
-      frame = tick * @tf
-      @io.frame = frame
       if key == MUSIC_EVENT
-        request_music_state(frame, payload.fetch(:state))
+        request_music_state(tick, payload.fetch(:state))
         return nil
       end
+      frame = frame_for(tick)
+      @io.frame = frame
       cue_id = @cfg.events[key]
       return nil if cue_id.nil? # audio is a sink: unmapped events are not ours
       start_cue(frame, cue_id, payload)
@@ -76,7 +90,7 @@ module GTA
 
     # Call once per tick AFTER that tick's events, BEFORE advancing the engine.
     def update(tick)
-      frame = tick * @tf
+      frame = frame_for(tick)
       @io.frame = frame
 
       # 1. poll voice ends (never callbacks)
@@ -120,6 +134,12 @@ module GTA
 
     def music_pending?
       !@music_pending.nil?
+    end
+
+    # [anchor_tick, anchor_frame] of the tick->frame map (clock-domain anchor,
+    # integration-readiness §3). Diagnostic only — audio never feeds the sim.
+    def clock_anchor
+      [@anchor_tick, @anchor_frame]
     end
 
     # Destroy sounds before groups, children before master, groups before the
@@ -268,7 +288,7 @@ module GTA
 
     # -- music ----------------------------------------------------------------
 
-    def request_music_state(frame, state_name)
+    def request_music_state(tick, state_name)
       return if @music_pending          # ignored while pending (documented)
       return if state_name == @music_state
       states = @cfg.music["states"]
@@ -278,6 +298,8 @@ module GTA
       outgoing = states.fetch(@music_state)["stem"]
       return if incoming == outgoing
 
+      frame = reanchor(tick) # pinned anchor point: a transition is about to schedule
+      @io.frame = frame
       earliest = frame + @tf # schedule-ahead: at least one tick
       boundary = ((earliest + @bar_frames - 1) / @bar_frames) * @bar_frames
       fade = @crossfade
@@ -300,6 +322,37 @@ module GTA
     end
 
     # -- helpers --------------------------------------------------------------
+
+    # The anchored tick->frame map. Pure integer math — allocation-free on the
+    # steady-state path.
+    def frame_for(tick)
+      @anchor_frame + (tick - @anchor_tick) * @tf
+    end
+
+    # Clock-domain re-anchor (integration-readiness §3; measured 2026-08-18:
+    # linear ~800 frames/s on the integration machine). Called ONLY when a
+    # music transition is about to schedule — the one recurring anchor point.
+    # The read is a diagnostic-class Native call (never a logged command; a
+    # pure read mutates nothing, so recorder equivalence is untouched). The
+    # one-tick threshold is structural (contract text: "drift exceeds a
+    # tick"), sized by tick_frames from engine.json — it also absorbs the
+    # sub-tick sampling jitter of reading mid-tick on a live device. In
+    # noDevice lockstep the read returns frame_for(tick) exactly, drift is 0,
+    # and this is a no-op forever (gate md5s prove it). After a re-anchor the
+    # whole map shifts: in-flight duck windows (duck_end) keep their old-map
+    # absolute frames — update()'s release check tracks the new map, so a
+    # release lands where the DEVICE clock meets duck_end (uniformly late
+    # pre-correction, exact after; if the map jumped forward past duck_end,
+    # miniaudio evaluates the release fade as partially elapsed — graceful).
+    def reanchor(tick)
+      predicted = frame_for(tick)
+      now = Native.gta_engine_time_pcm(@engine)
+      return predicted unless (now - predicted).abs > @tf
+
+      @anchor_tick = tick
+      @anchor_frame = now
+      now
+    end
 
     def fixture_path(file_key)
       File.join(@fixture_dir, "#{file_key}.wav")

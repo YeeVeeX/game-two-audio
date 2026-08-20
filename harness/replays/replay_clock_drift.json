@@ -1,0 +1,43 @@
+{
+  "_comment": "Gate replay 7 (M5): clock-domain anchor falsification (integration-readiness section 3; game-two r2 mail measured ~800 frames/s LINEAR drift on the integration machine, tick clock ~1.7% fast). The harness 'clock' block advances the noDevice engine 400 frames/tick against tick_frames=800 - a deliberately brutal, fully deterministic skew so the tick-domain and clock-domain bar grids diverge by a full bar inside a cheap render (the real device rate is ~13 frames/tick; same mechanism, longer horizon). Mechanics WITH the anchor: at tick 130 the music request reads the engine clock (the one pinned recurring anchor point), sees drift -52000 (predicted 104000 vs actual 52000, |drift| > one tick), re-anchors to (130, 52000) and quantizes from the REAL clock -> boundary 96000, crossfade 96000..105600. COUNTERFACTUAL (pre-anchor code): predicted frame 104000 -> earliest 104800 -> boundary 192000, a full bar later - the goertzel window at [108000,120000) would still read 400 Hz (falsified live during development). Second request at tick 280 re-anchors again (predicted 172000 vs actual 112000, drift -60000) -> boundary 192000, crossfade 192000..201600, proving the anchor keeps absorbing a LINEAR rate (the boot-anchor-only design cannot). Log md5 pins the exact re-anchored schedule values forever.",
+  "name": "replay_clock_drift",
+  "clock": { "advance_frames_per_tick": 400 },
+  "duration_ticks": 560,
+  "events": [
+    [130, "music_set_state", { "state": "combat" }],
+    [280, "music_set_state", { "state": "calm" }]
+  ],
+  "expectations": {
+    "goertzel": [
+      { "_calm_before": "stem_a only, well before the first boundary",
+        "freq_hz": 400.0, "ch": 0, "from_frame": 40000, "frames": 8000, "min_amp": 0.1 },
+      { "freq_hz": 1000.0, "ch": 0, "from_frame": 40000, "frames": 8000, "max_amp": 0.01 },
+      { "_the_anchor_assertion": "crossfade done at 105600 on the RE-ANCHORED clock; without the re-anchor the transition sits at 192000 and this window still reads 400 Hz",
+        "freq_hz": 1000.0, "ch": 0, "from_frame": 108000, "frames": 12000, "min_amp": 0.1 },
+      { "freq_hz": 400.0, "ch": 0, "from_frame": 108000, "frames": 12000, "max_amp": 0.01 },
+      { "_second_transition": "back to calm; crossfade 192000..201600 under the SECOND re-anchor (linear drift keeps accruing after the first)",
+        "freq_hz": 400.0, "ch": 0, "from_frame": 204000, "frames": 16000, "min_amp": 0.1 },
+      { "freq_hz": 1000.0, "ch": 0, "from_frame": 204000, "frames": 16000, "max_amp": 0.01 }
+    ],
+    "rms": [
+      { "from_frame": 0, "frames": 4800, "min": 0.1 }
+    ],
+    "log": [
+      { "_two_transitions_fully_scheduled": "out-fade + in-fade per transition",
+        "op": "sound_fade_at", "count": 4 },
+      { "op": "sound_start_at", "count": 2 },
+      { "_deterministic_phase_on_reuse": "incoming stem seeks 0 per transition",
+        "op": "sound_seek", "count": 2 },
+      { "_outgoing_stop_plus_never_clear": "2 per transition",
+        "op": "sound_stop_at", "count": 4 },
+      { "_initial_stem_plus_two_incoming_starts": "",
+        "op": "sound_start", "count": 3 },
+      { "_no_ducks_in_this_replay": "",
+        "op": "group_fade_at", "count": 0 }
+    ],
+    "peak": [
+      { "_comment": "headroom policy: whole render under -1 dBFS sample peak",
+        "max_peak": 0.8913 }
+    ]
+  }
+}

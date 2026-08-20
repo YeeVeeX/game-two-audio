@@ -98,6 +98,14 @@ M5 scope:
 4. Foreign-dirty files (PARKING_LOT.md, docs/integration-readiness.md —
    another session's uncommitted edits): their PARKED wording is superseded
    by the trail record; edit the status lines only after that work lands.
+5. **Clock-domain anchor — LANDED 2026-08-19** (the one item game-two's r2
+   cue-spec mail left this seat; measured linear ~800 frames/s drift):
+   anchored tick→frame map, engine clock read only at boot + music-boundary
+   anchor points, one-tick re-anchor threshold; noDevice gate mechanically
+   inert (six pins unchanged); falsified via replay_clock_drift (skewed
+   deterministic clock; pre-anchor code fails 9 checks); same-tick
+   double-duck pinned by replay_duck_sametick + unit tests. Record:
+   `drafts/_m5-clock-anchor-verdict-20260819.md`.
 
 M3 closed 2026-08-19: replay corpus 2 → 6 (per_category_caps enforced +
 rendered — in-category steal past a global-best decoy, 7/8 coherent proof; duck
@@ -171,8 +179,10 @@ file).
   floor; spike 02 needs the :spike bundler group — gosu — and a desktop session).
 - `rake gate` — deterministic replay gate (harness/replays/*.json → command-log
   md5 + WAV artifacts under tmp/gate/ + double-render byte-compare + assertions
-  incl. log op-counts and −1 dBFS peak ceilings; 6/6 green ×3 2026-08-19). The
-  ship gate for all audio work.
+  incl. log op-counts and −1 dBFS peak ceilings; 8/8 green ×3 2026-08-19 — the
+  six M3-era pins unchanged plus replay_clock_drift (skewed-clock anchor
+  falsification via the runner's per-replay "clock" block) and
+  replay_duck_sametick). The ship gate for all audio work.
 - `rake listen` — M4 listen track: same replays through the same runner against
   `data/audio_listen/` (musical fixtures; mirror law) → tmp/listen/*.wav for
   the owner's ears; peak ceiling + determinism still gate (docs/listen-track.md).

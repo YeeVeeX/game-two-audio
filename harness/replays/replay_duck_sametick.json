@@ -1,0 +1,49 @@
+{
+  "_comment": "Gate replay 8 (M5): SAME-TICK double duck on the music bus (game-two r2 mail: challenger_engaged + seal_breached can share a frame; both map to stinger+duck cues). boss1_spawn AND boss2_spawn fire at tick 20 (frame 16000): two independent cues, same duck rule (-12 dB, attack 2400, hold 24000, release 9600). Contract: the second apply_duck at the same depth computes the SAME duck_end (42400) - a degenerate pure extension that issues NOTHING (one pending fade slot per node); exactly ONE attack fade (16000) and ONE release (issued from update() at tick 53, scheduled at 42400, recovery complete 52000). group_fade_at == 2 is the assertion: a 3rd line means the same-tick overlap double-issued a fade. Both cue tones must be audibly present during the hold (two voices, no steal), and the 400 Hz duck depth/recovery ratios must match the single-duck contract exactly.",
+  "name": "replay_duck_sametick",
+  "duration_ticks": 100,
+  "events": [
+    [20, "boss1_spawn", null],
+    [20, "boss2_spawn", null]
+  ],
+  "expectations": {
+    "goertzel": [
+      { "_boss1_present_during_hold": "",
+        "freq_hz": 1500.0, "ch": 0, "from_frame": 24000, "frames": 4800, "min_amp": 0.06 },
+      { "_boss2_present_during_hold": "tone_2100_4s amp 0.02 through sfx -10 dB ~ 0.0063",
+        "freq_hz": 2100.0, "ch": 0, "from_frame": 24000, "frames": 4800, "min_amp": 0.004 }
+    ],
+    "rms": [
+      { "from_frame": 0, "frames": 4800, "min": 0.1 }
+    ],
+    "ratio": [
+      { "_hold_depth": "-12 dB = 0.2512 during the shared hold",
+        "freq_hz": 400.0, "ch": 0,
+        "a": { "from_frame": 8000, "frames": 4800 },
+        "b": { "from_frame": 24000, "frames": 4800 },
+        "min_ratio": 0.2, "max_ratio": 0.32 },
+      { "_single_shared_end": "duck_end 42400 for BOTH cues; still held just before it",
+        "freq_hz": 400.0, "ch": 0,
+        "a": { "from_frame": 8000, "frames": 4800 },
+        "b": { "from_frame": 36800, "frames": 4800 },
+        "min_ratio": 0.2, "max_ratio": 0.32 },
+      { "_full_recovery": "release 42400..52000",
+        "freq_hz": 400.0, "ch": 0,
+        "a": { "from_frame": 8000, "frames": 4800 },
+        "b": { "from_frame": 56000, "frames": 4800 },
+        "min_ratio": 0.85, "max_ratio": 1.15 }
+    ],
+    "log": [
+      { "_the_sametick_contract": "ONE attack + ONE release; a 3rd fade means the same-depth same-tick overlap re-issued",
+        "op": "group_fade_at", "id": "bus_music", "count": 2 },
+      { "_two_voices_no_steal": "",
+        "op": "sound_stop", "count": 0 },
+      { "_both_cues_loaded": "",
+        "op": "sound_load", "from_tick": 1, "ticks": 99, "count": 2 }
+    ],
+    "peak": [
+      { "_comment": "headroom policy: whole render under -1 dBFS sample peak",
+        "max_peak": 0.8913 }
+    ]
+  }
+}

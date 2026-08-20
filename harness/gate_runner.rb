@@ -22,6 +22,15 @@
 #            oversampled dBTP (see Analysis.sample_peak).
 # A per-replay metrics block (peak/rms/crest/over-1.0) is computed always —
 # informational (presentation axis input), only "peak" expectations gate.
+# M5 addition:
+#   "clock" — optional { "advance_frames_per_tick": N }: the harness advances
+#   the noDevice engine clock N frames per tick instead of tick_frames,
+#   DETERMINISTICALLY simulating a device clock that runs at a different rate
+#   than the tick clock (integration-readiness §3; measured ~800 frames/s on
+#   the integration machine). Same skew every render, so double-render
+#   byte-compare and log md5 pins hold exactly like every other replay.
+#   from_tick/ticks windows map through the ACTUAL advance rate (the render
+#   frame where that tick executed); absent "clock", behavior is unchanged.
 
 require "json"
 require "digest"
@@ -51,6 +60,11 @@ module GTA
         @expectation_types = expectation_types
         @engine_tbl = JSON.parse(File.read(File.join(data_dir, "engine.json")))
         @tf = @engine_tbl["tick_frames"]
+        clock = @replay["clock"]
+        @advance = clock ? clock.fetch("advance_frames_per_tick") : @tf
+        unless @advance.is_a?(Integer) && @advance.positive?
+          raise ArgumentError, "clock.advance_frames_per_tick must be a positive integer"
+        end
         @sr = @engine_tbl["sample_rate"]
         @channels = @engine_tbl["channels"]
         @events_by_tick = Hash.new { |h, k| h[k] = [] }
@@ -108,13 +122,13 @@ module GTA
         log = GTA::CommandLog.new
         audio = GTA::AudioSystem.new(engine: engine, data_dir: @data_dir, fixture_dir: @fixture_dir, log: log)
         renderer = GTA::Renderer.new(engine, channels: @channels)
-        capture = String.new(capacity: @replay.fetch("duration_ticks") * @tf * @channels * 4,
+        capture = String.new(capacity: @replay.fetch("duration_ticks") * @advance * @channels * 4,
                              encoding: Encoding::BINARY)
 
         @replay.fetch("duration_ticks").times do |tick|
           @events_by_tick[tick].each { |name, payload| audio.handle_event(tick, name, payload) }
           audio.update(tick)
-          renderer.advance(@tf, capture: capture)
+          renderer.advance(@advance, capture: capture)
         end
 
         diag = { active_voices: audio.active_voices, dropped_cues: audio.dropped_cues,
@@ -125,8 +139,8 @@ module GTA
       end
 
       def window(e)
-        from = e["from_frame"] || (e.fetch("from_tick") * @tf)
-        frames = e["frames"] || (e.fetch("ticks") * @tf)
+        from = e["from_frame"] || (e.fetch("from_tick") * @advance)
+        frames = e["frames"] || (e.fetch("ticks") * @advance)
         [from, frames]
       end
 
@@ -135,7 +149,7 @@ module GTA
         if e["from_frame"] || e["from_tick"]
           window(e)
         else
-          [0, @replay.fetch("duration_ticks") * @tf]
+          [0, @replay.fetch("duration_ticks") * @advance]
         end
       end
 

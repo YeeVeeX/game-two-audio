@@ -28,6 +28,23 @@
         "release_frames": 9600
       }
     },
+    "boss2_spawn": {
+      "_comment": "Second independent duck cue on the music bus (M5 r2 mail: challenger_engaged + seal_breached can share a frame). Same rule values as boss1_spawn on purpose — same-tick same-depth double-duck must collapse to ONE attack + ONE release (replay_duck_sametick pins group_fade_at == 2).",
+      "event": "boss2_spawn",
+      "file": "msfx_swarmpip_4s",
+      "bus": "sfx",
+      "priority": 90,
+      "gain": 1.0,
+      "pan": 0.0,
+      "spatial": true,
+      "duck": {
+        "bus": "music",
+        "duck_db": -12.0,
+        "attack_frames": 2400,
+        "hold_frames": 24000,
+        "release_frames": 9600
+      }
+    },
     "toll_paid": {
       "event": "toll_paid",
       "file": "mui_confirm_200ms",

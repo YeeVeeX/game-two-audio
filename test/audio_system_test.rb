@@ -221,4 +221,71 @@ class AudioSystemTest < Minitest::Test
     run_tick(1, [["music_set_state", { state: "calm" }]])
     assert_equal before, @log.lines.size
   end
+
+  # -- clock-domain anchor (integration-readiness §3; M5 r2 mail) ------------
+
+  def test_clock_anchor_stays_at_boot_in_lockstep
+    assert_equal [0, 0], @audio.clock_anchor, "boot anchor must be (0, 0) in noDevice"
+    (0..119).each { |t| run_tick(t) }
+    run_tick(120, [["music_set_state", { state: "combat" }]])
+    assert_equal [0, 0], @audio.clock_anchor,
+                 "lockstep drift is 0 by construction — the anchor must never move in gate mode"
+  end
+
+  def test_reanchor_at_music_boundary_under_skewed_clock
+    # Engine clock at HALF the tick rate (the deterministic device-drift
+    # instrument — same mechanics as replay_clock_drift). At tick 130 the
+    # request is the anchor point: predicted 104000, actual 52000.
+    (0..129).each do |t|
+      @audio.update(t)
+      @renderer.advance(400)
+    end
+    @audio.handle_event(130, "music_set_state", { state: "combat" })
+    assert_equal [130, 52_000], @audio.clock_anchor, "drift -52000 must re-snap the anchor"
+
+    fade = MUSIC_TBL["transition"]["crossfade_frames"]
+    out_fade = ops("sound_fade_at").select { |l| l.split(" ")[2] == "stem_a" }.last.strip
+    assert_equal "52000 sound_fade_at stem_a #{fhex(-1.0)},#{fhex(0.0)},#{fade},96000", out_fade,
+                 "boundary must quantize from the RE-ANCHORED clock (bar 1 = 96000), not tick math (192000)"
+    assert_includes ops("sound_start_at").map(&:strip), "52000 sound_start_at stem_b 96000"
+  end
+
+  def test_drift_of_exactly_one_tick_does_not_reanchor
+    # Threshold is "drift EXCEEDS a tick": 100 ticks at TF-8 frames/tick puts
+    # the clock exactly 800 frames behind — the anchor must hold.
+    (0..99).each do |t|
+      @audio.update(t)
+      @renderer.advance(TF - 8)
+    end
+    @audio.handle_event(100, "music_set_state", { state: "combat" })
+    assert_equal [0, 0], @audio.clock_anchor, "|drift| == one tick must NOT re-anchor"
+    out_fade = ops("sound_fade_at").select { |l| l.split(" ")[2] == "stem_a" }.last.strip
+    assert out_fade.start_with?("#{100 * TF} "),
+           "sub-threshold request must schedule from unshifted tick math: #{out_fade}"
+  end
+
+  def test_same_tick_double_duck_issues_one_attack_one_release
+    duck = CUES_TBL["cues"]["boss1_spawn"]["duck"]
+    gain = 10.0**(duck["duck_db"] / 20.0)
+    run_tick(0)
+    run_tick(1, [["boss1_spawn", nil], ["boss2_spawn", nil]]) # one frame, two duck cues
+    assert_equal 2, @audio.active_voices, "both cue voices must play"
+    assert_equal 1, ops("group_fade_at").size,
+                 "same-tick same-depth double duck must issue exactly ONE attack fade"
+
+    duck_end = 1 * TF + duck["attack_frames"] + duck["hold_frames"]
+    release_tick = nil
+    (2..((duck_end / TF) + 2)).each do |t|
+      before = ops("group_fade_at").size
+      run_tick(t)
+      if ops("group_fade_at").size > before
+        release_tick = t
+        break
+      end
+    end
+    refute_nil release_tick, "release never issued"
+    assert_equal 2, ops("group_fade_at").size, "exactly one release for the shared episode"
+    release = ops("group_fade_at").last.strip
+    assert_equal "#{release_tick * TF} group_fade_at bus_#{duck['bus']} #{fhex(gain)},#{fhex(1.0)},#{duck['release_frames']},#{duck_end}", release
+  end
 end
