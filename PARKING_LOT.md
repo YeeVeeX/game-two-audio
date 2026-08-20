@@ -26,3 +26,27 @@
   pipeline (docs/integration-readiness.md §4).
 - **Distance-attenuation DSP** — TRIGGER: game design asks for it; :distance payload is
   already plumbed as pool-steal metadata; the DSP needs a cue-table field + gate replay.
+
+Itexo vocabulary bank (2026-08-18, `docs/itexo-audio-vocabulary.md`; source addendum md5
+`cabd71a8f8a4a0cedee1410ef98e9099`; all five gated behind the integration unpark above):
+
+- **S1 telegraph_pre_cast — per-ability telegraph cues, fixed lead** — TRIGGER: integration
+  unparks and game-two's telegraphed-ability events get cue decisions (addendum §2.3).
+  Accept: replay pins telegraph-cue onset exactly K ticks before its ability event, every
+  cycle, per-ability log op-counts distinct.
+- **S2 deny_* — three-cue denial taxonomy (lane A / lane B / empty)** — TRIGGER: integration
+  unparks and game-two exposes which denial fired (event or payload discriminator; §2.9 +
+  §2.2 empty-resource line). Accept: interleaved-spam replay pins each denial type to its
+  own cue by log op-counts, RMS window proves micro-cue (no stacking).
+- **S3 low_stock_* — consume-cue escalation bands + last-few warning** — TRIGGER: a counted
+  consumable event carries a stock payload; needs a cue-schema variant-band field (same
+  shape as distance-attenuation's parked field) (addendum §2.2). Accept: stock 30→0 sweep
+  replay pins band switches at table thresholds via per-variant log op-counts.
+- **S4 milestone_stinger_* — minor/major/award ceremony tiers** — TRIGGER: game-two lands
+  milestone/ceremony events (its triage action 4) and integration unparks (addendum §2.6,
+  staging lesson §2.11). Accept: three-tier replay proves tier-distinct cues with
+  tier-scaled duck (award duck strictly longest) via log + group_fade_at counts.
+- **S5 register_yield/register_none — honest ledger-tick pair** — TRIGGER: integration
+  unparks and the yield/no-yield discriminator is decided (event or payload) with game-two
+  (addendum §2.9 instrument-trust + §2.1). Accept: alternating replay pins register_none to
+  empty-loot payloads only; RMS asserts the dry variant measurably smaller than yield.

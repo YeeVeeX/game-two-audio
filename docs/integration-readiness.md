@@ -23,7 +23,10 @@ placeholder discipline: cue ids stay mechanical; no fiction names).
 Cue archetypes available today: `ui_confirm` class (toll_paid: short ui
 blip), `stinger+duck` class (boss1_spawn: sfx hit that ducks music),
 `spatial one-shot` class (drone_low: pan/distance payload), plus the music
-state machine (calm/combat/silent).
+state machine (calm/combat/silent). Candidate archetype *extensions* banked
+from the Itexo corpus (telegraph lead-time pairing, 3-way deny taxonomy,
+low-stock variant bands, ceremony stinger tiers, yield/no-yield registration):
+`docs/itexo-audio-vocabulary.md` — parked, per-slot triggers in PARKING_LOT.md.
 
 | game-two event | status | proposed archetype |
 |---|---|---|
