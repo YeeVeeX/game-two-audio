@@ -1,0 +1,449 @@
+{
+  "_what": "game-two-audio -> game-two-assets audio handoff, batch v1.1 (M5, 2026-08-19). Owner-performed in-house renders (Reaper 7.79 + owner VSTs; agent-scaffolded MIDI gestures per game-two drafts/_audio-cue-spec-attacks-20260819.md), delivered via Downloads/msfx_v11 and ingested game-side same day (commits f228df8: 23 attack/effect takes; 3d20b93: 3 ambient-v2 drone variants). NO third-party audio, NO sample-pack content. These are the production source masters; the game runtime uses the 24->16 conversions pinned in game-two data/audio/fixtures.json (each replicated and sha-verified at banking time, see per-asset game_ingest). Take rotation is GAME-SIDE (data/audio/variants.json + VariantRotor; synthetic events attack_hit__a...) — this library and the game-two-audio schema are unchanged. Consumer: the game-two-assets exports pipeline (its manifest/provenance/loudness law governs runtime files; LUFS is deliberately unmeasured here — the assets pipeline measures at ingest per music-production/game-audio-pipeline.md).",
+  "produced_by": "game-two-audio M5 banking session, 2026-08-19 (sources: owner hub session, game-two seat mail from-game-two-audio-v11-banked.md)",
+  "engine_rate_hz": 48000,
+  "assets": [
+    {
+      "id": "msfx_death_400ms",
+      "role": "death cue (single take)",
+      "level_band": "sfx",
+      "file": "msfx_death_400ms.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.4,
+      "frames": 19200,
+      "sha256": "59af943b43d2318bfc0ab1ecfb96fdf55e83004ee92d08f268f198f6119f7eb0",
+      "peak_dbfs": -21.04,
+      "rms_dbfs": -33.59,
+      "game_ingest": {
+        "converted_sha256": "a70bb14bf6111526f6cd4b9d6cade5e33dbccd0f6b5fb5b6f10121e5b4a7e205",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_dodge_150ms_a",
+      "role": "dodge take (family attack_dodge, 8 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_dodge_150ms_a.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.15,
+      "frames": 7200,
+      "sha256": "9c49659feacc81998ad5f8a31b0685d7e497fbb1dc7800ce9ad24a9147e79f78",
+      "peak_dbfs": -11.54,
+      "rms_dbfs": -17.97,
+      "game_ingest": {
+        "converted_sha256": "15698d3da218a885aa3c436a6cf386c0904049907a79fd5355fdbfc641298404",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_dodge_150ms_b",
+      "role": "dodge take (family attack_dodge, 8 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_dodge_150ms_b.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.15,
+      "frames": 7200,
+      "sha256": "c261d0764b4ac530132e0ecd75ab4281027e74ad42eb3b9815c42a00111a76c3",
+      "peak_dbfs": -14.72,
+      "rms_dbfs": -21.98,
+      "game_ingest": {
+        "converted_sha256": "611cb697486a40229633acd3fd3c777ad0534215dc3d76dddfc23905361f0eb7",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_dodge_150ms_c",
+      "role": "dodge take (family attack_dodge, 8 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_dodge_150ms_c.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.15,
+      "frames": 7200,
+      "sha256": "342bb5404326b8ef98da1f11d3502907f5f5003e23cb3cbd1debb15e100842db",
+      "peak_dbfs": -15.91,
+      "rms_dbfs": -24.34,
+      "game_ingest": {
+        "converted_sha256": "2ee077b4f8d514052c7cc4a48fef287795dcd7a5b2a1fe7f4be03c9ae17e5926",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_dodge_150ms_d",
+      "role": "dodge take (family attack_dodge, 8 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_dodge_150ms_d.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.15,
+      "frames": 7200,
+      "sha256": "76e74cfa04f9133f10aff7c63f57208afa50d88844d002867f4504b853aaed46",
+      "peak_dbfs": -16.98,
+      "rms_dbfs": -26.11,
+      "game_ingest": {
+        "converted_sha256": "58ad25212fa9a199e43166b75a65855771f5f8eb193e9faa996bfb2ee1f29e0a",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_dodge_150ms_e",
+      "role": "dodge take (family attack_dodge, 8 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_dodge_150ms_e.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.15,
+      "frames": 7200,
+      "sha256": "41dcdbd2e94f0c1cad78dba4e28fc8d877d4d8ccfd52d2d64bbead33abf35beb",
+      "peak_dbfs": -20.49,
+      "rms_dbfs": -32.48,
+      "game_ingest": {
+        "converted_sha256": "1f4cd2a9108e7458d9bc5c0d38e03d917f27bd65a32f81cec1b9bc0dfde53232",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_dodge_150ms_f",
+      "role": "dodge take (family attack_dodge, 8 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_dodge_150ms_f.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.15,
+      "frames": 7200,
+      "sha256": "0e685c6c9b9f07f695017c36415c973d00a24b5c5f39ae56fd13b66e47e0da4e",
+      "peak_dbfs": -22.66,
+      "rms_dbfs": -34.61,
+      "game_ingest": {
+        "converted_sha256": "2dab5b3d5bbc4161d63ce6260467f58bf2580b2ee08db1736601d34f15b71a93",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_dodge_150ms_g",
+      "role": "dodge take (family attack_dodge, 8 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_dodge_150ms_g.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.15,
+      "frames": 7200,
+      "sha256": "db5b97e730ad69ec3c8dae588eb567409ed0489d145188d0859f754c6ddd5ec8",
+      "peak_dbfs": -23.73,
+      "rms_dbfs": -33.48,
+      "game_ingest": {
+        "converted_sha256": "84ed18dc06621e94fb055582474db8ca33c3c5cf4804d2db1807d776423aeae5",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_dodge_150ms_h",
+      "role": "dodge take (family attack_dodge, 8 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_dodge_150ms_h.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.15,
+      "frames": 7200,
+      "sha256": "f8d4a8aca32f08899c4a76b706ad2aa1f6f8053df8747111f28decad65a35a2e",
+      "peak_dbfs": -23.32,
+      "rms_dbfs": -34.02,
+      "game_ingest": {
+        "converted_sha256": "e04b50094464e75e5655ae39b5397622dd417a8807fec87f3d84e8d45f050420",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_drone_b_8s",
+      "role": "calm ambient drone variant (rotating calm family, ambient v2; bar-quantized crossfades game-side, combat pauses rotation)",
+      "level_band": "ambient drone — lowest layer, sits below everything",
+      "file": "msfx_drone_b_8s.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 8.0,
+      "frames": 384000,
+      "sha256": "14e3c5f1f6068cbf799a2d16d343e92e313b5faff18bfba54e26d2cf476b071a",
+      "peak_dbfs": -12.33,
+      "rms_dbfs": -24.53,
+      "game_ingest": {
+        "converted_sha256": "ac8aebb049ec36e963d365cc62e1b2e9b2c011aebc08631f3418e7cf6ce58da8",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "3d20b93"
+      }
+    },
+    {
+      "id": "msfx_drone_c_8s",
+      "role": "calm ambient drone variant (rotating calm family, ambient v2; bar-quantized crossfades game-side, combat pauses rotation)",
+      "level_band": "ambient drone — lowest layer, sits below everything",
+      "file": "msfx_drone_c_8s.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 8.0,
+      "frames": 384000,
+      "sha256": "559959d71d5a65cb6eb1a368ab5fcc038bb4fccecd82d9404619ff2e594a567f",
+      "peak_dbfs": -11.84,
+      "rms_dbfs": -25.21,
+      "game_ingest": {
+        "converted_sha256": "02758df315f6c35198e3c60653863e9603b7c8e1ac902faf9785a31b4fd30286",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "3d20b93"
+      }
+    },
+    {
+      "id": "msfx_drone_d_8s",
+      "role": "calm ambient drone variant (rotating calm family, ambient v2; bar-quantized crossfades game-side, combat pauses rotation)",
+      "level_band": "ambient drone — lowest layer, sits below everything",
+      "file": "msfx_drone_d_8s.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 8.0,
+      "frames": 384000,
+      "sha256": "d1bd8c57ae55a0f43489afbd6a9f536fe180bf7dbaf2d3371257f9c170afd8f6",
+      "peak_dbfs": -13.0,
+      "rms_dbfs": -26.45,
+      "game_ingest": {
+        "converted_sha256": "a000d6b392370fc214fe609bfe63de8f8aadad80810e1254604dc9bfde8e6a49",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "3d20b93"
+      }
+    },
+    {
+      "id": "msfx_heal_300ms",
+      "role": "heal cue (single take)",
+      "level_band": "sfx",
+      "file": "msfx_heal_300ms.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.3,
+      "frames": 14400,
+      "sha256": "bfd25f9f3e89eded5502c432ea6b877a6b533b9f18fa13903f735355e50a6b92",
+      "peak_dbfs": -15.48,
+      "rms_dbfs": -27.31,
+      "game_ingest": {
+        "converted_sha256": "b233102d9df89f68c40c72cef84135ec4e8b2bf35cbcab3ae0bac49d30b5c1b1",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_hit_200ms_a",
+      "role": "attack-hit take (family attack_hit, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_hit_200ms_a.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.2,
+      "frames": 9600,
+      "sha256": "4822aedbaf60303de6c3ecaf48f70a576c1fa741cdf78ab670396888c0aedba6",
+      "peak_dbfs": -13.66,
+      "rms_dbfs": -30.4,
+      "game_ingest": {
+        "converted_sha256": "b4ed8ff95d1037321518f4a5241d398ec9e19b16617140cb27bef9b0e76bbabe",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_hit_200ms_b",
+      "role": "attack-hit take (family attack_hit, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_hit_200ms_b.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.2,
+      "frames": 9600,
+      "sha256": "d2b7ce8d2ae841a2e6e0e5cebeb487dd3805e701ef0690590bed0761eb828011",
+      "peak_dbfs": -13.22,
+      "rms_dbfs": -30.61,
+      "game_ingest": {
+        "converted_sha256": "8707405a83a358557f27c9e136db1645b1cf03456063e8c4758e6b884f4774df",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_hit_200ms_c",
+      "role": "attack-hit take (family attack_hit, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_hit_200ms_c.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.2,
+      "frames": 9600,
+      "sha256": "4d9ae9553d112af9a7cc16a52e766c1ded39b2cd8bfbb82832379ac78e4ccb1d",
+      "peak_dbfs": -13.57,
+      "rms_dbfs": -30.57,
+      "game_ingest": {
+        "converted_sha256": "9e412ea04b92dc092aa4f1c1ba1b601a68c805e8ed4baa86162df40318e50f2b",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_hit_200ms_d",
+      "role": "attack-hit take (family attack_hit, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_hit_200ms_d.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.2,
+      "frames": 9600,
+      "sha256": "457e28331fa0ccbdf99dd127d2f386a180d933fd4252923484abb925e053e7ba",
+      "peak_dbfs": -11.73,
+      "rms_dbfs": -30.43,
+      "game_ingest": {
+        "converted_sha256": "b3ae44d873b9d86be6404487b97cb688b7631c101f69172b1a75d42169304601",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_special_600ms",
+      "role": "special-attack cue (single take)",
+      "level_band": "sfx",
+      "file": "msfx_special_600ms.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.6,
+      "frames": 28800,
+      "sha256": "36b6e26fc1d03df95d7126e45bc879076349c99e4e550fdd653b7a1eb2d0f735",
+      "peak_dbfs": -2.18,
+      "rms_dbfs": -9.71,
+      "game_ingest": {
+        "converted_sha256": "e438732ea3fe446108a50d10759e81237957eeebe2ff1269af01866b5e0936f9",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_throw_200ms_a",
+      "role": "throw take (family attack_throw, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_throw_200ms_a.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.2,
+      "frames": 9600,
+      "sha256": "2bb341454f96748138e8d92fa94c8073ac996dd59a76d4ac9b0ee0335a112917",
+      "peak_dbfs": -11.64,
+      "rms_dbfs": -18.89,
+      "game_ingest": {
+        "converted_sha256": "3ef77d971772c04cc56d40577ec909bb48ae74e1f06d2363bc5161ebeb3017fd",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_throw_200ms_b",
+      "role": "throw take (family attack_throw, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_throw_200ms_b.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.2,
+      "frames": 9600,
+      "sha256": "45e56831d3dc622cfcab6acfa1676c18ea9622384a13cacdaaff33245bfa99fa",
+      "peak_dbfs": -12.29,
+      "rms_dbfs": -19.05,
+      "game_ingest": {
+        "converted_sha256": "de7fc29ae752e7c52bf81fe9f9cd4ff50d26019e88e0a2acbf5fb6ef03ffeca8",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_throw_200ms_c",
+      "role": "throw take (family attack_throw, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_throw_200ms_c.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.2,
+      "frames": 9600,
+      "sha256": "fad52981355b634040780bf8274b9cefe17335fe1d5a1881e8955f20ec40134e",
+      "peak_dbfs": -12.97,
+      "rms_dbfs": -19.28,
+      "game_ingest": {
+        "converted_sha256": "8ad8693e3d1053df55fdd9804f93ac8155231aa80ce3058556dd3a075958176c",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_throw_200ms_d",
+      "role": "throw take (family attack_throw, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_throw_200ms_d.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 0.2,
+      "frames": 9600,
+      "sha256": "abc168ff1de7114f3e6c8f79eabf58848626202617a4b4ea337fbe14b90c7d08",
+      "peak_dbfs": -12.86,
+      "rms_dbfs": -19.01,
+      "game_ingest": {
+        "converted_sha256": "e57ae81becb2a0a512d69b3a5934d7be29db282d53e6a1c667148c110e2bf63d",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_wipe_1500ms_a",
+      "role": "wipe take (family attack_wipe, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_wipe_1500ms_a.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 1.5,
+      "frames": 72000,
+      "sha256": "f0d271326eab104d8548da4bd8a14de99f9a4778ceae4522ac95fbdd3e77a8e5",
+      "peak_dbfs": -10.05,
+      "rms_dbfs": -22.85,
+      "game_ingest": {
+        "converted_sha256": "a8d0770c723e3d1d8d8c01389d8317f863a5965fcb9bc051ed6091cebc7767c0",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_wipe_1500ms_b",
+      "role": "wipe take (family attack_wipe, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_wipe_1500ms_b.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 1.5,
+      "frames": 72000,
+      "sha256": "541d26a12a344c42d67a85f760ba748dbe7b77ec4ea5e6864667f0ada69b28db",
+      "peak_dbfs": -9.09,
+      "rms_dbfs": -23.46,
+      "game_ingest": {
+        "converted_sha256": "61240f3e4a44e8f4392e1b96d23d5ecc56f59a5a0f9e4e1902a5e5ba179ebc3d",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_wipe_1500ms_c",
+      "role": "wipe take (family attack_wipe, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_wipe_1500ms_c.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 1.5,
+      "frames": 72000,
+      "sha256": "0db9d932bfcdfc1c1b2ecad2898c80017afad6b0afd989fd82d2f6c699574b2c",
+      "peak_dbfs": -12.19,
+      "rms_dbfs": -24.81,
+      "game_ingest": {
+        "converted_sha256": "b5ba08ee0508662cca1ef5946e3c73fe6e84fb0a1a7715dfa954d2fd0593f540",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    },
+    {
+      "id": "msfx_wipe_1500ms_d",
+      "role": "wipe take (family attack_wipe, 4 takes; rotation is game-side, VariantRotor)",
+      "level_band": "sfx",
+      "file": "msfx_wipe_1500ms_d.wav",
+      "format": "WAV PCM 24-bit mono 48000 Hz (owner's original render)",
+      "dur_s": 1.5,
+      "frames": 72000,
+      "sha256": "07b179b23a4ab7bfa53596f45838423ac57c424bc7e9bf83ebbdab50a97b6c6c",
+      "peak_dbfs": -13.94,
+      "rms_dbfs": -27.01,
+      "game_ingest": {
+        "converted_sha256": "b333cc0c0a4a34bd82f9fb686780eac37ba8d5ec2102e7e0db60db544f905d9e",
+        "pinned_in": "game-two data/audio/fixtures.json (24->16 conversion (s24/256.0) round-half-even, clamp; replicated here, sha-verified)",
+        "game_commit": "f228df8"
+      }
+    }
+  ]
+}
