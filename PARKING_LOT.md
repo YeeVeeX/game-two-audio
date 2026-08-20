@@ -1,8 +1,10 @@
 # Parking lot — named triggers, never silent scope creep
 
-- **Integration into game-two** — TRIGGER: owner lifts the audio order (game-two
-  AGENTS.md "OUT of scope: audio"). Until then this repo only reaches
-  integration-readiness: event contract + gate + PoC.
+- **Integration into game-two** — TRIGGER FIRED 2026-08-18: owner lifted the audio
+  order in writing ("audio order lifted", `drafts/_m4-owner-scores.md`). Integration is
+  LIVE on the game-two side — its M5a lane consumes owner audio (game-two commits
+  `34bec50`/`eaf5e9b`/`dd84010`, cited in `handoff/audio-v12/BANKED.md`); cue mapping
+  proceeds iteratively in game-two custody.
 - **HRTF / binaural spatialization** — TRIGGER: 2D pan+attenuation proves insufficient
   in a real playtest verdict. miniaudio has spatializer support; not before.
 - **Occlusion via map raycasts** — TRIGGER: a zone design where the LPF-proxy audibly
@@ -26,9 +28,17 @@
   pipeline (docs/integration-readiness.md §4).
 - **Distance-attenuation DSP** — TRIGGER: game design asks for it; :distance payload is
   already plumbed as pool-steal metadata; the DSP needs a cue-table field + gate replay.
+- **Footstep-material cue family** — TRIGGER: game-two's builder-era cue-spec mail
+  arrives with material-keyed movement events (its Lane 3 tile-type registry, game-two
+  `2471b5d`; heads-up mail `done/from-game-two-worldbuilder-cue-families.md`). Flagged
+  concerns carried: step spam needs a cheap voice/priority lane or cadence gate;
+  per-material render sets reuse the attack-cue-spec handoff shape.
+- **Region-ambience beds** — TRIGGER: same lane (heads-up mail above); decide a
+  music_set_state-adjacent surface vs a second ambient bus AT SPEC TIME, not before.
 
 Itexo vocabulary bank (2026-08-18, `docs/itexo-audio-vocabulary.md`; source addendum md5
-`cabd71a8f8a4a0cedee1410ef98e9099`; all five gated behind the integration unpark above):
+`cabd71a8f8a4a0cedee1410ef98e9099`; the integration unpark above FIRED 2026-08-18 — each
+slot now waits on its own per-slot trigger):
 
 - **S1 telegraph_pre_cast — per-ability telegraph cues, fixed lead** — TRIGGER: integration
   unparks and game-two's telegraphed-ability events get cue decisions (addendum §2.3).

@@ -1,9 +1,14 @@
 # Integration readiness — game-two-audio → game-two
 
-**Status: PARKED on owner order (audio is ordered OUT of game-two).** This
-checklist prepares the seam so integration is a bounded, reviewable change
-when the order lifts. Nothing here has been executed against game-two; that
-repo stays untouched from this project.
+**Status: LIVE — order lifted 2026-08-18; game-two's M5a lane executed the
+integration on its own seat** (real-device smoke + in-game listens of record,
+owner verdict "acceptable for now": mail
+`done/from-game-two-m5-listen-verdict.md`; game-two commits
+`34bec50`/`eaf5e9b`/`dd84010` consume owner audio, cited in
+`handoff/audio-v12/BANKED.md`). This doc was the prepared runway and stays as
+the seam reference; cue-mapping decisions now proceed iteratively in game-two
+custody (its ear-check loop), so the table below is the pre-integration
+proposal snapshot. This repo still never writes into game-two.
 
 Sources read live 2026-08-19 (read-only): `game-two/src/game/world.rb`
 (`World::EVENTS`, 44 symbols), `game-two/src/core/event_bus.rb`.
@@ -118,8 +123,11 @@ ev.type, ev.payload) }`, then once per frame after `bus.process`:
    stems → child groups → master group → then `gta_engine_destroy` → then
    process exit / window close.
 
-**Open item — clock domains (measure on the integration machine, decide
-then):** in noDevice gate mode the control code advances the engine clock
+**Clock domains — LANDED 2026-08-19**
+(`drafts/_m5-clock-anchor-verdict-20260819.md`; game-two's r2 cue-spec mail
+measured ~800 frames/s linear drift on the real device; the anchor below
+shipped with replay_clock_drift falsification). Original analysis kept for
+the record: in noDevice gate mode the control code advances the engine clock
 itself, so `frame = tick * 800` is exact. On a real device the engine clock
 advances on the device thread at the hardware rate while ticks follow the
 game loop; `tick * 800` will drift from engine time (spike 02 measured
@@ -127,8 +135,8 @@ game loop; `tick * 800` will drift from engine time (spike 02 measured
 (schedule-ahead only, clock read on the control thread at anchor points,
 never per-command): anchor `engine_time_at_tick0` once at boot via
 `gta_engine_time_pcm` (shim export, verified vendor/gta_shim.c L116), schedule against `anchor + tick * 800`, and
-re-anchor at music boundaries if drift exceeds a tick. Needs a real-device
-measurement before pinning. (Reminder: `Process.clock_gettime` allocates on
+re-anchor at music boundaries if drift exceeds a tick. The real-device
+measurement landed and the anchor is pinned (see lead-in). (Reminder: `Process.clock_gettime` allocates on
 this build — keep any drift instrumentation out of GC-asserted regions.)
 
 ## 4. Asset handshake (game-two-assets `exports/`)

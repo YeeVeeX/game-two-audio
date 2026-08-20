@@ -80,24 +80,23 @@ M5 scope:
 1. **Assets lane**: game-two-assets ingests `handoff/audio-v1` through its
    exports/manifest law (its seat's work; LUFS measured at its gate — never
    here). The listen-stems lane stays evaluation-only, unchanged.
-2. **Engine integration** (game-two seat, per integration-readiness.md) —
-   **QUEUED by game-two's dev of record behind its v18 fun-verification
-   ritual ("the SEVENTEENTH", owner-paced; receipt 2026-08-18, archived in
-   mail done/)**; its scope docs already carry the lift. When the trigger
-   adjudicates (spark-up ready:
-   `drafts/_next-session-m5a-game-two-integration.txt`): scope-doc
-   verification, ~15-line adapter, boot/teardown order, real-device
-   smoke, gate re-pin on the integration machine, the clock-domain anchor
-   measurement, music_set_state derivation decision (recommendation on file:
-   audio-side, data-driven), and an initial ~6-event cue mapping chosen with
-   the owner (full 44-row table decided iteratively after the first in-game
-   listen).
+2. **Engine integration** — **LIVE on the game-two side (M5a, executed
+   2026-08-18 by its seat)**: real-device smoke + in-game listens of record
+   landed there (owner verdict of record "acceptable for now"; mail
+   `done/from-game-two-m5-listen-verdict.md`), and game-two consumes owner
+   audio in commits `34bec50`/`eaf5e9b`/`dd84010` (asks 7–9; cited in
+   `handoff/audio-v12/BANKED.md`). The clock-domain anchor measurement came
+   back via its r2 cue-spec mail and the fix landed here (item 5). Cue
+   mapping proceeds iteratively in game-two custody (its ear-check loop);
+   this seat serves cue-spec asks + banked originals. Superseded spark-up
+   kept for the record: `drafts/_next-session-m5a-game-two-integration.txt`.
 3. **Presentation closure**: the first in-game listen is the verdict of
    record for the open boxes + the −10 dB sfx balance question (headroom
    ceiling held mechanically all session; worst peak −11.82 dBFS).
-4. Foreign-dirty files (PARKING_LOT.md, docs/integration-readiness.md —
-   another session's uncommitted edits): their PARKED wording is superseded
-   by the trail record; edit the status lines only after that work lands.
+4. Foreign-dirty files — **RESOLVED 2026-08-20**: the inherited vocab-bank
+   edits landed verbatim (commit `90e78aa`), the owner's live Reaper state
+   pinned (`93d57ef`), and the stale PARKED wording in PARKING_LOT.md /
+   docs/integration-readiness.md / this file truth-synced same session.
 5. **Clock-domain anchor — LANDED 2026-08-19** (the one item game-two's r2
    cue-spec mail left this seat; measured linear ~800 frames/s drift):
    anchored tick→frame map, engine clock read only at boot + music-boundary
@@ -106,6 +105,12 @@ M5 scope:
    deterministic clock; pre-anchor code fails 9 checks); same-tick
    double-duck pinned by replay_duck_sametick + unit tests. Record:
    `drafts/_m5-clock-anchor-verdict-20260819.md`.
+
+Trail 2026-08-20: audio-v12 banked — `a5eb75a` (ask-8 evolving 64 s calm
+loop) + `d9534df` (ask-7 zone-change + ask-9 throws ×4), game-side 16-bit
+commits cited in `handoff/audio-v12/BANKED.md`; M5 truth-sync consolidation
+landed the inherited vocab bank + owner .rpp and synced these status lines
+(worldbuilder cue families parked with named triggers in PARKING_LOT.md).
 
 M3 closed 2026-08-19: replay corpus 2 → 6 (per_category_caps enforced +
 rendered — in-category steal past a global-best decoy, 7/8 coherent proof; duck
@@ -160,9 +165,10 @@ M4 scope + status (2026-08-19) — CLOSED except where moved to M5 above:
 **OUT of scope (→ PARKING_LOT.md):** HRTF/binaural; audio occlusion
 raycasts; runtime asset hot-reload; network-synced audio; LUFS metering in
 the gate (lives in the assets pipeline); distance-attenuation DSP (payload
-plumbed; needs a cue-table field + replay). Integration is NO LONGER parked
-(order lifted 2026-08-18; PARKING_LOT.md line pending edit — foreign-dirty
-file).
+plumbed; needs a cue-table field + replay); footstep-material cues +
+region-ambience beds (worldbuilder heads-up 2026-08-19; parked with named
+triggers). Integration is NO LONGER parked (order lifted 2026-08-18;
+PARKING_LOT.md entry updated 2026-08-20).
 
 ## Environment (mirrors game-two, verified there 2026-08-09)
 
