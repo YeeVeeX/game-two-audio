@@ -6,4 +6,5 @@
 !handoff/*/*.wav
 /data/audio_listen/reaper/Backups/
 /data/audio_listen/reaper/Media/
+/data/audio_listen/reaper/owner_project_[0-9]*.rpp
 /.bundle/
