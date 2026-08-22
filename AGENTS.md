@@ -3,16 +3,23 @@
 Sibling project of `workspace/game-two` (same pattern as game-two-lore): **audio is
 owner-ordered OUT of the game-two repo**; this project develops the audio system to
 integration readiness. Dev agent is the **dev of record** (design calls are the dev's to
-make and defend); owner is the tester. Nothing here touches game-two until the owner
-lifts the audio order.
+make and defend); owner is the tester. The audio order was LIFTED 2026-08-18
+(`drafts/_m4-owner-scores.md`); integration flows through game-two's seat —
+this repo still never writes into game-two.
 
-## Workspace family (game-two program) — synced 2026-08-19
+<!-- FAMILY-BLOCK BEGIN -->
+## Workspace family (game-two program) — synced 2026-08-22
 
 - **Peers:** Gabriel (owner-founder, es-CR) + Junior (co-creator,
   pt-br) co-direct the whole program with equal creative standing —
   design, code, audio/assets, ideas flow from BOTH; neither is the
   other's worker. Owner overrides are law and get RECORDED (one line)
   in the affected repo.
+- **Never gate on peer availability (owner order 2026-08-22):** solo
+  progress is the default in every repo — peer online = good, absent =
+  keep moving, symmetric both ways; the dev of record proactively
+  surfaces REAL recorded work items (never fabricated ones). Peer
+  ratifications land async in the hub chat.
 - **Hub-and-spoke:** the game-two dev chat is the HUB; work in this
   repo runs as bounded sessions under its own dev-of-record.
   Cross-repo asks travel by SEAT MAIL (`~/.pi/agent/mail/<repo>/`),
@@ -27,6 +34,7 @@ lifts the audio order.
 - **Contract mirror:** AGENTS.md is ground truth; CLAUDE.md is a thin
   pointer to it so Claude sessions load the same contract (AGENTS.md
   wins on any disagreement).
+<!-- FAMILY-BLOCK END -->
 
 ## The decision (pinned)
 
@@ -112,55 +120,24 @@ commits cited in `handoff/audio-v12/BANKED.md`; M5 truth-sync consolidation
 landed the inherited vocab bank + owner .rpp and synced these status lines
 (worldbuilder cue families parked with named triggers in PARKING_LOT.md).
 
-M3 closed 2026-08-19: replay corpus 2 → 6 (per_category_caps enforced +
-rendered — in-category steal past a global-best decoy, 7/8 coherent proof; duck
-overlap — pure hold extension, single extended release, mid-release re-attack,
-`group_fade_at count == 4` pinned; music churn with the stem-reuse path finally
-RENDERED + ignored requests pinned by per-stem log counts; payload pan sweep
-with float-exact opposite-channel zeros); harness grew `log` (exact op-count)
-and `peak` expectation types + an always-on metrics block (peak/rms/crest/
-over-1.0). Headroom decision (dev of record, KB-cited): data-staged, NO
-limiter — sfx bus −3 → −10 dB, every replay gated under −1 dBFS sample peak
-(worst now −1.76 dBFS, over-1.0 = 0 everywhere; was +0.93 dBFS / 4627 overs).
-Evidence: `drafts/_m3-verdict-20260819.md`. New pinned facts: same-depth duck
-overlap issues NO fade (extension moves duck_end only); with sum(caps) ==
-max_voices the global steal path is unreachable for capped categories;
-collapse-ratio numerators are leakage floors — they don't scale with staging.
+M3 CLOSED 2026-08-19 — record: `drafts/_m3-verdict-20260819.md` (replay
+corpus 2 → 6; harness `log`/`peak` expectation types + always-on metrics
+block). Headroom law (dev of record, KB-cited): sfx bus at −10 dB, every
+replay gated under −1 dBFS sample peak; a limiter stays OUT unless
+listening demands it (DLL-rebuild scope break — re-ask first). Pinned
+facts: same-depth duck overlap issues NO fade (extension moves duck_end
+only); with sum(caps) == max_voices the global steal path is unreachable
+for capped categories; collapse-ratio numerators are leakage floors —
+they don't scale with staging.
 
-M4 scope + status (2026-08-19) — CLOSED except where moved to M5 above:
-1. **Owner listen** (presentation axis, Rule 2's second score — accuracy is
-   green, presentation is UNSCORED): take 1 (sine fixtures) falsified by the
-   owner's ears ("constant hum"); take 2 (musical listen track,
-   `data/audio_listen/` + `rake listen`) approved in direction, ACCEPTED as
-   prototype placeholder material; **the 17 score boxes are still open**
-   (`drafts/_m4-listen-sheet.md`; sub-3 box = presentation-gate FAIL, fix
-   lands with a replay/expectation guard). Verbatim feedback trail:
-   `drafts/_m4-owner-scores.md`. Mirror law pinned by
-   `test/listen_track_test.rb`; gate corpus untouched (md5 set verified).
-2. **Owner production loop — LIVE end-to-end, waiting on owner VST choices**:
-   roles pinned — **owner = ears + sound design (Reaper/VST/analog); dev = ALL
-   format/validation/render automation and never scores presentation**. Built:
-   `rake midi`; live Reaper-MCP bridge (the owner's installed auto-start Lua
-   server, no `.rpp` fabrication); `rake reaper:setup` → protected
-   `owner_project.rpp` + generated `scaffold.rpp`, 7 canonical MIDI items /
-   exact non-overlapping regions, disposable ReaSynth audition FX; per-slot
-   `rake reaper:render SLOT=<id>` → fresh never-overwritten inbox revision →
-   48 kHz/duration verification → selective sha-pinned import → auto listen
-   render; manual `rake stems:import` still handles batches. Real Reaper 7.79
-   proof: all-regions 7/7 exact and sandbox-imported; per-slot calm render
-   exact 288000 frames; production manifest/listen hashes untouched. Current
-   owner action: replace ReaSynths with chosen VSTs and tune while each region
-   loops; then import the first owner-designed revision.
-3. **Headroom closure**: the −1 dBFS ceiling holds mechanically; the open
-   half is the balance question (does sfx sit too quiet at −10 dB?). Close
-   with the owner's ears; a limiter stays out unless listening demands it
-   (that would be a DLL-rebuild scope break — re-ask first).
-4. Whatever the listen sheet surfaces (steal transient, re-attack feel,
-   center-vs-side pan loudness are the flagged candidates; pre-thought fix
-   designs live in `drafts/_next-session-m4-listen-closure.txt` §2).
-5. ~~**Integration stays PARKED** on owner order~~ — **order lifted
-   2026-08-18** (see M5 block; `docs/integration-readiness.md` is now the
-   active runway; its two open design items move to M5).
+M4 CLOSED 2026-08-19 (except items moved to M5 above) — records:
+`drafts/_m4-owner-scores.md` (verbatim owner feedback trail),
+`drafts/_m4b-verdict-20260818.md`. Live remainders: the 17 listen-sheet
+score boxes stay open BY OWNER CHOICE with in-game listening as the
+presentation instrument of record (`drafts/_m4-listen-sheet.md`); owner
+production loop LIVE end-to-end (roles pinned: owner = ears + sound
+design (Reaper/VST/analog); dev = ALL format/validation/render
+automation, never scores presentation).
 
 **OUT of scope (→ PARKING_LOT.md):** HRTF/binaural; audio occlusion
 raycasts; runtime asset hot-reload; network-synced audio; LUFS metering in
