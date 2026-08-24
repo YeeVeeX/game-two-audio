@@ -129,6 +129,15 @@ unchanged, 9/9 green, listen 9/9. T3 footstep/ambience cue spec received
 same session (`done/from-game-two-t3-cue-spec.md`): zero library work owed
 until owner renders land; PARKING_LOT entries truth-synced.
 
+Trail 2026-08-24 (second session): calm-loop seam ask served
+(`done/from-game-two-calm-loop-seam-20260824.md`): seam confirmed in the
+24-bit v12 original (jump 0.012276 FS — game-side 16-bit conversion
+exonerated); owner re-render queued (option a — 2× render, second 32
+bars — steered first), banks to handoff/audio-v13/ on arrival; no
+seat-side bake without recorded owner delegation (owner-originals law).
+Ack mailed; no library change — gate 9/9, pins untouched. Record:
+`drafts/_m5-calm-seam-service-20260824.md`.
+
 M3 CLOSED 2026-08-19 — record: `drafts/_m3-verdict-20260819.md` (replay
 corpus 2 → 6; harness `log`/`peak` expectation types + always-on metrics
 block). Headroom law (dev of record, KB-cited): sfx bus at −10 dB, every
