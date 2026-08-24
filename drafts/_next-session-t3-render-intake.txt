@@ -1,0 +1,129 @@
+Session goal: game-two-audio T3 service session - owner render intake
+(footsteps + ambience beds) -> audio-v13 banking, the parked ambience-bed
+mechanism decision (this seat's architecture call), and standing seat-mail
+service (J-6 follow-ups). OWNER-PACED: if neither renders nor mail exist,
+verify green and close honestly - never fabricate work items.
+
+Work in C:/Users/gabri/workspace/game-two-audio. You are the dev of
+record at this seat: design calls are yours to make and defend. Sibling
+repos (../game-two, ../game-two-assets) are READ-ONLY from here - asks
+travel by seat mail (~/.pi/agent/mail/<repo>/, digest-stamped, RECEIPT
+lines).
+
+ENVIRONMENT (first action, every bash session):
+  export PATH="/c/Ruby34-x64/bin:$PATH"
+Ruby 3.4.10, no YJIT. Commands: rake (tests), rake gate (ship gate),
+rake listen (owner-ear renders). vendor/miniaudio.dll is pinned - never
+rebuild casually (vendor law: VERSION bump + full gate rerun + re-ask).
+
+PHASE 0 - orient + baseline (do this before ANY change):
+1. Read AGENTS.md (ground truth; auto-injected but honor it over memory).
+2. Read drafts/_m5-j6-bus-volume-20260824.md - last session's record
+   (J-6 volume API shipped at 07aeb1c; T3 spec received same day).
+3. Read ~/.pi/agent/mail/game-two-audio/done/from-game-two-t3-cue-spec.md
+   IN FULL - it is the binding spec for this session's main lane: four
+   footstep materials (msfx_step_stone/dirt/grass/wood_150ms), three
+   ambience beds (mamb_meadow/town/dungeon_30s), event names, cadence,
+   mapping-row constraints (steps: sfx bus, priority 10, no duck ever;
+   beds: mechanism = YOUR call).
+4. git status (expect clean; foreign-dirty files -> stop, ask the user).
+5. Run rake AND rake gate; capture the gate md5/sha table to a temp file
+   as the session baseline (9 replays green expected, incl.
+   replay_bus_volume). Any pre-existing red -> stop, report, fix nothing
+   silently.
+
+PHASE 1 - seat mail service (standing):
+Check ~/.pi/agent/mail/game-two-audio/ (top level + inbox/). Likely
+traffic: game-two's J-6 receipt follow-up (menu rows wiring; we promised
+a ramp follow-up IF hard mute clicks audibly in-game - that is a small
+set_bus_volume fade variant at THIS seat, gate-covered, only on their
+recorded ask). Act, answer with RECEIPT lines, archive to done/.
+Escalate to the human only for owner-level decisions.
+
+PHASE 2 - render intake -> audio-v13 banking (only if renders exist):
+Owner drops WAVs at his pace - check data/audio_listen/inbox/ and ask
+the owner if he is present and mentioned renders. Partial delivery is
+normal (steps first, beds later - the mail's own priority).
+LANE LAW (trap): T3 renders are RUNTIME assets -> they bank to
+handoff/audio-v13/. They are NOT listen stems - do NOT run
+rake stems:import on them, do NOT touch data/audio_listen/stems/.
+Template: handoff/audio-v12/BANKED.md - follow it exactly:
+- Validate each WAV mechanically: RIFF header walk (expect PCM 24-bit
+  mono 48 kHz like v12 - if the owner rendered another depth/rate,
+  record what IS there and ask before converting; dev owns ALL
+  format/validation automation, owner is never asked to re-export for
+  our convenience without a reason).
+- Report per-file: duration s, data_bytes, sample peak dBFS. Steps
+  should read SHORT (~0.15 s) and QUIET relative to the throw/attack
+  family (the owner asked for "bajitos"); beds ~30-60 s. For beds also
+  measure the loop seam (first/last-sample discontinuity) - report the
+  number, the owner's ear decides; never "sounds fine to me".
+- sha256-pin every source file; write handoff/audio-v13/BANKED.md in
+  the v12 format. Game-side 16-bit shas are PENDING lines until
+  game-two's commits land - say so in the file.
+- Commit (explicit paths, never git add -A) + push.
+- Mail game-two: banked + shas + pointer to their own T3 mapping rows
+  (cue rows are THEIR custody; zero rows change in our data/audio/ for
+  footsteps).
+Footsteps need ZERO library code - they are ordinary cue rows at
+game-two. Do not invent a footstep feature here.
+
+PHASE 3 - ambience-bed mechanism (the real design work; only when bed
+renders exist or the owner/game asks to pre-decide):
+The parked call (PARKING_LOT.md): long-loop cue rows vs music-adjacent
+state family vs stereo-ambient library increment. Sensei rule 1: name
+the 2-3 risks before implementing. Known constraints + traps:
+- Keys arrive change-only (ambience_amb_meadow/town/dungeon), crossfade
+  friendly; beds layer BESIDE music states, never replace them.
+- Long-loop cue rows ride the voice pool -> STEAL-VULNERABLE (priority
+  lanes fill under combat load; a stolen bed = audible ambience dropout)
+  and one-shot lifecycle (at_end polling) fights infinite loops.
+- The music state machine already solves loop + crossfade + change-only
+  + determinism, BUT it quantizes transitions to BAR boundaries - a
+  musical law that makes no sense for zone-change ambience; a bed lane
+  needs its own (next-tick-or-later, schedule-ahead) quantization.
+  Current lean of the dev of record (a lean, not a pin - decide with
+  renders in hand): a small bed state machine parallel to music - own
+  bus row, stems preloaded at boot, pool-bypassed like music stems,
+  tick-quantized crossfade on key change. Defend or beat it.
+- GATE LAW: gate replays stay tone-based FOREVER. The mechanism ships
+  with sine fixtures + a new replay (bed switch, crossfade window
+  ratios, log op-counts, peak ceiling, change-only dedupe) + unit
+  tests; owner WAVs never enter gate replays. Mirror law: any
+  data/audio/ table change mirrors into data/audio_listen/ (
+  test/listen_track_test.rb enforces).
+- Zero tunables in code; new fields validate in AudioData with named
+  errors; docs/integration-readiness.md gets the contract row (follow
+  the 2b pattern); game-two consumes via mail receipt, never a write
+  from here.
+- KB first (rule: consequential design): hub kb query --domain
+  game-research "ambience bed architecture" / "audio state machine
+  crossfade" before committing the design; cite what you use in the
+  drafts record.
+- Verification: baseline-diff pattern from Phase 0 - the 9 prior gate
+  pins must be BYTE-IDENTICAL after the mechanism lands (new replay
+  adds a 10th). rake + rake gate + rake listen all green before ship.
+If BOTH Phase 2 and Phase 3 land in one session and context tightens:
+bank first (small, owner-facing), then run compact-checkpoint skill
+before the mechanism work rather than rushing a design decision.
+
+PHASE 4 - close:
+- drafts/_m5-<topic>-<date>.md session record (house style: decisions +
+  defense + verification evidence, like _m5-j6-bus-volume-20260824.md).
+- AGENTS.md trail line + PARKING_LOT truth-sync IF state changed
+  (pi edit-tool law: re-emit any heading your oldText spans; grep
+  headings after structural edits).
+- Commit + push at natural completion points (standing order; explicit
+  paths; conventional prefixes; hooks bind - a failed gate blocks).
+- Mail receipts for anything another seat waits on.
+
+NON-NEGOTIABLES RESTATED (the ones this session will actually touch):
+audio thread never enters Ruby; audio is a pure event sink; the replay
+gate is THE ship gate (Rule 2 analog - never "sounds right to me");
+data-driven tables, mechanical placeholder names only, no third-party
+audio ever; no mocks in integration tests (real DLL or skip loudly);
+read-before-edit; sfx headroom law (-10 dB bus, -1 dBFS ceiling per
+replay); per-tick zero-allocation discipline on steady-state paths.
+BUDGET: this is one bounded session - stop conditions are the phase
+gates above; a DLL rebuild, a limiter, or any game-two-side write is a
+scope break -> re-ask first.
