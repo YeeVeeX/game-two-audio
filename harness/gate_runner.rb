@@ -31,6 +31,12 @@
 #   byte-compare and log md5 pins hold exactly like every other replay.
 #   from_tick/ticks windows map through the ACTUAL advance rate (the render
 #   frame where that tick executed); absent "clock", behavior is unchanged.
+#   "volume" — optional [[tick, bus_id, trim_db], ...]: runtime bus-volume
+#   trims through the PUBLIC control surface (AudioSystem#set_bus_volume —
+#   the J-6 menu API), applied after update(tick) and before that tick's
+#   render advance — the menu-rate control-thread call between the tick
+#   update and the device pull. The log line stamps at that tick's frame;
+#   absent "volume", behavior is unchanged.
 
 require "json"
 require "digest"
@@ -70,6 +76,10 @@ module GTA
         @events_by_tick = Hash.new { |h, k| h[k] = [] }
         @replay.fetch("events").each do |tick, name, payload|
           @events_by_tick[tick] << [name, symbolize(payload)]
+        end
+        @volume_by_tick = Hash.new { |h, k| h[k] = [] }
+        (@replay["volume"] || []).each do |tick, bus_id, db|
+          @volume_by_tick[tick] << [bus_id, db]
         end
       end
 
@@ -128,6 +138,7 @@ module GTA
         @replay.fetch("duration_ticks").times do |tick|
           @events_by_tick[tick].each { |name, payload| audio.handle_event(tick, name, payload) }
           audio.update(tick)
+          @volume_by_tick[tick].each { |bus_id, db| audio.set_bus_volume(bus_id, db) }
           renderer.advance(@advance, capture: capture)
         end
 

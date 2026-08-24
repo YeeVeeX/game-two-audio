@@ -120,6 +120,15 @@ commits cited in `handoff/audio-v12/BANKED.md`; M5 truth-sync consolidation
 landed the inherited vocab bank + owner .rpp and synced these status lines
 (worldbuilder cue families parked with named triggers in PARKING_LOT.md).
 
+Trail 2026-08-24: J-6 runtime bus-volume API landed (game-two menu ask,
+`done/from-game-two-j6-volume-api.md`): `set_bus_volume` (user trim, clamp
+[−60, 0], floor = true mute, unknown bus refuses loud) + `bus_ids`;
+contract row docs/integration-readiness.md §2b; gate replay_bus_volume
+added via the runner's optional "volume" block — 8 prior pins byte-
+unchanged, 9/9 green, listen 9/9. T3 footstep/ambience cue spec received
+same session (`done/from-game-two-t3-cue-spec.md`): zero library work owed
+until owner renders land; PARKING_LOT entries truth-synced.
+
 M3 CLOSED 2026-08-19 — record: `drafts/_m3-verdict-20260819.md` (replay
 corpus 2 → 6; harness `log`/`peak` expectation types + always-on metrics
 block). Headroom law (dev of record, KB-cited): sfx bus at −10 dB, every
@@ -143,9 +152,10 @@ automation, never scores presentation).
 raycasts; runtime asset hot-reload; network-synced audio; LUFS metering in
 the gate (lives in the assets pipeline); distance-attenuation DSP (payload
 plumbed; needs a cue-table field + replay); footstep-material cues +
-region-ambience beds (worldbuilder heads-up 2026-08-19; parked with named
-triggers). Integration is NO LONGER parked (order lifted 2026-08-18;
-PARKING_LOT.md entry updated 2026-08-20).
+region-ambience beds (T3 spec in hand — `done/from-game-two-t3-cue-spec.md`;
+waiting on owner renders). Integration
+is NO LONGER parked (order lifted 2026-08-18; PARKING_LOT.md entry updated
+2026-08-20).
 
 ## Environment (mirrors game-two, verified there 2026-08-09)
 

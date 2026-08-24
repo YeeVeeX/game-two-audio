@@ -46,6 +46,19 @@ module GTA
     MUSIC_EVENT = "music_set_state"
     NEVER = 0xFFFFFFFFFFFFFFFF # miniaudio sentinel: default/cleared stop time
 
+    # Runtime user-volume trim bounds (J-6 contract, game-two menu — mail
+    # done/from-game-two-j6-volume-api.md; docs/integration-readiness.md §2b).
+    # CONTRACT constants, not mix tunables (same class as NEVER and the log
+    # grammar): the game persists raw trim dBs in its prefs, so a data-table
+    # edit must never silently re-interpret them; and game-two carries its own
+    # data/audio tables, so a new required JSON field would break its boot.
+    # Ceiling 0.0 is structural: a user trim can only ATTENUATE, never push a
+    # bus past the authored balance — the M3 headroom proof (−1 dBFS ceiling,
+    # sfx −10 dB budget) therefore holds at every user setting. At the floor
+    # the gain snaps to exactly 0.0 (true digital mute).
+    USER_TRIM_DB_FLOOR = -60.0
+    USER_TRIM_DB_CEILING = 0.0
+
     DuckState = Struct.new(:bus_id, :group, :phase, :duck_end, :duck_gain, :release_frames)
     DuckRule = Struct.new(:state, :gain, :attack, :hold, :release)
 
@@ -126,6 +139,44 @@ module GTA
       nil
     end
 
+    # -- runtime bus volume (public control surface; J-6, game-two menu) ------
+
+    # set_bus_volume(bus_id, db) -> applied trim db (Float, post-clamp)
+    #
+    # db is a USER TRIM in dB relative to the AUTHORED bus volume_db from
+    # cues.json: effective gain = db_to_gain(authored_db + trim). The trim is
+    # clamped to [USER_TRIM_DB_FLOOR, USER_TRIM_DB_CEILING]; at the floor the
+    # gain snaps to exactly 0.0 (true mute — the menu quick-mute is
+    # set_bus_volume(bus, USER_TRIM_DB_FLOOR), restore = re-apply the prior
+    # trim). Unknown bus_id is a NAMED REFUSAL (ArgumentError, loud by design,
+    # same policy as unknown music states) — render menu rows from bus_ids so
+    # unknown ids stay a programming error, never user-reachable.
+    #
+    # Control-thread only, like every public method here. Applies immediately
+    # (menu-rate, unfaded) through the ordinary command path — one logged
+    # group_set_volume line, stamped at the last ticked frame. DUCK
+    # INDEPENDENCE: ducks ride the group's FADER (group_fade_at); this trim
+    # drives the group's node volume (gta_group_set_volume) — two independent
+    # multipliers in the miniaudio engine node, so a trim change mid-duck
+    # applies at once and the duck attack/hold/release schedule is untouched
+    # (the release still restores the fader to 1.0 on time; pinned by
+    # replay_bus_volume's group_fade_at count and the mid-duck unit test).
+    def set_bus_volume(bus_id, db)
+      key = bus_id.is_a?(Symbol) ? bus_id.name : bus_id
+      group = @groups[key]
+      raise ArgumentError, "unknown bus #{key}" if group.nil?
+      trim = Float(db).clamp(USER_TRIM_DB_FLOOR, USER_TRIM_DB_CEILING)
+      gain = trim <= USER_TRIM_DB_FLOOR ? 0.0 : db_to_gain(@bus_authored_db.fetch(key) + trim)
+      @io.group_set_volume(@group_log_ids.fetch(key), group, gain)
+      trim
+    end
+
+    # Bus ids in build order (master first, then master's children), frozen —
+    # the menu renders volume rows from this truth instead of hardcoding.
+    def bus_ids
+      @group_order
+    end
+
     # -- diagnostics (read-only; audio never feeds the sim) -------------------
 
     def active_voices
@@ -168,11 +219,13 @@ module GTA
       @groups = {}
       @group_log_ids = {}
       @group_order = []
+      @bus_authored_db = {}
       buses = @cfg.buses
       create_bus("master", FFI::Pointer::NULL, "-", buses["master"])
       buses["master"].fetch("children", []).each do |bus_id|
         create_bus(bus_id, @groups["master"], "bus_master", buses[bus_id])
       end
+      @group_order.freeze
     end
 
     def create_bus(bus_id, parent_ptr, parent_log_id, table)
@@ -182,6 +235,7 @@ module GTA
       @group_log_ids[bus_id] = log_id
       @group_order << bus_id
       db = table["volume_db"]
+      @bus_authored_db[bus_id] = db || 0.0 # absent volume_db = engine default (0 dB)
       @io.group_set_volume(log_id, g, db_to_gain(db)) if db
     end
 

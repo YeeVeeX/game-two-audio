@@ -28,13 +28,20 @@
   pipeline (docs/integration-readiness.md §4).
 - **Distance-attenuation DSP** — TRIGGER: game design asks for it; :distance payload is
   already plumbed as pool-steal metadata; the DSP needs a cue-table field + gate replay.
-- **Footstep-material cue family** — TRIGGER: game-two's builder-era cue-spec mail
-  arrives with material-keyed movement events (its Lane 3 tile-type registry, game-two
-  `2471b5d`; heads-up mail `done/from-game-two-worldbuilder-cue-families.md`). Flagged
-  concerns carried: step spam needs a cheap voice/priority lane or cadence gate;
-  per-material render sets reuse the attack-cue-spec handoff shape.
-- **Region-ambience beds** — TRIGGER: same lane (heads-up mail above); decide a
-  music_set_state-adjacent surface vs a second ambient bus AT SPEC TIME, not before.
+- **Footstep-material cue family** — TRIGGER FIRED 2026-08-20: T3 cue-spec mail arrived
+  (`done/from-game-two-t3-cue-spec.md`) — four material events (`footstep_stone/dirt/
+  grass/wood`), one per tile step (13–19 ticks), payload-blind v1, priority 10 on sfx
+  (steal-order makes steps first-stolen under load — correct), no duck ever, mapping
+  rows are game-two custody. NOW WAITING ON: owner renders (`msfx_step_*_150ms`, his
+  pace — es-CR list in the mail). Zero library-side work owed before renders exist;
+  game emits the events already (unmapped = silent no-op). Carried concerns stand:
+  step spam lane covered by priority 10 + caps; game-side adjacency guard already
+  suppresses dodge-jump steps (mail P.S.).
+- **Region-ambience beds** — SPEC IN HAND (same T3 mail): `ambience_amb_meadow/town/
+  dungeon` keys, change-only cadence, crossfade-friendly; beds layer BESIDE music
+  states, never replace them. Architecture call (long-loop cue rows vs music-adjacent
+  state family vs parked stereo-ambient increment) stays THIS seat's, decided when
+  owner bed renders (`mamb_*_30s`) land — not before.
 
 Itexo vocabulary bank (2026-08-18, `docs/itexo-audio-vocabulary.md`; source addendum md5
 `cabd71a8f8a4a0cedee1410ef98e9099`; the integration unpark above FIRED 2026-08-18 — each

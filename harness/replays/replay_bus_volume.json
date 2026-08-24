@@ -1,0 +1,64 @@
+{
+  "_comment": "Gate replay 9 (M5, J-6): the runtime bus-volume control surface (AudioSystem#set_bus_volume — game-two menu API, mail done/from-game-two-j6-volume-api.md). Choreography: music (stem_a 400 Hz, music bus) runs throughout; drone_low (500 Hz, sfx bus) starts tick 5. Tick 20: sfx trim -20 dB (500 Hz amp must drop to 0.1x while 400 Hz is UNTOUCHED — trim hits only its bus). Tick 40: sfx trim +6.0 must CLAMP to the 0.0 ceiling (exact recovery to authored level; an unclamped +6 would read ~2.0x and break the ratio bound). Tick 60: master trim -60.0 = the floor = gain snaps to exactly 0.0 (quick-mute contract) — true digital silence. Tick 80: master back to 0.0, music recovers to its pre-mute level. group_fade_at count 0 pins duck independence at the log level: the volume path must NEVER touch the group fader. Volume ops apply after update(tick), before that tick's render advance, so effects start exactly at tick*800.",
+  "name": "replay_bus_volume",
+  "duration_ticks": 100,
+  "events": [
+    [5, "drone_low", null]
+  ],
+  "volume": [
+    [20, "sfx", -20.0],
+    [40, "sfx", 6.0],
+    [60, "master", -60.0],
+    [80, "master", 0.0]
+  ],
+  "expectations": {
+    "goertzel": [
+      { "_drone_present_pre_trim": "tone_0500_4s amp 0.3 through sfx -10 dB ~ 0.095",
+        "freq_hz": 500.0, "ch": 0, "from_frame": 8000, "frames": 4800, "min_amp": 0.06 }
+    ],
+    "rms": [
+      { "_pre_window_sanity": "music + drone both audible",
+        "from_frame": 8000, "frames": 4800, "min": 0.1 }
+    ],
+    "ratio": [
+      { "_sfx_trim_minus20": "-20 dB = 0.1x on the sfx bus",
+        "freq_hz": 500.0, "ch": 0,
+        "a": { "from_frame": 8000, "frames": 4800 },
+        "b": { "from_frame": 17600, "frames": 4800 },
+        "min_ratio": 0.08, "max_ratio": 0.12 },
+      { "_bus_isolation": "music 400 Hz must be untouched while the sfx trim is down",
+        "freq_hz": 400.0, "ch": 0,
+        "a": { "from_frame": 8000, "frames": 4800 },
+        "b": { "from_frame": 17600, "frames": 4800 },
+        "min_ratio": 0.9, "max_ratio": 1.1 },
+      { "_ceiling_clamp": "+6.0 request clamps to trim 0.0 = exact authored level; unclamped would be ~2.0",
+        "freq_hz": 500.0, "ch": 0,
+        "a": { "from_frame": 8000, "frames": 4800 },
+        "b": { "from_frame": 33600, "frames": 4800 },
+        "min_ratio": 0.9, "max_ratio": 1.1 },
+      { "_master_restore": "music recovers to its pre-mute level after the mute lifts",
+        "freq_hz": 400.0, "ch": 0,
+        "a": { "from_frame": 40000, "frames": 4800 },
+        "b": { "from_frame": 64800, "frames": 4800 },
+        "min_ratio": 0.9, "max_ratio": 1.1 }
+    ],
+    "silence": [
+      { "_master_floor_is_true_mute": "gain snaps to exactly 0.0 at the -60 floor",
+        "from_frame": 48800, "frames": 4800, "max_rms": 1e-7 }
+    ],
+    "log": [
+      { "_boot3_plus_runtime4": "3 boot bus volumes (music/sfx/ui) + 4 runtime trims",
+        "op": "group_set_volume", "count": 7 },
+      { "_master_mute_and_restore": "",
+        "op": "group_set_volume", "id": "bus_master", "count": 2 },
+      { "_runtime_sfx_trims": "boot lines sit at frame 0; from_tick 1 isolates the runtime pair",
+        "op": "group_set_volume", "id": "bus_sfx", "from_tick": 1, "ticks": 99, "count": 2 },
+      { "_duck_independence": "the volume path must never touch the group fader",
+        "op": "group_fade_at", "count": 0 }
+    ],
+    "peak": [
+      { "_comment": "headroom policy: whole render under -1 dBFS sample peak",
+        "max_peak": 0.8913 }
+    ]
+  }
+}

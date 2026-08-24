@@ -107,6 +107,45 @@ mapped event `bus.subscribe(type) { |ev| audio.handle_event(world.frame,
 ev.type, ev.payload) }`, then once per frame after `bus.process`:
 `audio.update(world.frame)`.
 
+## 2b. Runtime bus-volume API (J-6 menu ask, landed 2026-08-24)
+
+Public control surface for the non-pausing menu's per-bus volume rows +
+quick mute (ask: `done/from-game-two-j6-volume-api.md`; gate coverage:
+`replay_bus_volume` + the J-6 unit block in `test/audio_system_test.rb`).
+**This section is the citable contract row.**
+
+- `AudioSystem#set_bus_volume(bus_id, db) -> applied_db (Float)` —
+  control-thread only. `db` is a **USER TRIM in dB relative to the
+  authored `volume_db`** in cues.json (effective gain =
+  `db_to_gain(authored + trim)`); the menu never needs the authored
+  values — slider top = 0.0, bottom = floor.
+- **Clamp (treat as law):** trim clamps to **[−60.0, 0.0]**
+  (`AudioSystem::USER_TRIM_DB_FLOOR` / `USER_TRIM_DB_CEILING` — contract
+  constants, deliberately not data-tunable: game-side prefs persist raw
+  trim dBs whose meaning must never shift under a data edit). Ceiling 0.0
+  is structural: a user can only attenuate, so the M3 headroom proof
+  (−1 dBFS ceiling) holds at every user setting. **At/below the floor the
+  gain snaps to exactly 0.0 (true digital mute)** — quick mute =
+  `set_bus_volume(bus, -60.0)`, restore = re-apply the prior trim. The
+  return value is the applied (post-clamp) trim — persist that.
+- **Unknown bus_id = named refusal** (`ArgumentError`, same policy as
+  unknown music states). Render rows from `bus_ids` and it stays
+  unreachable. Accepts String or Symbol bus ids (String canonical).
+- `AudioSystem#bus_ids -> frozen Array<String>` — build order, master
+  first, then master's children: `["master", "music", "sfx", "ui"]` today.
+- Applies **immediately, unfaded** (menu-rate; if a hard mute ever clicks
+  audibly at listen time, a ramp is a one-line follow-up — re-ask).
+  Logged as an ordinary `group_set_volume` command (no new log ops;
+  stamps at the last ticked frame).
+- **Duck independence:** ducks ride the group FADER, trims ride the
+  group node VOLUME — independent multipliers in the engine node. A trim
+  change mid-duck applies at once; the duck attack/hold/release schedule
+  is untouched (pinned: `replay_bus_volume` asserts `group_fade_at`
+  count 0; mid-duck unit test asserts the release keeps its schedule).
+- Pure-sink law unchanged: volume flows in; nothing flows back (the
+  return value and `bus_ids` are diagnostics-class reads of audio's own
+  control state, never sim state).
+
 ## 3. Real-device boot + teardown order
 
 1. **Process entry, before any SDL audio init**: `ENV["SDL_AUDIODRIVER"] =

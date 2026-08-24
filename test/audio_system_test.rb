@@ -288,4 +288,81 @@ class AudioSystemTest < Minitest::Test
     release = ops("group_fade_at").last.strip
     assert_equal "#{release_tick * TF} group_fade_at bus_#{duck['bus']} #{fhex(gain)},#{fhex(1.0)},#{duck['release_frames']},#{duck_end}", release
   end
+
+  # -- runtime bus volume (J-6 public control surface) ------------------------
+
+  def test_bus_ids_returns_build_order_frozen
+    expected = ["master"] + CUES_TBL["buses"]["master"]["children"]
+    assert_equal expected, @audio.bus_ids
+    assert @audio.bus_ids.frozen?, "bus_ids must be frozen (menu reads it, never mutates)"
+  end
+
+  def test_set_bus_volume_composes_trim_with_authored_db_and_logs
+    run_tick(0)
+    run_tick(1)
+    applied = @audio.set_bus_volume("sfx", -20.0)
+    assert_equal(-20.0, applied)
+    authored = CUES_TBL["buses"]["sfx"]["volume_db"]
+    assert_equal "#{TF} group_set_volume bus_sfx #{fhex(10.0**((authored - 20.0) / 20.0))}",
+                 ops("group_set_volume").last.strip,
+                 "trim must compose with the authored volume_db, stamped at the last ticked frame"
+  end
+
+  def test_set_bus_volume_on_master_uses_zero_authored_default
+    run_tick(0)
+    @audio.set_bus_volume("master", -6.0)
+    assert_equal "0 group_set_volume bus_master #{fhex(10.0**(-6.0 / 20.0))}",
+                 ops("group_set_volume").last.strip,
+                 "master has no authored volume_db: trim rides on 0 dB"
+  end
+
+  def test_set_bus_volume_clamps_to_ceiling_at_authored_level
+    run_tick(0)
+    applied = @audio.set_bus_volume("sfx", 6.0)
+    assert_equal 0.0, applied, "ceiling clamp must report the applied trim"
+    authored = CUES_TBL["buses"]["sfx"]["volume_db"]
+    assert_equal fhex(10.0**(authored / 20.0)), ops("group_set_volume").last.split(" ")[3],
+                 "a positive trim clamps to the authored balance (headroom law)"
+  end
+
+  def test_set_bus_volume_floor_snaps_to_true_mute
+    run_tick(0)
+    applied = @audio.set_bus_volume("master", -80.0)
+    assert_equal GTA::AudioSystem::USER_TRIM_DB_FLOOR, applied
+    assert_equal fhex(0.0), ops("group_set_volume").last.split(" ")[3],
+                 "at/below the floor the gain must snap to exactly 0.0 (true mute)"
+  end
+
+  def test_set_bus_volume_unknown_bus_is_a_named_refusal
+    run_tick(0)
+    before = @log.lines.size
+    assert_raises(ArgumentError) { @audio.set_bus_volume("voice", -6.0) }
+    assert_equal before, @log.lines.size, "a refused call must issue no commands"
+  end
+
+  def test_bus_volume_change_mid_duck_leaves_the_duck_schedule_untouched
+    duck = CUES_TBL["cues"]["boss1_spawn"]["duck"]
+    gain = 10.0**(duck["duck_db"] / 20.0)
+    run_tick(0)
+    run_tick(1, [["boss1_spawn", nil]])
+    assert_equal 1, ops("group_fade_at").size
+    @audio.set_bus_volume("music", -12.0) # menu move mid-duck: volume axis only
+
+    duck_end = 1 * TF + duck["attack_frames"] + duck["hold_frames"]
+    release_tick = nil
+    (2..((duck_end / TF) + 2)).each do |t|
+      before = ops("group_fade_at").size
+      run_tick(t)
+      if ops("group_fade_at").size > before
+        release_tick = t
+        break
+      end
+    end
+    refute_nil release_tick, "duck release never issued"
+    assert_equal "#{release_tick * TF} group_fade_at bus_#{duck['bus']} #{fhex(gain)},#{fhex(1.0)},#{duck['release_frames']},#{duck_end}",
+                 ops("group_fade_at").last.strip,
+                 "duck release must keep its original schedule and fader endpoints"
+    assert_equal 2, @log.lines.count { |l| l.include?("group_set_volume bus_music") },
+                 "exactly boot + the one runtime trim on the music bus"
+  end
 end
