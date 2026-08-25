@@ -95,3 +95,34 @@ three lanes + stone family intact, project saved (backup
   banking commit's pre-commit hook).
 - Renders live in `tmp/t3_render_20260825-061701/` (never overwritten);
   banked copies sha-verified identical at copy time.
+
+## Addendum (same day, later): 8-take strips staged for dirt/grass/wood + full drift repair
+
+Owner ask (es-CR): "puedes repetirlos 8 veces cada uno tambien y
+acomodarlos antes de que yo los toque?" — stage 8 takes per remaining
+material, arranged before he voices them.
+
+- **Space solve:** 8 takes × 0.5 s per material don't fit under the bed
+  work area at 260. The three bed lanes (pure seat scaffolding — owner
+  hadn't touched them) relocated to 584/648/712 (regions = second half:
+  614–644 / 678–708 / 742–772, T3 CAMAS marker → 584). Step
+  neighborhood now compact: stone 246–249.65, dirt 250.5–254.15, grass
+  255.0–258.65, wood 259.5–263.15 — all 0.5 s take spacing, regions
+  `_a..h` per material, single-name regions retired (family law from
+  stone applies when rendered).
+- **Trigger content:** 8 identical copies of each material's existing
+  trigger note (read live: p=48 v=100 d=0.120 for all three) — NO
+  fabricated per-take variation; performance/differentiation is the
+  owner's (owner-originals law). He voices each take, then per-take
+  export mirrors the stone pipeline.
+- **Drift repair (the accidental drag's full extent):** staging
+  validation REFUSED on first run — meadow item at 261.05. Audit showed
+  the earlier +1.05 s drag had also hit: all 16 calm copies (both
+  passes), all 3 bed items, the calm render region AND the CALM guide
+  marker. All snapped to absolute expected positions (19 items,
+  region → [516,580], marker → 452). Owner originals (162–208) and
+  zone/throw material were never touched by the drag.
+- **Final audit: ALL EXACT** — 89 asserted objects (11 tracks' item
+  maps, 40 region positions incl. calm pair, retired singles absent,
+  3 guide markers). Backups before every mutating pass
+  (`tmp/reaper_backup_20260825_16*.rpp`).
