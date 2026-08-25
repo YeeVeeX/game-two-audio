@@ -82,6 +82,12 @@ lane gets re-squared mechanically; if it's your working style, the
 regions move to the items instead — either is a one-liner at render
 time. Nothing exported from those lanes yet, so nothing is wrong today.
 
+RESOLVED same session: owner confirmed accidental ("it was accidental,
+fix it please") — items moved home (253.05→252.0, 255.05→254.0,
+257.05→256.0), ReaSynth restored on grass/wood, read-back verified all
+three lanes + stone family intact, project saved (backup
+`tmp/reaper_backup_20260825_062519.rpp`).
+
 ## Verification state
 
 - No src/data/harness surface touched → the session-start gate baseline
