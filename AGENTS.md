@@ -138,6 +138,17 @@ seat-side bake without recorded owner delegation (owner-originals law).
 Ack mailed; no library change — gate 9/9, pins untouched. Record:
 `drafts/_m5-calm-seam-service-20260824.md`.
 
+Trail 2026-08-25: live owner production session (Reaper bridge): T3
+step/bed lanes + calm 2× work area staged in owner_project_001 (bed
+regions render the SECOND 30 s — seam law by construction; old calm
+region renamed _old0824); owner's 8 packed stone takes restructured to
+spaced take items (bleed defense, performance data exact) and banked —
+first v13 delivery: `handoff/audio-v13/msfx_step_stone_150ms_a..h.wav`
+(24-bit mono 48 kHz, 7200 frames, peaks −15.12…−18.97 dBFS, all under
+the throw reference −14.70; sha-pinned, game-side lines PENDING).
+Dirt/grass/wood + beds + calm re-render still owner-paced. Record:
+`drafts/_m5-t3-stone-takes-20260825.md`.
+
 M3 CLOSED 2026-08-19 — record: `drafts/_m3-verdict-20260819.md` (replay
 corpus 2 → 6; harness `log`/`peak` expectation types + always-on metrics
 block). Headroom law (dev of record, KB-cited): sfx bus at −10 dB, every

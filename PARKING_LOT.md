@@ -32,8 +32,10 @@
   (`done/from-game-two-t3-cue-spec.md`) — four material events (`footstep_stone/dirt/
   grass/wood`), one per tile step (13–19 ticks), payload-blind v1, priority 10 on sfx
   (steal-order makes steps first-stolen under load — correct), no duck ever, mapping
-  rows are game-two custody. NOW WAITING ON: owner renders (`msfx_step_*_150ms`, his
-  pace — es-CR list in the mail). Zero library-side work owed before renders exist;
+  rows are game-two custody. STONE DELIVERED 2026-08-25: 8-take rotation family
+  (`handoff/audio-v13/msfx_step_stone_150ms_a..h.wav`, sha-pinned in its BANKED.md;
+  rotation is game-side variants custody). STILL WAITING ON: `msfx_step_dirt/grass/
+  wood_150ms` renders (his pace). Zero library-side work owed;
   game emits the events already (unmapped = silent no-op). Carried concerns stand:
   step spam lane covered by priority 10 + caps; game-side adjacency guard already
   suppresses dodge-jump steps (mail P.S.).
